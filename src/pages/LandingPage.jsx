@@ -202,7 +202,7 @@ const LandingPage = () => {
       </section>
 
       {/* Deadline Countdown */}
-      <div className="bg-[#111D2E] py-6 px-8">
+      <div className="bg-[#111D2E] py-6 px-8 border-0">
         <div className="max-w-6xl mx-auto flex items-center justify-center gap-8">
           <span className="text-gray-400 font-semibold">Next Deadline:</span>
           <div className="flex gap-4">
