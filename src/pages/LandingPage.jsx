@@ -202,7 +202,7 @@ const LandingPage = () => {
       </section>
 
       {/* Deadline Countdown */}
-      <div className="bg-[#111D2E] py-6 px-8 border-0">
+      <div className="bg-[#111111] py-6 px-8 border-0">
         <div className="max-w-6xl mx-auto flex items-center justify-center gap-8">
           <span className="text-gray-400 font-semibold">Next Deadline:</span>
           <div className="flex gap-4">
@@ -287,7 +287,7 @@ const LandingPage = () => {
       </section>
 
       {/* Scout Picks */}
-      <section className="py-20 px-8 bg-navy/50">
+      <section className="py-20 px-8 bg-[#1A1A1A]">
         <div className="max-w-6xl mx-auto">
           <h2 className="font-oswald text-4xl font-bold text-center mb-16">SCOUT PICKS THIS WEEK</h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -359,7 +359,7 @@ const LandingPage = () => {
       </section>
 
       {/* Top Picks */}
-      <section className="py-20 px-8 bg-navy/50">
+      <section className="py-20 px-8 bg-[#1A1A1A]">
         <div className="max-w-6xl mx-auto">
           <h2 className="font-oswald text-4xl font-bold text-center mb-16">TOP PICKS THIS WEEK</h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -455,68 +455,151 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Fixtures This Week */}
-      <section className="py-20 px-8 bg-navy/50">
+      {/* Latest News */}
+      <section className="py-20 px-8 bg-[#1A1A1A]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-oswald text-4xl font-bold text-center mb-16">FIXTURES THIS WEEK</h2>
-          <div className="space-y-4">
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="font-oswald text-xl font-bold">Newcastle Eagles</p>
-                </div>
-                <span className="text-orange font-oswald text-2xl font-bold">vs</span>
-                <div className="text-left">
-                  <p className="font-oswald text-xl font-bold">London Lions</p>
-                </div>
+          <h2 className="font-oswald text-4xl font-bold text-center mb-16">Latest News</h2>
+          <div className="grid md:grid-cols-5 gap-6">
+            {/* Large Featured Card - Left (60%) */}
+            <Link to="/news" className="md:col-span-3 relative h-96 rounded-xl overflow-hidden group cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10" />
+              <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                <h3 className="font-oswald text-2xl font-bold mb-2">London Lions seal SLB domestic Quadruple at The O2</h3>
+                <p className="text-gray-300 text-sm">The defending champions complete an historic season with their fourth trophy of the campaign.</p>
               </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-gray-400">Friday 7:30pm</p>
+            </Link>
+
+            {/* Stacked Cards - Right (40%) */}
+            <div className="md:col-span-2 flex flex-col gap-6">
+              {/* Top Right Card */}
+              <Link to="/news" className="relative h-44 rounded-xl overflow-hidden group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10" />
+                <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors" />
+                <div className="absolute bottom-0 left-0 right-0 p-5 z-20">
+                  <h3 className="font-oswald text-lg font-bold mb-1">Patrick Robinson named 2025/26 Season MVP</h3>
+                  <p className="text-gray-300 text-xs">London Lions guard takes home the league's most prestigious individual award.</p>
                 </div>
-                <span className="bg-green-500/20 text-green-400 px-4 py-2 rounded-full text-sm font-semibold">Easy</span>
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="font-oswald text-xl font-bold">Manchester Giants</p>
+              </Link>
+
+              {/* Bottom Right Card */}
+              <Link to="/news" className="relative h-44 rounded-xl overflow-hidden group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10" />
+                <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors" />
+                <div className="absolute bottom-0 left-0 right-0 p-5 z-20">
+                  <h3 className="font-oswald text-lg font-bold mb-1">Joel Scott returns to London Lions for 2026/27 season</h3>
+                  <p className="text-gray-300 text-xs">Star forward commits to another year with the London Lions.</p>
                 </div>
-                <span className="text-orange font-oswald text-2xl font-bold">vs</span>
-                <div className="text-left">
-                  <p className="font-oswald text-xl font-bold">Bristol Flyers</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-gray-400">Saturday 6:00pm</p>
-                </div>
-                <span className="bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-full text-sm font-semibold">Medium</span>
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="font-oswald text-xl font-bold">Leicester Riders</p>
-                </div>
-                <span className="text-orange font-oswald text-2xl font-bold">vs</span>
-                <div className="text-left">
-                  <p className="font-oswald text-xl font-bold">Sheffield Sharks</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-gray-400">Sunday 4:00pm</p>
-                </div>
-                <span className="bg-red-500/20 text-red-400 px-4 py-2 rounded-full text-sm font-semibold">Hard</span>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
+      {/* 2025/26 Final Standings */}
+      <section className="py-20 px-8">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-oswald text-4xl font-bold text-center mb-16">2025/26 Final Standings</h2>
+          <div className="bg-[#111111] rounded-xl border border-white/10 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10 bg-[#1A1A1A]">
+                  <th className="text-left py-4 px-6 font-oswald text-lg text-orange">Pos</th>
+                  <th className="text-left py-4 px-6 font-oswald text-lg text-orange">Team</th>
+                  <th className="text-left py-4 px-6 font-oswald text-lg text-orange">Record</th>
+                  <th className="text-left py-4 px-6 font-oswald text-lg text-orange">Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-white/5 bg-orange/10">
+                  <td className="py-4 px-6 font-bold text-orange">1</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#FF5C00]" />
+                    London Lions
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">26W 6L</td>
+                  <td className="py-4 px-6 font-bold">52</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">2</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#0066CC]" />
+                    Cheshire Phoenix
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">20W 12L</td>
+                  <td className="py-4 px-6 font-bold">40</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">3</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#000000]" />
+                    Manchester Basketball
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">19W 13L</td>
+                  <td className="py-4 px-6 font-bold">38</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">4</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#CC0000]" />
+                    Sheffield Sharks
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">16W 16L</td>
+                  <td className="py-4 px-6 font-bold">32</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">5</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#003366]" />
+                    Leicester Riders
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">15W 17L</td>
+                  <td className="py-4 px-6 font-bold">30</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">6</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#FF6600]" />
+                    Bristol Flyers
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">15W 17L</td>
+                  <td className="py-4 px-6 font-bold">30</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">7</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#9900CC]" />
+                    Surrey 89ers
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">14W 18L</td>
+                  <td className="py-4 px-6 font-bold">28</td>
+                </tr>
+                <tr className="border-b border-white/5">
+                  <td className="py-4 px-6 font-bold">8</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#003399]" />
+                    Newcastle Eagles
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">12W 20L</td>
+                  <td className="py-4 px-6 font-bold">24</td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-6 font-bold">9</td>
+                  <td className="py-4 px-6 flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#006600]" />
+                    Caledonia Gladiators
+                  </td>
+                  <td className="py-4 px-6 text-gray-400">7W 25L</td>
+                  <td className="py-4 px-6 font-bold">14</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* Email Waitlist */}
-      <section className="py-20 px-8 bg-navy/50">
+      <section className="py-20 px-8 bg-[#1A1A1A]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-oswald text-4xl font-bold mb-4">Be first to play when we launch</h2>
           <p className="text-xl text-gray-400 mb-10">Join the waitlist — launching autumn 2026</p>
@@ -527,7 +610,7 @@ const LandingPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="flex-1 bg-navy border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange"
+              className="flex-1 bg-[#1A1A1A] border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange"
             />
             <button
               type="submit"
@@ -564,7 +647,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-8 bg-navy border-t border-white/10">
+      <footer className="py-12 px-8 bg-[#1A1A1A] border-t border-white/10">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="font-oswald text-2xl font-bold text-orange">SLB FANTASY</div>

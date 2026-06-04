@@ -67,7 +67,7 @@ const FixturesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-navy text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
@@ -87,7 +87,7 @@ const FixturesPage = () => {
                 className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
                   selectedGameweek === gw
                     ? 'bg-orange text-white'
-                    : 'bg-[#111D2E] text-gray-400 hover:text-white'
+                    : 'bg-[#111111] text-gray-400 hover:text-white'
                 }`}
               >
                 GW{gw}
@@ -103,7 +103,7 @@ const FixturesPage = () => {
           {loading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-[#111D2E] rounded-xl p-6 animate-pulse" />
+                <div key={i} className="bg-[#111111] rounded-xl p-6 animate-pulse" />
               ))}
             </div>
           ) : fixtures.length === 0 ? (
@@ -113,7 +113,7 @@ const FixturesPage = () => {
           ) : (
             <div className="space-y-4">
               {fixtures.map((fixture) => (
-                <div key={fixture.id} className="bg-[#111D2E] rounded-xl p-6 border border-white/10">
+                <div key={fixture.id} className="bg-[#111111] rounded-xl p-6 border border-white/10">
                   <div className="flex items-center justify-between mb-4">
                     {/* Home Team */}
                     <div className="flex-1 text-right">
@@ -168,7 +168,7 @@ const FixturesPage = () => {
       {/* Difficulty Rating Key */}
       <div className="px-8 pb-20">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-[#111D2E] rounded-xl p-6 border border-white/10">
+          <div className="bg-[#111111] rounded-xl p-6 border border-white/10">
             <h3 className="font-oswald text-xl font-bold mb-4">Difficulty Rating Key</h3>
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2">

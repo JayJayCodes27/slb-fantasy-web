@@ -109,7 +109,7 @@ const PlayersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-navy text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
@@ -121,7 +121,7 @@ const PlayersPage = () => {
       {/* Filter Bar */}
       <div className="px-8 pb-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-[#111D2E] rounded-xl p-6 border border-white/10">
+          <div className="bg-[#111111] rounded-xl p-6 border border-white/10">
             <div className="flex flex-wrap gap-4 items-center">
               {/* Search */}
               <div className="flex-1 min-w-[200px]">
@@ -130,7 +130,7 @@ const PlayersPage = () => {
                   placeholder="Search players..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-navy border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange"
+                  className="w-full bg-[#1A1A1A] border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange"
                 />
               </div>
 
@@ -143,7 +143,7 @@ const PlayersPage = () => {
                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                       positionFilter === pos
                         ? 'bg-orange text-white'
-                        : 'bg-navy text-gray-400 hover:text-white'
+                        : 'bg-[#1A1A1A] text-gray-400 hover:text-white'
                     }`}
                   >
                     {pos}
@@ -191,7 +191,7 @@ const PlayersPage = () => {
           {loading ? (
             <div className="space-y-3">
               {[...Array(10)].map((_, i) => (
-                <div key={i} className="bg-[#111D2E] rounded-lg h-16 animate-pulse" />
+                <div key={i} className="bg-[#111111] rounded-lg h-16 animate-pulse" />
               ))}
             </div>
           ) : filteredPlayers.length === 0 ? (
@@ -199,7 +199,7 @@ const PlayersPage = () => {
               <p className="text-2xl text-gray-400">No players found</p>
             </div>
           ) : (
-            <div className="bg-[#111D2E] rounded-xl border border-white/10 overflow-hidden">
+            <div className="bg-[#111111] rounded-xl border border-white/10 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/10">
@@ -259,7 +259,7 @@ const PlayersPage = () => {
           onClick={() => setSelectedPlayer(null)}
         >
           <div
-            className="absolute right-0 top-0 h-full w-full max-w-md bg-[#111D2E] border-l border-white/10 overflow-y-auto"
+            className="absolute right-0 top-0 h-full w-full max-w-md bg-[#111111] border-l border-white/10 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8">
@@ -295,11 +295,11 @@ const PlayersPage = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-navy rounded-lg p-4 border border-white/10">
+                <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
                   <p className="text-gray-400 text-sm mb-1">Value</p>
                   <p className="font-oswald text-2xl font-bold text-orange">{formatValue(selectedPlayer.value)}</p>
                 </div>
-                <div className="bg-navy rounded-lg p-4 border border-white/10">
+                <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
                   <p className="text-gray-400 text-sm mb-1">Season Points</p>
                   <p className="font-oswald text-2xl font-bold">{selectedPlayer.total_season_points}</p>
                 </div>
@@ -309,23 +309,23 @@ const PlayersPage = () => {
               <div>
                 <h3 className="font-oswald text-xl font-bold mb-4">Per Game Stats</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-navy rounded-lg p-4 border border-white/10">
+                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
                     <p className="text-gray-400 text-sm mb-1">Points</p>
                     <p className="font-oswald text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-navy rounded-lg p-4 border border-white/10">
+                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
                     <p className="text-gray-400 text-sm mb-1">Assists</p>
                     <p className="font-oswald text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-navy rounded-lg p-4 border border-white/10">
+                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
                     <p className="text-gray-400 text-sm mb-1">Rebounds</p>
                     <p className="font-oswald text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-navy rounded-lg p-4 border border-white/10">
+                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
                     <p className="text-gray-400 text-sm mb-1">Blocks</p>
                     <p className="font-oswald text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-navy rounded-lg p-4 border border-white/10 col-span-2">
+                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10 col-span-2">
                     <p className="text-gray-400 text-sm mb-1">Steals</p>
                     <p className="font-oswald text-2xl font-bold">0</p>
                   </div>

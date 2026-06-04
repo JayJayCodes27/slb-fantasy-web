@@ -115,7 +115,7 @@ const NewsPage = () => {
   const filteredNews = getFilteredNews();
 
   return (
-    <div className="min-h-screen bg-navy text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
@@ -135,7 +135,7 @@ const NewsPage = () => {
                 className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
                   activeFilter === filter
                     ? 'bg-orange text-white'
-                    : 'bg-[#111D2E] text-gray-400 hover:text-white'
+                    : 'bg-[#111111] text-gray-400 hover:text-white'
                 }`}
               >
                 {filter}
@@ -151,7 +151,7 @@ const NewsPage = () => {
           {loading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-[#111D2E] rounded-xl p-6 animate-pulse" />
+                <div key={i} className="bg-[#111111] rounded-xl p-6 animate-pulse" />
               ))}
             </div>
           ) : filteredNews.length === 0 ? (
@@ -165,7 +165,7 @@ const NewsPage = () => {
           ) : (
             <div className="space-y-4">
               {filteredNews.map((item) => (
-                <div key={item.id} className="bg-[#111D2E] rounded-xl p-6 border border-white/10">
+                <div key={item.id} className="bg-[#111111] rounded-xl p-6 border border-white/10">
                   {item.type === 'injury' ? (
                     // Injury/Availability Card
                     <div>
