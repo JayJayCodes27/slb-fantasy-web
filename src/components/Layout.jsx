@@ -55,23 +55,14 @@ const Layout = ({ children }) => {
       </nav>
 
       {/* Secondary Navigation */}
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="flex gap-8 py-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-sm font-medium transition-colors ${
-                  location.pathname === link.path
-                    ? 'text-orange border-b-2 border-orange pb-1'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
+      <div style={{backgroundColor: '#111111', borderBottom: '1px solid #222222'}}>
+        <div style={{maxWidth: '1200px', margin: '0 auto', padding: '8px 24px', display: 'flex', gap: '32px'}}>
+          <Link to="/" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Home</Link>
+          <Link to="/news" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Scout</Link>
+          <Link to="/news" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Injuries</Link>
+          <Link to="/fixtures" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Fixtures</Link>
+          <Link to="/players" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Statistics</Link>
+          <Link to="/news" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>News</Link>
         </div>
       </div>
       
