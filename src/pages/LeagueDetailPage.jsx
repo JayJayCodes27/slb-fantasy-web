@@ -16,13 +16,10 @@ const LeagueDetailPage = () => {
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/signin');
-      return;
-    }
+    if (!user) return;
     fetchSettings();
     fetchLeagueData();
-  }, [user, navigate, leagueId]);
+  }, [user, leagueId]);
 
   const fetchSettings = async () => {
     try {

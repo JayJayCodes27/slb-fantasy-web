@@ -25,13 +25,10 @@ const LeaguesPage = () => {
   const [joinError, setJoinError] = useState('');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/signin');
-      return;
-    }
+    if (!user) return;
     fetchSettings();
     fetchMyLeagues();
-  }, [user, navigate]);
+  }, [user]);
 
   const fetchSettings = async () => {
     try {
