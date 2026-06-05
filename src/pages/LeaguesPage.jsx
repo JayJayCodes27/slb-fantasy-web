@@ -100,78 +100,75 @@ const LeaguesPage = () => {
 
   const handleCreatePrivateLeague = async (e) => {
     e.preventDefault();
+    if (!leagueName.trim()) return;
     setCreating(true);
     setCreateSuccess(null);
 
     try {
-      let newLeague = null;
-      let leagueError = null;
-      let newInviteCode = '';
+      const code = generateInviteCode();
+      console.log('Attempting insert with:', {
+        name: leagueName,
+        commissioner_id: user.id,
+        league_type: 'private',
+        format: 'total_points',
+        max_managers: 50,
+        draft_complete: false,
+        invite_code: code
+      });
 
-      // Retry logic for invite code collision
-      for (let attempt = 0; attempt < 5; attempt++) {
-        newInviteCode = generateInviteCode();
-        
-        const result = await supabase
-          .from('leagues')
-          .insert({
-            name: leagueName,
-            commissioner_id: user.id,
-            league_type: 'private',
-            format: 'total_points',
-            max_managers: 50,
-            draft_complete: false,
-            invite_code: newInviteCode
-          })
-          .select()
-          .single();
+      const result = await supabase
+        .from('leagues')
+        .insert({
+          name: leagueName,
+          commissioner_id: user.id,
+          league_type: 'private',
+          format: 'total_points',
+          max_managers: 50,
+          draft_complete: false,
+          invite_code: code
+        })
+        .select()
+        .single();
 
-        if (result.error) {
-          leagueError = result.error;
-          // Retry on conflict (409)
-          if (result.error.code === '23505' || result.error.status === 409) {
-            console.log(`Invite code collision on attempt ${attempt + 1}, retrying...`);
-            continue;
-          }
-          break;
-        }
-        
-        newLeague = result.data;
-        leagueError = null;
-        break;
-      }
+      console.log('Full result:', JSON.stringify(result));
+      console.log('Data:', result.data);
+      console.log('Error:', result.error);
+      console.log('Status:', result.status);
+      console.log('StatusText:', result.statusText);
 
-      if (leagueError) {
-        console.log('Create league error details:', JSON.stringify(leagueError, null, 2));
-        console.log('Current user id:', user.id);
-        console.log('Commissioner id being set:', user.id);
-        throw leagueError;
+      if (result.error) {
+        console.log('Error code:', result.error.code);
+        console.log('Error message:', result.error.message);
+        console.log('Error details:', result.error.details);
+        console.log('Error hint:', result.error.hint);
+        throw result.error;
       }
 
       // Add commissioner as member
       const { error: memberError } = await supabase
         .from('league_members')
         .insert({
-          league_id: newLeague.id,
+          league_id: result.data.id,
           user_id: user.id
         });
 
       if (memberError) {
-        console.log('Add member error details:', JSON.stringify(memberError, null, 2));
-        console.log('Current user id:', user.id);
-        console.log('League id:', newLeague.id);
+        console.log('Add member error:', memberError);
         throw memberError;
       }
 
       setCreateSuccess({
-        leagueId: newLeague.id,
-        leagueName: newLeague.name,
-        inviteCode: newInviteCode
+        leagueId: result.data.id,
+        leagueName: result.data.name,
+        inviteCode: code
       });
 
+      setLeagueName('');
       fetchMyLeagues();
-    } catch (error) {
-      console.error('Error creating league:', error);
+    } catch (err) {
+      console.log('Caught error:', JSON.stringify(err));
+      console.log('Error message:', err.message);
+      console.log('Error code:', err.code);
       alert('Failed to create league. Please try again.');
     } finally {
       setCreating(false);
