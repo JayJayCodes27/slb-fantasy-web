@@ -58,17 +58,15 @@ const SignUpPage = () => {
       if (authError) throw authError;
 
       // Insert user into public users table
-      const { error: userError } = await supabase
+      const { error: profileError } = await supabase
         .from('users')
-        .insert([
-          {
-            id: authData.user.id,
-            email: email,
-            username: username,
-          },
-        ]);
+        .insert({
+          id: authData.user.id,
+          email: email,
+          username: username
+        });
 
-      if (userError) throw userError;
+      if (profileError) throw profileError;
 
       navigate('/my-team');
     } catch (error) {
