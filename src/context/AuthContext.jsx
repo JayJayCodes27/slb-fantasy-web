@@ -61,6 +61,10 @@ export const AuthProvider = ({ children }) => {
     await supabase.auth.signOut();
   };
 
+  useEffect(() => {
+    console.log('AuthContext user changed:', user?.email);
+  }, [user]);
+
   return (
     <AuthContext.Provider value={{ user, session, loading, signOut }}>
       {children}

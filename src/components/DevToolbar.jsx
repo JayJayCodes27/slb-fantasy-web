@@ -2,20 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
 
-const DevToolbar = () => {
+export default function DevToolbar() {
   const { user } = useAuth();
   const [seasonState, setSeasonState] = useState('off_season');
   const [currentGameweek, setCurrentGameweek] = useState(0);
   const [settings, setSettings] = useState(null);
 
-  useEffect(() => {
-    if (!user || user.email !== 'jamaljohnson29@gmail.com') return;
-    fetchSettings();
-  }, [user]);
+  console.log('DevToolbar render, user:', user?.email);
 
-  if (!user || user.email !== 'jamaljohnson29@gmail.com') {
+  if (!user) {
+    console.log('DevToolbar: no user');
     return null;
   }
+
+  if (user.email !== 'jamaljohnson29@gmail.com') {
+    console.log('DevToolbar: wrong email', user.email);
+    return null;
+  }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   const fetchSettings = async () => {
     try {
@@ -137,5 +144,3 @@ const DevToolbar = () => {
     </div>
   );
 };
-
-export default DevToolbar;
