@@ -4,12 +4,14 @@ import LandingPage from './pages/LandingPage.jsx';
 import PlayersPage from './pages/PlayersPage.jsx';
 import FixturesPage from './pages/FixturesPage.jsx';
 import NewsPage from './pages/NewsPage.jsx';
+import MyTeamPage from './pages/MyTeamPage.jsx';
 
 function App() {
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/my-team" element={<MyTeamPage />} />
         <Route path="/players" element={<PlayersPage />} />
         <Route path="/fixtures" element={<FixturesPage />} />
         <Route path="/news" element={<NewsPage />} />

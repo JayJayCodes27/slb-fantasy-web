@@ -27,9 +27,9 @@ const Layout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0D0D0D] text-white font-dm-sans">
       {/* Live Scores Ticker */}
-      <div className="bg-[#111111] py-2 overflow-hidden border-b border-white/10 relative">
+      <div className="bg-[#141414] py-2 overflow-hidden border-b border-[#2A2A2A] relative">
         <div className="flex animate-ticker whitespace-nowrap">
           {[...scores, ...scores, ...scores].map((score, i) => (
             <span key={i} className="mx-6 text-xs">
@@ -43,45 +43,49 @@ const Layout = ({ children }) => {
           href="https://www.superleaguebasketballm.co.uk"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#FF5C00] hover:text-[#FF7700] transition-colors"
-          style={{ backgroundColor: '#111111', padding: '4px 16px' }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#FF5500] hover:text-[#FF6B1A] transition-colors"
+          style={{ backgroundColor: '#141414', padding: '4px 16px' }}
         >
           Official SLB Site →
         </a>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6 bg-[#111111]/95 backdrop-blur-sm fixed w-full top-10 z-50 border-b border-white/10">
+      <nav className="flex items-center justify-between px-8 py-6 bg-[#0D0D0D] fixed w-full top-10 z-50 border-b border-[#2A2A2A]">
         <div className="flex items-center gap-3">
-          <Link to="/" className="font-oswald text-2xl font-bold text-orange">SLB FANTASY</Link>
+          <Link to="/" className="font-bebas text-3xl font-bold text-orange flex items-center gap-2">
+            🏀 SLB FANTASY
+          </Link>
           <a
             href="https://www.superleaguebasketballm.co.uk"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-[#666666] hover:text-[#FF5C00] transition-colors"
+            className="text-xs text-[#999999] hover:text-[#FF5500] transition-colors"
           >
             ↗ Official Site
           </a>
         </div>
         <div className="flex items-center gap-8">
-          <Link to="/" className="text-white hover:text-orange transition-colors">Home</Link>
-          <Link to="/players" className="text-white hover:text-orange transition-colors">Players</Link>
-          <Link to="/fixtures" className="text-white hover:text-orange transition-colors">Fixtures</Link>
-          <Link to="/news" className="text-white hover:text-orange transition-colors">News</Link>
-          <Link to="/leagues" className="text-white hover:text-orange transition-colors">Leagues</Link>
-          <Link to="/signin" className="bg-orange text-white px-6 py-2 rounded font-semibold hover:bg-orange/90 transition-colors">Sign In</Link>
+          <Link to="/" className={`text-white hover:text-orange transition-colors ${location.pathname === '/' ? 'text-orange border-b-2 border-orange' : ''}`}>Home</Link>
+          <Link to="/my-team" className={`text-white hover:text-orange transition-colors ${location.pathname === '/my-team' ? 'text-orange border-b-2 border-orange' : ''}`}>My Team</Link>
+          <Link to="/players" className={`text-white hover:text-orange transition-colors ${location.pathname === '/players' ? 'text-orange border-b-2 border-orange' : ''}`}>Players</Link>
+          <Link to="/fixtures" className={`text-white hover:text-orange transition-colors ${location.pathname === '/fixtures' ? 'text-orange border-b-2 border-orange' : ''}`}>Fixtures</Link>
+          <Link to="/news" className={`text-white hover:text-orange transition-colors ${location.pathname === '/news' ? 'text-orange border-b-2 border-orange' : ''}`}>News</Link>
+          <Link to="/leagues" className={`text-white hover:text-orange transition-colors ${location.pathname === '/leagues' ? 'text-orange border-b-2 border-orange' : ''}`}>Leagues</Link>
+          <button className="text-2xl hover:text-orange transition-colors">🔔</button>
+          <Link to="/signin" className="bg-[#FF5500] text-white px-6 py-2 rounded-full font-bold hover:bg-[#FF6B1A] transition-colors">Sign In</Link>
         </div>
       </nav>
 
       {/* Secondary Navigation */}
-      <div style={{backgroundColor: '#111111', borderBottom: '1px solid #222222'}}>
+      <div style={{backgroundColor: '#141414', borderBottom: '1px solid #2A2A2A'}}>
         <div style={{maxWidth: '1200px', margin: '0 auto', padding: '8px 24px', display: 'flex', gap: '32px'}}>
-          <Link to="/" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Home</Link>
-          <Link to="/news" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Scout</Link>
-          <Link to="/news" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Injuries</Link>
-          <Link to="/fixtures" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Fixtures</Link>
-          <Link to="/players" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>Statistics</Link>
-          <Link to="/news" style={{color: '#999', fontSize: '13px', textDecoration: 'none'}}>News</Link>
+          <Link to="/" style={{color: '#999999', fontSize: '13px', textDecoration: 'none'}}>Home</Link>
+          <Link to="/news" style={{color: '#999999', fontSize: '13px', textDecoration: 'none'}}>Scout</Link>
+          <Link to="/news" style={{color: '#999999', fontSize: '13px', textDecoration: 'none'}}>Injuries</Link>
+          <Link to="/fixtures" style={{color: '#999999', fontSize: '13px', textDecoration: 'none'}}>Fixtures</Link>
+          <Link to="/players" style={{color: '#999999', fontSize: '13px', textDecoration: 'none'}}>Statistics</Link>
+          <Link to="/news" style={{color: '#999999', fontSize: '13px', textDecoration: 'none'}}>News</Link>
         </div>
       </div>
       

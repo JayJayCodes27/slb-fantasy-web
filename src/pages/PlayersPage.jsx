@@ -109,19 +109,19 @@ const PlayersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0D0D0D] text-white font-dm-sans">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="font-oswald text-5xl font-bold mb-4">Players</h1>
-          <p className="text-xl text-gray-400">Full SLB player pool — stats, values and availability</p>
+          <h1 className="font-bebas text-5xl font-bold mb-4">Players</h1>
+          <p className="text-xl text-[#999999]">Full SLB player pool — stats, values and availability</p>
         </div>
       </div>
 
       {/* Filter Bar */}
       <div className="px-8 pb-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-[#111111] rounded-xl p-6 border border-white/10">
+          <div className="card p-6">
             <div className="flex flex-wrap gap-4 items-center">
               {/* Search */}
               <div className="flex-1 min-w-[200px]">
@@ -130,7 +130,7 @@ const PlayersPage = () => {
                   placeholder="Search players..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#1A1A1A] border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange"
+                  className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF5500]"
                 />
               </div>
 
@@ -142,8 +142,8 @@ const PlayersPage = () => {
                     onClick={() => setPositionFilter(pos)}
                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                       positionFilter === pos
-                        ? 'bg-orange text-white'
-                        : 'bg-[#1A1A1A] text-gray-400 hover:text-white'
+                        ? 'bg-[#FF5500] text-white'
+                        : 'bg-[#1C1C1C] text-[#999999] hover:text-white'
                     }`}
                   >
                     {pos}
@@ -156,7 +156,7 @@ const PlayersPage = () => {
                 <select
                   value={teamFilter}
                   onChange={(e) => setTeamFilter(e.target.value)}
-                  className="w-full bg-navy border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange"
+                  className="w-full bg-[#141414] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#FF5500]"
                 >
                   <option value="All">All Teams</option>
                   {teams.map((team) => (
@@ -172,7 +172,7 @@ const PlayersPage = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-navy border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange"
+                  className="w-full bg-[#141414] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#FF5500]"
                 >
                   <option value="value-desc">Value (high to low)</option>
                   <option value="value-asc">Value (low to high)</option>
@@ -191,24 +191,24 @@ const PlayersPage = () => {
           {loading ? (
             <div className="space-y-3">
               {[...Array(10)].map((_, i) => (
-                <div key={i} className="bg-[#111111] rounded-lg h-16 animate-pulse" />
+                <div key={i} className="card h-16 animate-pulse" />
               ))}
             </div>
           ) : filteredPlayers.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-2xl text-gray-400">No players found</p>
+              <p className="text-2xl text-[#999999]">No players found</p>
             </div>
           ) : (
-            <div className="bg-[#111111] rounded-xl border border-white/10 overflow-hidden">
+            <div className="card overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-4 px-6 font-oswald text-lg text-gray-400">Player</th>
-                    <th className="text-left py-4 px-6 font-oswald text-lg text-gray-400">Position</th>
-                    <th className="text-left py-4 px-6 font-oswald text-lg text-gray-400">Team</th>
-                    <th className="text-left py-4 px-6 font-oswald text-lg text-gray-400">Value</th>
-                    <th className="text-left py-4 px-6 font-oswald text-lg text-gray-400">Season Points</th>
-                    <th className="text-left py-4 px-6 font-oswald text-lg text-gray-400">Availability</th>
+                  <tr className="border-b border-[#2A2A2A]">
+                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Player</th>
+                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Position</th>
+                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Team</th>
+                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Value</th>
+                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Season Points</th>
+                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Availability</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -216,7 +216,7 @@ const PlayersPage = () => {
                     <tr
                       key={player.id}
                       onClick={() => setSelectedPlayer(player)}
-                      className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
+                      className="border-b border-[#2A2A2A]/5 hover:bg-[#1C1C1C] cursor-pointer transition-colors"
                     >
                       <td className="py-4 px-6 font-semibold">{player.name}</td>
                       <td className="py-4 px-6">
@@ -239,7 +239,7 @@ const PlayersPage = () => {
                       <td className="py-4 px-6">
                         <div
                           className={`w-3 h-3 rounded-full ${
-                            player.is_available ? 'bg-green-500' : 'bg-red-500'
+                            player.is_available ? 'bg-[#00FF87]' : 'bg-[#FF3B3B]'
                           }`}
                         />
                       </td>
@@ -273,21 +273,21 @@ const PlayersPage = () => {
           onClick={() => setSelectedPlayer(null)}
         >
           <div
-            className="absolute right-0 top-0 h-full w-full max-w-md bg-[#111111] border-l border-white/10 overflow-y-auto"
+            className="absolute right-0 top-0 h-full w-full max-w-md bg-[#141414] border-l border-[#2A2A2A] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8">
               {/* Close Button */}
               <button
                 onClick={() => setSelectedPlayer(null)}
-                className="absolute top-6 right-6 text-gray-400 hover:text-white text-2xl"
+                className="absolute top-6 right-6 text-[#999999] hover:text-white text-2xl"
               >
                 ×
               </button>
 
               {/* Player Header */}
               <div className="mb-8">
-                <h2 className="font-oswald text-4xl font-bold mb-2">{selectedPlayer.name}</h2>
+                <h2 className="font-bebas text-4xl font-bold mb-2">{selectedPlayer.name}</h2>
                 <span
                   className="px-4 py-2 rounded-full text-sm font-semibold inline-block"
                   style={{ backgroundColor: getPositionColor(selectedPlayer.position) + '20', color: getPositionColor(selectedPlayer.position) }}
@@ -309,39 +309,39 @@ const PlayersPage = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
-                  <p className="text-gray-400 text-sm mb-1">Value</p>
-                  <p className="font-oswald text-2xl font-bold text-orange">{formatValue(selectedPlayer.value)}</p>
+                <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
+                  <p className="text-[#999999] text-sm mb-1">Value</p>
+                  <p className="font-bebas text-2xl font-bold text-[#FF5500]">{formatValue(selectedPlayer.value)}</p>
                 </div>
-                <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
-                  <p className="text-gray-400 text-sm mb-1">Season Points</p>
-                  <p className="font-oswald text-2xl font-bold">{selectedPlayer.total_season_points}</p>
+                <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
+                  <p className="text-[#999999] text-sm mb-1">Season Points</p>
+                  <p className="font-bebas text-2xl font-bold">{selectedPlayer.total_season_points}</p>
                 </div>
               </div>
 
               {/* Per Game Stats */}
               <div>
-                <h3 className="font-oswald text-xl font-bold mb-4">Per Game Stats</h3>
+                <h3 className="font-bebas text-xl font-bold mb-4">Per Game Stats</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
-                    <p className="text-gray-400 text-sm mb-1">Points</p>
-                    <p className="font-oswald text-2xl font-bold">0</p>
+                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
+                    <p className="text-[#999999] text-sm mb-1">Points</p>
+                    <p className="font-bebas text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
-                    <p className="text-gray-400 text-sm mb-1">Assists</p>
-                    <p className="font-oswald text-2xl font-bold">0</p>
+                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
+                    <p className="text-[#999999] text-sm mb-1">Assists</p>
+                    <p className="font-bebas text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
-                    <p className="text-gray-400 text-sm mb-1">Rebounds</p>
-                    <p className="font-oswald text-2xl font-bold">0</p>
+                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
+                    <p className="text-[#999999] text-sm mb-1">Rebounds</p>
+                    <p className="font-bebas text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10">
-                    <p className="text-gray-400 text-sm mb-1">Blocks</p>
-                    <p className="font-oswald text-2xl font-bold">0</p>
+                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
+                    <p className="text-[#999999] text-sm mb-1">Blocks</p>
+                    <p className="font-bebas text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1A1A1A] rounded-lg p-4 border border-white/10 col-span-2">
-                    <p className="text-gray-400 text-sm mb-1">Steals</p>
-                    <p className="font-oswald text-2xl font-bold">0</p>
+                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A] col-span-2">
+                    <p className="text-[#999999] text-sm mb-1">Steals</p>
+                    <p className="font-bebas text-2xl font-bold">0</p>
                   </div>
                 </div>
               </div>

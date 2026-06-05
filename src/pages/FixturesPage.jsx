@@ -46,11 +46,11 @@ const FixturesPage = () => {
 
   const getDifficultyInfo = (rating) => {
     const difficulties = {
-      1: { label: 'Easy', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
+      1: { label: 'Easy', color: 'bg-[#00FF87]/20 text-[#00FF87] border-[#00FF87]/30' },
       2: { label: 'Fairly Easy', color: 'bg-green-400/20 text-green-300 border-green-400/30' },
-      3: { label: 'Medium', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-      4: { label: 'Hard', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-      5: { label: 'Very Hard', color: 'bg-red-500/20 text-red-400 border-red-500/30' }
+      3: { label: 'Medium', color: 'bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30' },
+      4: { label: 'Hard', color: 'bg-[#FF5500]/20 text-[#FF5500] border-[#FF5500]/30' },
+      5: { label: 'Very Hard', color: 'bg-[#FF3B3B]/20 text-[#FF3B3B] border-[#FF3B3B]/30' }
     };
     return difficulties[rating] || difficulties[3];
   };
@@ -67,12 +67,12 @@ const FixturesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0D0D0D] text-white font-dm-sans">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="font-oswald text-5xl font-bold mb-4">Fixtures</h1>
-          <p className="text-xl text-gray-400">Full SLB fixture list with difficulty ratings</p>
+          <h1 className="font-bebas text-5xl font-bold mb-4">Fixtures</h1>
+          <p className="text-xl text-[#999999]">Full SLB fixture list with difficulty ratings</p>
         </div>
       </div>
 
@@ -86,8 +86,8 @@ const FixturesPage = () => {
                 onClick={() => setSelectedGameweek(gw)}
                 className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
                   selectedGameweek === gw
-                    ? 'bg-orange text-white'
-                    : 'bg-[#111111] text-gray-400 hover:text-white'
+                    ? 'bg-[#FF5500] text-white'
+                    : 'bg-[#141414] text-[#999999] hover:text-white'
                 }`}
               >
                 GW{gw}
@@ -103,17 +103,17 @@ const FixturesPage = () => {
           {loading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-[#111111] rounded-xl p-6 animate-pulse" />
+                <div key={i} className="card p-6 animate-pulse" />
               ))}
             </div>
           ) : fixtures.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-2xl text-gray-400">No fixtures scheduled for this gameweek</p>
+              <p className="text-2xl text-[#999999]">No fixtures scheduled for this gameweek</p>
             </div>
           ) : (
             <div className="space-y-4">
               {fixtures.map((fixture) => (
-                <div key={fixture.id} className="bg-[#111111] rounded-xl p-6 border border-white/10">
+                <div key={fixture.id} className="card p-6">
                   <div className="flex items-center justify-between mb-4">
                     {/* Home Team */}
                     <div className="flex-1 text-right">
@@ -122,7 +122,7 @@ const FixturesPage = () => {
                           className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: fixture.home_team?.primary_colour || '#6B7280' }}
                         />
-                        <p className="font-oswald text-xl font-bold">{fixture.home_team?.name || 'TBD'}</p>
+                        <p className="font-bebas text-xl font-bold">{fixture.home_team?.name || 'TBD'}</p>
                       </div>
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getDifficultyInfo(fixture.home_difficulty).color}`}
@@ -139,7 +139,7 @@ const FixturesPage = () => {
                     {/* Away Team */}
                     <div className="flex-1 text-left">
                       <div className="flex items-center gap-3 mb-2">
-                        <p className="font-oswald text-xl font-bold">{fixture.away_team?.name || 'TBD'}</p>
+                        <p className="font-bebas text-xl font-bold">{fixture.away_team?.name || 'TBD'}</p>
                         <div
                           className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: fixture.away_team?.primary_colour || '#6B7280' }}
@@ -154,7 +154,7 @@ const FixturesPage = () => {
                   </div>
 
                   {/* Date and Venue */}
-                  <div className="flex items-center justify-center gap-6 text-gray-400 text-sm">
+                  <div className="flex items-center justify-center gap-6 text-[#999999] text-sm">
                     <span>{formatDate(fixture.match_date)}</span>
                     {fixture.venue && <span>• {fixture.venue}</span>}
                   </div>
@@ -174,7 +174,7 @@ const FixturesPage = () => {
             rel="noopener noreferrer"
             className="text-sm text-gray-500 hover:text-gray-400 transition-colors"
           >
-            View full official fixture list at <span className="text-[#FF5C00]">superleaguebasketballm.co.uk</span> →
+            View full official fixture list at <span className="text-[#FF5500]">superleaguebasketballm.co.uk</span> →
           </a>
         </div>
       </div>
@@ -182,11 +182,11 @@ const FixturesPage = () => {
       {/* Difficulty Rating Key */}
       <div className="px-8 pb-20">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-[#111111] rounded-xl p-6 border border-white/10">
-            <h3 className="font-oswald text-xl font-bold mb-4">Difficulty Rating Key</h3>
+          <div className="card p-6">
+            <h3 className="font-bebas text-xl font-bold mb-4">Difficulty Rating Key</h3>
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-green-500" />
+                <div className="w-4 h-4 rounded-full bg-[#00FF87]" />
                 <span className="text-sm">1 = Easy</span>
               </div>
               <div className="flex items-center gap-2">
@@ -194,15 +194,15 @@ const FixturesPage = () => {
                 <span className="text-sm">2 = Fairly Easy</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-amber-500" />
+                <div className="w-4 h-4 rounded-full bg-[#FFB800]" />
                 <span className="text-sm">3 = Medium</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-orange-500" />
+                <div className="w-4 h-4 rounded-full bg-[#FF5500]" />
                 <span className="text-sm">4 = Hard</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-red-500" />
+                <div className="w-4 h-4 rounded-full bg-[#FF3B3B]" />
                 <span className="text-sm">5 = Very Hard</span>
               </div>
             </div>

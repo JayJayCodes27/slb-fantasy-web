@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import JerseyCard from '../components/JerseyCard';
 
 const LandingPage = () => {
   const [countdown, setCountdown] = useState({ days: 7, hours: 0, minutes: 0, seconds: 0 });
@@ -183,63 +184,87 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="pt-12 pb-20 px-8 animate-fade-in">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="font-oswald text-6xl md:text-7xl font-bold mb-6 leading-tight">
-            BUILD YOUR SLB SQUAD.<br />
+          <h1 className="font-bebas text-7xl md:text-8xl font-bold mb-6 leading-tight">
+            YOUR SLB SQUAD.<br />
             <span className="text-orange">OWN THE SEASON.</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto">
             The first fantasy basketball game for UK Super League Basketball — live scoring, season-long leagues, free to play.
           </p>
-          <div className="flex gap-4 justify-center">
-            <a href="#" className="bg-orange text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-orange/90 transition-colors">
+          <div className="flex gap-4 justify-center mb-12">
+            <a href="#" className="bg-[#FF5500] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#FF6B1A] transition-colors">
               Download on iOS
             </a>
             <a href="#" className="bg-white/10 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition-colors border border-white/20">
               Get it on Android
             </a>
           </div>
+          
+          {/* Feature Icons */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <div className="card p-6 text-center">
+              <div className="text-4xl mb-3">🏀</div>
+              <h3 className="font-bebas text-xl font-bold text-white mb-2">Create or Join Leagues</h3>
+              <p className="text-[#999999] text-sm">Compete with friends</p>
+            </div>
+            <div className="card p-6 text-center">
+              <div className="text-4xl mb-3">📅</div>
+              <h3 className="font-bebas text-xl font-bold text-white mb-2">Weekly Gameweeks</h3>
+              <p className="text-[#999999] text-sm">Real matchups, real points</p>
+            </div>
+            <div className="card p-6 text-center">
+              <div className="text-4xl mb-3">🏆</div>
+              <h3 className="font-bebas text-xl font-bold text-white mb-2">Climb the Rankings</h3>
+              <p className="text-[#999999] text-sm">Top the leaderboard</p>
+            </div>
+            <div className="card p-6 text-center">
+              <div className="text-4xl mb-3">🎁</div>
+              <h3 className="font-bebas text-xl font-bold text-white mb-2">Free to Play</h3>
+              <p className="text-[#999999] text-sm">No entry fees. Ever.</p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Deadline Countdown */}
-      <div style={{backgroundColor: '#111111', padding: '20px 0'}}>
+      <div style={{backgroundColor: '#141414', padding: '20px 0'}}>
         <div style={{textAlign: 'center'}}>
-          <span className="text-gray-400 font-semibold">Next Deadline:</span>
+          <span className="text-[#999999] font-semibold">Next Deadline:</span>
           <div className="flex gap-4 justify-center items-center mt-4">
             <div className="text-center">
-              <div className="font-oswald text-4xl font-bold text-orange">{String(countdown.days).padStart(2, '0')}</div>
-              <div className="text-xs text-gray-400">DD</div>
+              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.days).padStart(2, '0')}</div>
+              <div className="text-xs text-[#999999]">DD</div>
             </div>
-            <div className="font-oswald text-4xl font-bold text-orange">:</div>
+            <div className="font-bebas text-4xl font-bold text-[#FF5500]">:</div>
             <div className="text-center">
-              <div className="font-oswald text-4xl font-bold text-orange">{String(countdown.hours).padStart(2, '0')}</div>
-              <div className="text-xs text-gray-400">HH</div>
+              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.hours).padStart(2, '0')}</div>
+              <div className="text-xs text-[#999999]">HH</div>
             </div>
-            <div className="font-oswald text-4xl font-bold text-orange">:</div>
+            <div className="font-bebas text-4xl font-bold text-[#FF5500]">:</div>
             <div className="text-center">
-              <div className="font-oswald text-4xl font-bold text-orange">{String(countdown.minutes).padStart(2, '0')}</div>
-              <div className="text-xs text-gray-400">MM</div>
+              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.minutes).padStart(2, '0')}</div>
+              <div className="text-xs text-[#999999]">MM</div>
             </div>
-            <div className="font-oswald text-4xl font-bold text-orange">:</div>
+            <div className="font-bebas text-4xl font-bold text-[#FF5500]">:</div>
             <div className="text-center">
-              <div className="font-oswald text-4xl font-bold text-orange">{String(countdown.seconds).padStart(2, '0')}</div>
-              <div className="text-xs text-gray-400">SS</div>
+              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.seconds).padStart(2, '0')}</div>
+              <div className="text-xs text-[#999999]">SS</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* News Ticker */}
-      <div className="bg-orange/10 border-y border-orange/20 overflow-hidden">
+      <div className="bg-[#FF5500]/10 border-y border-[#FF5500]/20 overflow-hidden">
         <div className="flex animate-scroll whitespace-nowrap py-3">
           {newsItems.length > 0 ? (
             [...newsItems, ...newsItems].map((item, i) => (
-              <span key={i} className="mx-8 text-orange font-semibold">
+              <span key={i} className="mx-8 text-[#FF5500] font-semibold">
                 🏀 {item.text}
               </span>
             ))
           ) : (
-            <span className="mx-8 text-orange font-semibold">🏀 Loading news...</span>
+            <span className="mx-8 text-[#FF5500] font-semibold">🏀 Loading news...</span>
           )}
         </div>
       </div>
@@ -247,40 +272,23 @@ const LandingPage = () => {
       {/* Top Form Players */}
       <section className="py-20 px-8">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-oswald text-4xl font-bold text-center mb-16">TOP FORM PLAYERS THIS WEEK</h2>
+          <h2 className="font-bebas text-4xl font-bold text-center mb-16">TOP FORM PLAYERS THIS WEEK</h2>
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
             {topPlayers.length > 0 ? (
-              topPlayers.map((player) => (
-                <div key={player.id} className="bg-white/5 rounded-xl p-6 border border-white/10 min-w-[280px] flex-shrink-0">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-oswald text-xl font-bold">{player.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className="px-2 py-1 rounded text-xs font-semibold"
-                          style={{ backgroundColor: getPositionColor(player.position) + '20', color: getPositionColor(player.position) }}
-                        >
-                          {player.position}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: player.slb_teams?.primary_colour || '#6B7280' }}
-                          />
-                          <span className="text-gray-400 text-sm">{player.slb_teams?.name || 'Unknown'}</span>
-                        </div>
-                      </div>
-                    </div>
-                    {getPriceTrendIcon(player.price_trend)}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-orange font-oswald text-2xl font-bold">{player.total_season_points}</span>
-                    <span className="text-gray-400">{formatValue(player.value)}</span>
-                  </div>
-                </div>
+              topPlayers.map((player, index) => (
+                <JerseyCard
+                  key={player.id}
+                  playerName={player.name}
+                  position={player.position}
+                  teamColour={player.slb_teams?.primary_colour || '#6B7280'}
+                  number={player.position}
+                  points={player.total_season_points}
+                  showRank={true}
+                  rank={index + 1}
+                />
               ))
             ) : (
-              <p className="text-gray-400">Loading top players...</p>
+              <p className="text-[#999999]">Loading top players...</p>
             )}
           </div>
         </div>
