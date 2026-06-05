@@ -397,28 +397,28 @@ const LeaguesPage = () => {
     (settings?.season_state === 'season_active' && settings?.current_gameweek <= 3);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] p-8">
+    <div className="min-h-screen bg-[#0A0A0A] p-4 sm:p-8">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
-        <h1 className="text-white font-oswald text-5xl font-bold mb-8">Leagues</h1>
+        <h1 className="text-white font-oswald text-3xl sm:text-5xl font-bold mb-6 sm:mb-8">Leagues</h1>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
           {/* Left Column - My Leagues */}
-          <div className="w-[40%]">
-            <h2 className="text-white font-bold text-2xl mb-4">My Leagues</h2>
+          <div className="w-full lg:w-[40%]">
+            <h2 className="text-white font-bold text-xl sm:text-2xl mb-4">My Leagues</h2>
             
             {myLeagues.length === 0 ? (
-              <div className="card p-6 text-center mb-6">
-                <p className="text-[#a0a0a0] mb-2">No leagues yet. Create or join one to get started.</p>
+              <div className="card p-4 sm:p-6 text-center mb-6">
+                <p className="text-[#a0a0a0] mb-2 text-sm sm:text-base">No leagues yet. Create or join one to get started.</p>
               </div>
             ) : (
               <div className="space-y-4 mb-6">
                 {myLeagues.map((league) => {
                   const stateBadge = getSeasonStateBadge(league);
                   return (
-                    <div key={league.id} className="card p-5">
+                    <div key={league.id} className="card p-4 sm:p-5">
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-white font-bold text-lg">{league.name}</h3>
+                        <h3 className="text-white font-bold text-base sm:text-lg">{league.name}</h3>
                         <span className={`text-xs px-2 py-1 rounded-pill ${
                           league.league_type === 'public' 
                             ? 'bg-blue-500/20 text-blue-500' 
@@ -427,15 +427,15 @@ const LeaguesPage = () => {
                           {league.league_type === 'public' ? 'Public' : 'Private'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 mb-4">
-                        <span className="text-[#a0a0a0] text-sm">{league.member_count} / {league.max_managers} managers</span>
-                        <span className={`text-sm ${stateBadge.color}`}>
+                      <div className="flex items-center gap-3 sm:gap-4 mb-4">
+                        <span className="text-[#a0a0a0] text-xs sm:text-sm">{league.member_count} / {league.max_managers} managers</span>
+                        <span className={`text-xs sm:text-sm ${stateBadge.color}`}>
                           {stateBadge.text}
                         </span>
                       </div>
                       <Link
                         to={`/leagues/${league.id}`}
-                        className="block w-full border border-[#FF5500] text-[#FF5500] font-bold py-2 rounded-button text-center hover:bg-[#FF5500] hover:text-white transition-colors"
+                        className="block w-full border border-[#FF5500] text-[#FF5500] font-bold py-2 rounded-button text-center hover:bg-[#FF5500] hover:text-white transition-colors text-sm sm:text-base"
                       >
                         Enter League
                       </Link>
@@ -446,33 +446,33 @@ const LeaguesPage = () => {
             )}
 
             {/* Playing without a league info card */}
-            <div className="card p-5">
-              <h3 className="text-white font-bold text-sm mb-2">Playing without a league?</h3>
-              <p className="text-[#a0a0a0] text-sm mb-3">You still earn points every gameweek. Your score appears on the global leaderboard.</p>
-              <Link to="/leaderboard" className="text-[#FF5500] text-sm font-semibold hover:underline">
+            <div className="card p-4 sm:p-5">
+              <h3 className="text-white font-bold text-xs sm:text-sm mb-2">Playing without a league?</h3>
+              <p className="text-[#a0a0a0] text-xs sm:text-sm mb-3">You still earn points every gameweek. Your score appears on the global leaderboard.</p>
+              <Link to="/leaderboard" className="text-[#FF5500] text-xs sm:text-sm font-semibold hover:underline">
                 View Global Leaderboard
               </Link>
             </div>
           </div>
 
           {/* Right Column - Create or Join */}
-          <div className="w-[60%]">
-            <div className="card p-6">
+          <div className="w-full lg:w-[60%]">
+            <div className="card p-4 sm:p-6">
               {/* Off Season Banner */}
               {isOffSeason && (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4 animate-bounce">🏀</div>
-                  <h2 className="text-white font-oswald text-3xl font-bold mb-2">Leagues are coming soon</h2>
-                  <p className="text-[#a0a0a0]">SLB Fantasy leagues open before the 2026/27 season. Check back soon.</p>
+                <div className="text-center py-8 sm:py-12">
+                  <div className="text-4xl sm:text-6xl mb-4 animate-bounce">🏀</div>
+                  <h2 className="text-white font-oswald text-xl sm:text-3xl font-bold mb-2">Leagues are coming soon</h2>
+                  <p className="text-[#a0a0a0] text-sm sm:text-base">SLB Fantasy leagues open before the 2026/27 season. Check back soon.</p>
                 </div>
               )}
 
               {/* Leagues Locked Banner */}
               {isLeaguesLocked && (
-                <div className="text-center py-12">
-                  <h2 className="text-white font-oswald text-2xl font-bold mb-2">League joining is now closed</h2>
-                  <p className="text-[#a0a0a0] mb-2">Leagues locked after Gameweek 3</p>
-                  <p className="text-[#555555] text-sm">You can still view your existing leagues</p>
+                <div className="text-center py-8 sm:py-12">
+                  <h2 className="text-white font-oswald text-xl sm:text-2xl font-bold mb-2">League joining is now closed</h2>
+                  <p className="text-[#a0a0a0] mb-2 text-sm sm:text-base">Leagues locked after Gameweek 3</p>
+                  <p className="text-[#555555] text-xs sm:text-sm">You can still view your existing leagues</p>
                 </div>
               )}
 
@@ -480,14 +480,14 @@ const LeaguesPage = () => {
               {canJoinLeagues && (
                 <>
                   {/* Tabs */}
-                  <div className="flex gap-4 mb-6">
+                  <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6">
                     <button
                       onClick={() => {
                         setActiveTab('create');
                         setCreateSuccess(null);
                         setJoinSuccess(null);
                       }}
-                      className={`px-4 py-2 rounded-button font-bold ${
+                      className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-button font-bold text-xs sm:text-base ${
                         activeTab === 'create'
                           ? 'bg-[#FF5500] text-white'
                           : 'bg-[#1a1a1a] text-[#a0a0a0] hover:text-white'
@@ -501,7 +501,7 @@ const LeaguesPage = () => {
                         setCreateSuccess(null);
                         setJoinSuccess(null);
                       }}
-                      className={`px-4 py-2 rounded-button font-bold ${
+                      className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-button font-bold text-xs sm:text-base ${
                         activeTab === 'join'
                           ? 'bg-[#FF5500] text-white'
                           : 'bg-[#1a1a1a] text-[#a0a0a0] hover:text-white'
@@ -515,22 +515,22 @@ const LeaguesPage = () => {
                   {activeTab === 'create' && (
                     <>
                       {createSuccess ? (
-                        <div className="text-center py-8">
-                          <div className="text-green-500 text-4xl mb-4">✓</div>
-                          <h3 className="text-white font-bold text-2xl mb-4">League Created!</h3>
-                          <p className="text-[#a0a0a0] mb-4">Share this code with your friends</p>
-                          <div className="bg-[#1a1a1a] border border-[#2A2A2A] rounded-lg p-6 mb-4">
-                            <p className="text-[#FF5500] font-oswald font-bold text-5xl mb-2">{createSuccess.inviteCode}</p>
+                        <div className="text-center py-6 sm:py-8">
+                          <div className="text-green-500 text-3xl sm:text-4xl mb-4">✓</div>
+                          <h3 className="text-white font-bold text-xl sm:text-2xl mb-4">League Created!</h3>
+                          <p className="text-[#a0a0a0] mb-4 text-sm sm:text-base">Share this code with your friends</p>
+                          <div className="bg-[#1a1a1a] border border-[#2A2A2A] rounded-lg p-4 sm:p-6 mb-4">
+                            <p className="text-[#FF5500] font-oswald font-bold text-3xl sm:text-5xl mb-2">{createSuccess.inviteCode}</p>
                             <button
                               onClick={() => copyToClipboard(createSuccess.inviteCode)}
-                              className="text-[#a0a0a0] text-sm hover:text-white underline"
+                              className="text-[#a0a0a0] text-xs sm:text-sm hover:text-white underline"
                             >
                               {copied ? 'Copied!' : 'Copy'}
                             </button>
                           </div>
                           <Link
                             to={`/leagues/${createSuccess.leagueId}`}
-                            className="inline-block bg-[#FF5500] text-white font-bold px-8 py-3 rounded-button hover:bg-[#e05f00] transition-colors"
+                            className="inline-block bg-[#FF5500] text-white font-bold px-6 sm:px-8 py-3 rounded-button hover:bg-[#e05f00] transition-colors text-sm sm:text-base"
                           >
                             Enter My League
                           </Link>
@@ -538,22 +538,22 @@ const LeaguesPage = () => {
                       ) : (
                         <form onSubmit={handleCreatePrivateLeague} className="space-y-4">
                           <div>
-                            <label className="text-white text-sm font-medium mb-2 block">League Name</label>
+                            <label className="text-white text-xs sm:text-sm font-medium mb-2 block">League Name</label>
                             <input
                               type="text"
                               value={leagueName}
                               onChange={(e) => setLeagueName(e.target.value.slice(0, 30))}
-                              className="w-full bg-[#1a1a1a] border border-[#2A2A2A] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF5500] transition-colors"
+                              className="w-full bg-[#1a1a1a] border border-[#2A2A2A] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF5500] transition-colors text-sm sm:text-base"
                               placeholder="e.g. The Hoops Gang"
                               required
                             />
-                            <p className="text-[#555555] text-xs mt-1">{leagueName.length}/30 characters</p>
+                            <p className="text-[#555555] text-[10px] sm:text-xs mt-1">{leagueName.length}/30 characters</p>
                           </div>
 
                           <button
                             type="submit"
                             disabled={creating}
-                            className="w-full bg-[#FF5500] text-white font-bold py-3 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-[#FF5500] text-white font-bold py-3 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                           >
                             {creating ? 'Creating...' : 'Create League'}
                           </button>
@@ -566,59 +566,59 @@ const LeaguesPage = () => {
                   {activeTab === 'join' && (
                     <>
                       {joinSuccess ? (
-                        <div className="text-center py-8">
-                          <div className="text-green-500 text-4xl mb-4">✓</div>
-                          <h3 className="text-white font-bold text-2xl mb-2">
+                        <div className="text-center py-6 sm:py-8">
+                          <div className="text-green-500 text-3xl sm:text-4xl mb-4">✓</div>
+                          <h3 className="text-white font-bold text-xl sm:text-2xl mb-2">
                             You have joined {joinSuccess.leagueName}!
                           </h3>
                           {joinSuccess.managerNumber && (
-                            <p className="text-[#a0a0a0] mb-4">You are manager number {joinSuccess.managerNumber}.</p>
+                            <p className="text-[#a0a0a0] mb-4 text-sm sm:text-base">You are manager number {joinSuccess.managerNumber}.</p>
                           )}
                           <Link
                             to={`/leagues/${joinSuccess.leagueId}`}
-                            className="inline-block bg-[#FF5500] text-white font-bold px-8 py-3 rounded-button hover:bg-[#e05f00] transition-colors"
+                            className="inline-block bg-[#FF5500] text-white font-bold px-6 sm:px-8 py-3 rounded-button hover:bg-[#e05f00] transition-colors text-sm sm:text-base"
                           >
                             Enter League
                           </Link>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {/* Public League Card */}
-                          <div className="card p-5">
-                            <div className="text-4xl mb-3">🏀</div>
-                            <h3 className="text-white font-bold text-lg mb-2">Public League</h3>
-                            <p className="text-[#a0a0a0] text-sm mb-4">Compete against other SLB Fantasy managers. You'll be placed in the next available league.</p>
+                          <div className="card p-4 sm:p-5">
+                            <div className="text-3xl sm:text-4xl mb-3">🏀</div>
+                            <h3 className="text-white font-bold text-base sm:text-lg mb-2">Public League</h3>
+                            <p className="text-[#a0a0a0] text-xs sm:text-sm mb-4">Compete against other SLB Fantasy managers. You'll be placed in the next available league.</p>
                             <button
                               onClick={handleJoinPublicLeague}
                               disabled={joiningPublic}
-                              className="w-full bg-[#FF5500] text-white font-bold py-2 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="w-full bg-[#FF5500] text-white font-bold py-2 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                               {joiningPublic ? 'Joining...' : 'Join Public League'}
                             </button>
                           </div>
 
                           {/* Private League Card */}
-                          <div className="card p-5">
-                            <div className="text-4xl mb-3">🔒</div>
-                            <h3 className="text-white font-bold text-lg mb-2">Private League</h3>
-                            <p className="text-[#a0a0a0] text-sm mb-4">Enter the invite code from your friend to join their private league.</p>
+                          <div className="card p-4 sm:p-5">
+                            <div className="text-3xl sm:text-4xl mb-3">🔒</div>
+                            <h3 className="text-white font-bold text-base sm:text-lg mb-2">Private League</h3>
+                            <p className="text-[#a0a0a0] text-xs sm:text-sm mb-4">Enter the invite code from your friend to join their private league.</p>
                             <form onSubmit={handleJoinPrivateLeague} className="space-y-3">
                               <input
                                 type="text"
                                 value={privateInviteCode}
                                 onChange={(e) => setPrivateInviteCode(e.target.value.toUpperCase())}
-                                className="w-full bg-[#1a1a1a] border border-[#2A2A2A] rounded-button px-4 py-2 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF5500] transition-colors uppercase"
+                                className="w-full bg-[#1a1a1a] border border-[#2A2A2A] rounded-button px-4 py-2 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF5500] transition-colors uppercase text-sm sm:text-base"
                                 placeholder="XXXXXX"
                                 maxLength={6}
                                 required
                               />
                               {joinError && (
-                                <p className="text-red-500 text-xs">{joinError}</p>
+                                <p className="text-red-500 text-[10px] sm:text-xs">{joinError}</p>
                               )}
                               <button
                                 type="submit"
                                 disabled={joiningPrivate}
-                                className="w-full bg-[#FF5500] text-white font-bold py-2 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-[#FF5500] text-white font-bold py-2 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                               >
                                 {joiningPrivate ? 'Joining...' : 'Join with Code'}
                               </button>

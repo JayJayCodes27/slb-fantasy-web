@@ -32,9 +32,9 @@ const MyTeamPage = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
       {/* Page Sub-header */}
-      <div className="px-6 py-5 flex items-center justify-between border-b border-[#242424]">
+      <div className="px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#242424]">
         <div className="flex items-center gap-3">
-          <h1 className="text-white font-bold text-xl uppercase tracking-wide">GAMEWEEK 1</h1>
+          <h1 className="text-white font-bold text-lg sm:text-xl uppercase tracking-wide">GAMEWEEK 1</h1>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#22c55e]"></div>
             <span className="text-[#22c55e] text-xs">Live</span>
@@ -42,10 +42,10 @@ const MyTeamPage = () => {
             <span className="text-[#a0a0a0] text-xs">5 players playing</span>
           </div>
         </div>
-        <div className="flex gap-0">
+        <div className="flex gap-0 w-full sm:w-auto">
           <button
             onClick={() => setView('court')}
-            className={`px-4 py-2 text-sm font-medium rounded-button transition-colors ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors ${
               view === 'court' ? 'bg-[#FF6B00] text-white' : 'bg-[#1a1a1a] text-white border border-[#242424]'
             }`}
           >
@@ -53,7 +53,7 @@ const MyTeamPage = () => {
           </button>
           <button
             onClick={() => setView('list')}
-            className={`px-4 py-2 text-sm font-medium rounded-button transition-colors ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors ${
               view === 'list' ? 'bg-[#FF6B00] text-white' : 'bg-[#1a1a1a] text-white border border-[#242424]'
             }`}
           >
@@ -62,9 +62,9 @@ const MyTeamPage = () => {
         </div>
       </div>
 
-      <div className="flex">
-        {/* Left Sidebar — 260px wide */}
-        <div className="w-[260px] flex-shrink-0 p-6 space-y-3">
+      <div className="flex flex-col lg:flex-row">
+        {/* Left Sidebar — 260px wide, hidden on mobile */}
+        <div className="hidden lg:block w-[260px] flex-shrink-0 p-6 space-y-3">
           {/* Sidebar Card 1 — My SLB Squad */}
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
@@ -154,17 +154,17 @@ const MyTeamPage = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 p-6 space-y-3">
+        <div className="flex-1 p-4 sm:p-6 space-y-3">
           {/* Court Panel */}
-          <div className="card p-5 h-[520px]">
+          <div className="card p-4 sm:p-5 h-auto sm:h-[520px]">
             {/* Panel Header */}
-            <div className="mb-6">
-              <p className="text-[#FF6B00] font-bold text-2xl">Total: 54 pts</p>
+            <div className="mb-4 sm:mb-6">
+              <p className="text-[#FF6B00] font-bold text-xl sm:text-2xl">Total: 54 pts</p>
               <p className="text-[#a0a0a0] text-xs mt-1">GW1 • 5 players playing</p>
             </div>
 
             {/* Basketball Court */}
-            <div className="relative w-full" style={{ height: '380px', backgroundColor: '#181818', borderRadius: '8px' }}>
+            <div className="relative w-full" style={{ height: '280px sm:380px', backgroundColor: '#181818', borderRadius: '8px' }}>
               {/* Court Lines */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 380">
                 {/* Three point arc */}
@@ -184,106 +184,106 @@ const MyTeamPage = () => {
 
               {/* Player Jersey Positions */}
               {/* C - Top Centre (near basket) */}
-              <div className="absolute" style={{ top: '30px', left: '50%', transform: 'translateX(-50%)' }}>
+              <div className="absolute" style={{ top: '20px sm:30px', left: '50%', transform: 'translateX(-50%)' }}>
                 <div className="text-center cursor-pointer">
-                  <div className="relative w-[60px] h-[50px] mx-auto mb-2">
+                  <div className="relative w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
                       <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[4].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">C</text>
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">C</text>
                     </svg>
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[4].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[4].points} pts</p>
+                  <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[4].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[4].points} pts</p>
                 </div>
               </div>
 
               {/* PF - Top Left of Paint */}
-              <div className="absolute" style={{ top: '100px', left: '130px' }}>
+              <div className="absolute" style={{ top: '70px sm:100px', left: '100px sm:130px' }}>
                 <div className="text-center cursor-pointer">
-                  <div className="relative w-[60px] h-[50px] mx-auto mb-2">
+                  <div className="relative w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
                       <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[3].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">PF</text>
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">PF</text>
                     </svg>
                     {startingPlayers[3].isViceCaptain && (
-                      <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                        <span className="text-white text-[10px] font-bold">V</span>
+                      <div className="absolute -top-2 -right-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                        <span className="text-white text-[8px] sm:text-[10px] font-bold">V</span>
                       </div>
                     )}
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[3].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[3].points} pts</p>
+                  <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[3].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[3].points} pts</p>
                 </div>
               </div>
 
               {/* SF - Left Wing Outside Arc */}
-              <div className="absolute" style={{ top: '180px', left: '40px' }}>
+              <div className="absolute" style={{ top: '130px sm:180px', left: '20px sm:40px' }}>
                 <div className="text-center cursor-pointer">
-                  <div className="w-[60px] h-[50px] mx-auto mb-2">
+                  <div className="w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
                       <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[2].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">SF</text>
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">SF</text>
                     </svg>
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[2].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[2].points} pts</p>
+                  <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[2].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[2].points} pts</p>
                 </div>
               </div>
 
               {/* SG - Right Wing Outside Arc */}
-              <div className="absolute" style={{ top: '180px', right: '40px' }}>
+              <div className="absolute" style={{ top: '130px sm:180px', right: '20px sm:40px' }}>
                 <div className="text-center cursor-pointer">
-                  <div className="w-[60px] h-[50px] mx-auto mb-2">
+                  <div className="w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
                       <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[1].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">SG</text>
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">SG</text>
                     </svg>
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[1].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[1].points} pts</p>
+                  <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[1].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[1].points} pts</p>
                 </div>
               </div>
 
               {/* PG - Bottom Centre (ball handler) */}
-              <div className="absolute" style={{ bottom: '20px', left: '50%', transform: 'translateX(-50%)' }}>
+              <div className="absolute" style={{ bottom: '15px sm:20px', left: '50%', transform: 'translateX(-50%)' }}>
                 <div className="text-center cursor-pointer">
-                  <div className="relative w-[60px] h-[50px] mx-auto mb-2">
+                  <div className="relative w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
                       <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[0].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">PG</text>
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">PG</text>
                     </svg>
                     {startingPlayers[0].isCaptain && (
-                      <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                        <span className="text-white text-[10px] font-bold">C</span>
+                      <div className="absolute -top-2 -right-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                        <span className="text-white text-[8px] sm:text-[10px] font-bold">C</span>
                       </div>
                     )}
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[0].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[0].points} pts</p>
+                  <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[0].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[0].points} pts</p>
                 </div>
               </div>
             </div>
 
             {/* Bench Section */}
-            <div className="border-t border-[#242424] mt-4 pt-4">
-              <h3 className="text-white font-bold text-sm mb-3">Bench</h3>
-              <div className="flex gap-3">
+            <div className="border-t border-[#242424] mt-3 sm:mt-4 pt-3 sm:pt-4">
+              <h3 className="text-white font-bold text-xs sm:text-sm mb-2 sm:mb-3">Bench</h3>
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
                 {benchPlayers.map((player, index) => (
-                  <div key={player?.id || index} className="text-center flex-1">
+                  <div key={player?.id || index} className="text-center flex-shrink-0 flex-1 sm:flex-none">
                     {player.name ? (
                       <div className="cursor-pointer">
-                        <div className="w-[55px] h-[50px] mx-auto mb-1">
+                        <div className="w-[45px] sm:w-[55px] h-[40px] sm:h-[50px] mx-auto mb-1">
                           <svg viewBox="0 0 60 50" className="w-full h-full">
                             <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={player.teamColour} />
-                            <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">{player.position}</text>
+                            <text x="30" y="30" textAnchor="middle" fill="white" fontSize="12 sm:14" fontWeight="bold">{player.position}</text>
                           </svg>
                         </div>
-                        <p className="text-white font-bold text-[11px]">{player.name}</p>
-                        <p className="text-[#FF6B00] font-bold text-[11px]">{player.points} pts</p>
+                        <p className="text-white font-bold text-[10px] sm:text-[11px]">{player.name}</p>
+                        <p className="text-[#FF6B00] font-bold text-[10px] sm:text-[11px]">{player.points} pts</p>
                       </div>
                     ) : (
-                      <div className="border border-dashed border-[#333] rounded-button p-2 h-[70px] flex flex-col items-center justify-center">
-                        <span className="text-[#555] text-[11px]">Player</span>
+                      <div className="border border-dashed border-[#333] rounded-button p-2 h-[60px] sm:h-[70px] flex flex-col items-center justify-center">
+                        <span className="text-[#555] text-[10px] sm:text-[11px]">Player</span>
                       </div>
                     )}
                   </div>
@@ -293,29 +293,29 @@ const MyTeamPage = () => {
           </div>
 
           {/* Bottom Stats Bar */}
-          <div className="card h-20 flex items-center">
-            <div className="flex-1 flex items-center justify-center border-r border-[#242424]">
+          <div className="card h-auto sm:h-20 flex flex-col sm:flex-row items-center">
+            <div className="flex-1 flex items-center justify-center border-r border-[#242424] w-full sm:w-auto py-3 sm:py-0">
               <div className="text-center">
-                <p className="text-[#a0a0a0] text-[11px] uppercase tracking-wider mb-1">GAMEWEEK POINTS</p>
-                <p className="text-[#FF6B00] font-bold text-2xl">54</p>
+                <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">GAMEWEEK POINTS</p>
+                <p className="text-[#FF6B00] font-bold text-xl sm:text-2xl">54</p>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center border-r border-[#242424]">
+            <div className="flex-1 flex items-center justify-center border-r border-[#242424] w-full sm:w-auto py-3 sm:py-0">
               <div className="text-center">
-                <p className="text-[#a0a0a0] text-[11px] uppercase tracking-wider mb-1">OVERALL POINTS</p>
-                <p className="text-white font-bold text-2xl">54</p>
+                <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">OVERALL POINTS</p>
+                <p className="text-white font-bold text-xl sm:text-2xl">54</p>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center border-r border-[#242424]">
+            <div className="flex-1 flex items-center justify-center border-r border-[#242424] w-full sm:w-auto py-3 sm:py-0">
               <div className="text-center">
-                <p className="text-[#a0a0a0] text-[11px] uppercase tracking-wider mb-1">OVERALL RANK</p>
-                <p className="text-white font-bold text-2xl">—</p>
+                <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">OVERALL RANK</p>
+                <p className="text-white font-bold text-xl sm:text-2xl">—</p>
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center w-full sm:w-auto py-3 sm:py-0">
               <div className="text-center">
-                <p className="text-[#a0a0a0] text-[11px] uppercase tracking-wider mb-1">TRANSFERS</p>
-                <p className="text-white font-bold text-2xl">1</p>
+                <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">TRANSFERS</p>
+                <p className="text-white font-bold text-xl sm:text-2xl">1</p>
               </div>
             </div>
           </div>
