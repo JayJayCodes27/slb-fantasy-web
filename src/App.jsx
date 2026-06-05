@@ -7,6 +7,7 @@ import FixturesPage from './pages/FixturesPage.jsx';
 import NewsPage from './pages/NewsPage.jsx';
 import MyTeamPage from './pages/MyTeamPage.jsx';
 import LeaguesPage from './pages/LeaguesPage.jsx';
+import LeagueDetailPage from './pages/LeagueDetailPage.jsx';
 import SignInPage from './pages/SignInPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -21,6 +22,7 @@ function App() {
         <Route path="/fixtures" element={<Layout><FixturesPage /></Layout>} />
         <Route path="/news" element={<Layout><NewsPage /></Layout>} />
         <Route path="/leagues" element={<Layout><LeaguesPage /></Layout>} />
+        <Route path="/leagues/:id" element={<Layout><LeagueDetailPage /></Layout>} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
       </Routes>
