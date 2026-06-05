@@ -182,113 +182,165 @@ const LandingPage = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="pt-12 pb-20 px-8 animate-fade-in">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="font-bebas text-7xl md:text-8xl font-bold mb-6 leading-tight">
-            YOUR SLB SQUAD.<br />
-            <span className="text-orange">OWN THE SEASON.</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto">
-            The first fantasy basketball game for UK Super League Basketball — live scoring, season-long leagues, free to play.
-          </p>
-          <div className="flex gap-4 justify-center mb-12">
-            <a href="#" className="bg-[#FF5500] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#FF6B1A] transition-colors">
-              Download on iOS
-            </a>
-            <a href="#" className="bg-white/10 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition-colors border border-white/20">
-              Get it on Android
-            </a>
-          </div>
-          
-          {/* Feature Icons */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            <div className="card p-6 text-center">
-              <div className="text-4xl mb-3">🏀</div>
-              <h3 className="font-bebas text-xl font-bold text-white mb-2">Create or Join Leagues</h3>
-              <p className="text-[#999999] text-sm">Compete with friends</p>
+      <section className="py-20 px-12 animate-fade-in">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="flex items-center gap-16">
+            {/* Left Column - 55% */}
+            <div className="w-[55%]">
+              <h1 className="text-white font-bold text-5xl uppercase leading-tight mb-4">
+                YOUR SLB SQUAD.
+              </h1>
+              <h2 className="text-[#FF6B00] font-bold text-5xl uppercase leading-tight mb-6">
+                OWN THE SEASON.
+              </h2>
+              <p className="text-[#c0c0c0] text-base leading-relaxed mb-6">
+                The UK's first fantasy basketball game for Super League Basketball.
+              </p>
+              <p className="text-[#c0c0c0] text-base leading-relaxed mb-8">
+                Live scoring. Season-long leagues. Free to play.
+              </p>
+              <div className="flex gap-3">
+                <button className="bg-[#FF6B00] text-white font-bold text-sm px-5 py-3 rounded-button h-11 flex items-center gap-2 hover:bg-[#e05f00] transition-colors">
+                  <span className="text-lg">🍎</span>
+                  Download on iOS
+                </button>
+                <button className="bg-[#1e1e1e] text-white font-bold text-sm px-5 py-3 rounded-button h-11 border border-[#333] flex items-center gap-2 hover:bg-[#2a2a2a] transition-colors">
+                  <span className="text-lg">▶️</span>
+                  Get it on Android
+                </button>
+              </div>
             </div>
-            <div className="card p-6 text-center">
-              <div className="text-4xl mb-3">📅</div>
-              <h3 className="font-bebas text-xl font-bold text-white mb-2">Weekly Gameweeks</h3>
-              <p className="text-[#999999] text-sm">Real matchups, real points</p>
-            </div>
-            <div className="card p-6 text-center">
-              <div className="text-4xl mb-3">🏆</div>
-              <h3 className="font-bebas text-xl font-bold text-white mb-2">Climb the Rankings</h3>
-              <p className="text-[#999999] text-sm">Top the leaderboard</p>
-            </div>
-            <div className="card p-6 text-center">
-              <div className="text-4xl mb-3">🎁</div>
-              <h3 className="font-bebas text-xl font-bold text-white mb-2">Free to Play</h3>
-              <p className="text-[#999999] text-sm">No entry fees. Ever.</p>
+
+            {/* Right Column - 45% */}
+            <div className="w-[45%] flex items-center justify-center">
+              <div className="relative" style={{ width: '280px', height: '350px' }}>
+                {/* Radiating light burst effect */}
+                <div className="absolute inset-0 bg-gradient-radial from-[#FF6B00]/30 via-[#FF6B00]/10 to-transparent rounded-full blur-3xl"></div>
+                
+                {/* Jersey illustration */}
+                <div className="relative transform rotate-[-10deg]">
+                  <svg viewBox="0 0 280 350" className="w-full h-full">
+                    {/* Jersey base */}
+                    <path d="M40 20 L240 20 L260 60 L260 180 L240 220 L140 240 L40 220 L20 180 L20 60 Z" fill="#111" />
+                    {/* Orange shoulder/side trim */}
+                    <path d="M40 20 L240 20 L260 60 L240 80 L40 80 L20 60 Z" fill="#FF6B00" />
+                    <path d="M20 60 L40 80 L40 220 L20 180 Z" fill="#FF6B00" />
+                    <path d="M240 20 L260 60 L260 180 L240 220 L240 80 Z" fill="#FF6B00" />
+                    {/* SLB logo */}
+                    <text x="140" y="120" textAnchor="middle" fill="white" fontSize="30" fontWeight="bold">SLB</text>
+                    {/* Number */}
+                    <text x="140" y="200" textAnchor="middle" fill="white" fontSize="80" fontWeight="bold">23</text>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Deadline Countdown */}
-      <div style={{backgroundColor: '#141414', padding: '20px 0'}}>
-        <div style={{textAlign: 'center'}}>
-          <span className="text-[#999999] font-semibold">Next Deadline:</span>
-          <div className="flex gap-4 justify-center items-center mt-4">
-            <div className="text-center">
-              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.days).padStart(2, '0')}</div>
-              <div className="text-xs text-[#999999]">DD</div>
-            </div>
-            <div className="font-bebas text-4xl font-bold text-[#FF5500]">:</div>
-            <div className="text-center">
-              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.hours).padStart(2, '0')}</div>
-              <div className="text-xs text-[#999999]">HH</div>
-            </div>
-            <div className="font-bebas text-4xl font-bold text-[#FF5500]">:</div>
-            <div className="text-center">
-              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.minutes).padStart(2, '0')}</div>
-              <div className="text-xs text-[#999999]">MM</div>
-            </div>
-            <div className="font-bebas text-4xl font-bold text-[#FF5500]">:</div>
-            <div className="text-center">
-              <div className="font-bebas text-4xl font-bold text-[#FF5500]">{String(countdown.seconds).padStart(2, '0')}</div>
-              <div className="text-xs text-[#999999]">SS</div>
+      {/* Feature Icons Row */}
+      <section className="px-12 pb-8">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="card p-5 h-[100px]">
+            <div className="grid grid-cols-4 gap-4 h-full">
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="text-2xl mb-2">👥</div>
+                <h3 className="text-white font-bold text-sm mb-1">Create or Join Leagues</h3>
+                <p className="text-[#a0a0a0] text-xs">Compete with friends</p>
+              </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="text-2xl mb-2">📅</div>
+                <h3 className="text-white font-bold text-sm mb-1">Weekly Gameweeks</h3>
+                <p className="text-[#a0a0a0] text-xs">Real matchups, real points</p>
+              </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="text-2xl mb-2">🏆</div>
+                <h3 className="text-white font-bold text-sm mb-1">Climb the Rankings</h3>
+                <p className="text-[#a0a0a0] text-xs">Top the leaderboard</p>
+              </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="text-2xl mb-2">🎁</div>
+                <h3 className="text-white font-bold text-sm mb-1">Free to Play</h3>
+                <p className="text-[#a0a0a0] text-xs">No entry fees. Ever.</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Countdown Banner */}
+      <section className="px-12 pb-4">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="card h-20 flex items-center px-8">
+            <span className="text-[#a0a0a0] text-xs uppercase tracking-widest mr-auto">NEXT DEADLINE</span>
+            <div className="flex items-center gap-4 ml-auto">
+              <div className="text-center">
+                <div className="text-[#FF6B00] font-bold text-4xl">{String(countdown.days).padStart(2, '0')}</div>
+                <div className="text-[#555] text-[10px] uppercase">DAYS</div>
+              </div>
+              <div className="text-[#FF6B00] font-bold text-3xl">:</div>
+              <div className="text-center">
+                <div className="text-[#FF6B00] font-bold text-4xl">{String(countdown.hours).padStart(2, '0')}</div>
+                <div className="text-[#555] text-[10px] uppercase">HRS</div>
+              </div>
+              <div className="text-[#FF6B00] font-bold text-3xl">:</div>
+              <div className="text-center">
+                <div className="text-[#FF6B00] font-bold text-4xl">{String(countdown.minutes).padStart(2, '0')}</div>
+                <div className="text-[#555] text-[10px] uppercase">MINS</div>
+              </div>
+              <div className="text-[#FF6B00] font-bold text-3xl">:</div>
+              <div className="text-center">
+                <div className="text-[#FF6B00] font-bold text-4xl">{String(countdown.seconds).padStart(2, '0')}</div>
+                <div className="text-[#555] text-[10px] uppercase">SECS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* News Ticker */}
-      <div className="bg-[#FF5500]/10 border-y border-[#FF5500]/20 overflow-hidden">
+      <div className="bg-[#FF6B00]/10 border-y border-[#FF6B00]/20 overflow-hidden">
         <div className="flex animate-scroll whitespace-nowrap py-3">
           {newsItems.length > 0 ? (
             [...newsItems, ...newsItems].map((item, i) => (
-              <span key={i} className="mx-8 text-[#FF5500] font-semibold">
+              <span key={i} className="mx-8 text-[#FF6B00] font-semibold">
                 🏀 {item.text}
               </span>
             ))
           ) : (
-            <span className="mx-8 text-[#FF5500] font-semibold">🏀 Loading news...</span>
+            <span className="mx-8 text-[#FF6B00] font-semibold">🏀 Loading news...</span>
           )}
         </div>
       </div>
 
       {/* Top Form Players */}
-      <section className="py-20 px-8">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-bebas text-4xl font-bold text-center mb-16">TOP FORM PLAYERS THIS WEEK</h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+      <section className="py-8 px-12">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white font-bold text-base uppercase tracking-wide">TOP FORM PLAYERS THIS WEEK</h2>
+            <span className="text-[#FF6B00] text-xs cursor-pointer">View all →</span>
+          </div>
+          <div className="flex gap-3">
             {topPlayers.length > 0 ? (
               topPlayers.map((player, index) => (
-                <JerseyCard
-                  key={player.id}
-                  playerName={player.name}
-                  position={player.position}
-                  teamColour={player.slb_teams?.primary_colour || '#6B7280'}
-                  number={player.position}
-                  points={player.total_season_points}
-                  showRank={true}
-                  rank={index + 1}
-                />
+                <div key={player.id} className="card p-4 h-[200px] flex-1">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-white font-bold text-xl">{index + 1}</span>
+                  </div>
+                  <div className="flex justify-center mb-4">
+                    <svg viewBox="0 0 60 50" className="w-[90px] h-[90px]">
+                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={player.slb_teams?.primary_colour || '#6B7280'} />
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">{player.position}</text>
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-bold text-sm mb-1">{player.name}</p>
+                    <p className="text-[#FF6B00] font-bold text-xs uppercase">{player.total_season_points} PTS</p>
+                  </div>
+                </div>
               ))
             ) : (
-              <p className="text-[#999999]">Loading top players...</p>
+              <p className="text-[#a0a0a0]">Loading top players...</p>
             )}
           </div>
         </div>

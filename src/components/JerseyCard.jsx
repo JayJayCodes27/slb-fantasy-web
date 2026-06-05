@@ -4,57 +4,58 @@ const JerseyCard = ({ playerName, position, teamColour, number, points, showRank
   const displayNumber = number || position;
 
   return (
-    <div className="card p-4 text-center cursor-pointer hover:bg-card-hover transition-colors relative">
+    <div className="card p-4 text-center cursor-pointer hover:bg-[#1a1a1a] transition-colors relative">
       {showRank && rank && (
-        <div className="absolute top-2 left-2 text-orange font-bebas text-2xl font-bold">#{rank}</div>
+        <div className="absolute top-2 left-2 text-white font-bold text-xl">{rank}</div>
       )}
       <div className="flex flex-col items-center">
         {/* Jersey SVG Silhouette */}
-        <svg width="80" height="90" viewBox="0 0 80 90" className="mb-3">
+        <svg width="90" height="90" viewBox="0 0 60 50" className="mb-3">
           {/* Jersey body */}
           <path
-            d="M 10 20 L 20 10 L 35 10 L 40 25 L 45 10 L 60 10 L 70 20 L 65 35 L 70 85 L 10 85 L 15 35 Z"
+            d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z"
             fill={teamColour}
-            stroke="white"
-            strokeWidth="1"
           />
           {/* Jersey number */}
           <text
-            x="40"
-            y="55"
+            x="30"
+            y="30"
             textAnchor="middle"
             fill="white"
-            fontSize="24"
+            fontSize="16"
             fontWeight="bold"
-            fontFamily="Bebas Neue, sans-serif"
           >
             {displayNumber}
           </text>
         </svg>
         
         {/* Player name */}
-        <p className="text-white font-semibold text-sm mb-1">{playerName}</p>
+        <p className="text-white font-bold text-sm mb-1">{playerName}</p>
         
         {/* Points */}
         {points !== null && points !== undefined && (
-          <p className="text-orange font-bebas text-xl font-bold">{points} pts</p>
+          <p className="text-[#FF6B00] font-bold text-xs uppercase">{points} PTS</p>
         )}
         
         {/* Position badge */}
         {position && (
-          <span className="inline-block mt-2 px-2 py-0.5 bg-white/10 rounded-full text-xs font-semibold text-white">
-            {position}
-          </span>
+          <div className="w-5 h-5 rounded-full bg-[#FF6B00] flex items-center justify-center mt-2">
+            <span className="text-white text-[10px] font-bold">{position}</span>
+          </div>
         )}
         
         {/* Captain/Vice Captain badges */}
         {showCaptain && (isCaptain || isViceCaptain) && (
-          <div className="mt-2">
+          <div className="absolute top-2 right-2">
             {isCaptain && (
-              <span className="inline-block px-2 py-0.5 bg-orange text-white text-xs rounded-full font-bold">C</span>
+              <div className="w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                <span className="text-white text-[10px] font-bold">C</span>
+              </div>
             )}
             {isViceCaptain && !isCaptain && (
-              <span className="inline-block px-2 py-0.5 bg-orange text-white text-xs rounded-full font-bold">V</span>
+              <div className="w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                <span className="text-white text-[10px] font-bold">V</span>
+              </div>
             )}
           </div>
         )}

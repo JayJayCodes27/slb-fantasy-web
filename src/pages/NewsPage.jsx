@@ -67,7 +67,7 @@ const NewsPage = () => {
 
   const getStatusInfo = (status) => {
     const statuses = {
-      fit: { label: 'Fit', color: 'bg-[#00FF87]/20 text-[#00FF87] border-[#00FF87]/30' },
+      fit: { label: 'Fit', color: 'bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30' },
       doubtful: { label: 'Doubtful', color: 'bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30' },
       out: { label: 'Out', color: 'bg-[#FF3B3B]/20 text-[#FF3B3B] border-[#FF3B3B]/30' }
     };
@@ -76,9 +76,9 @@ const NewsPage = () => {
 
   const getTransferStatusInfo = (status) => {
     const statuses = {
-      rumour: { label: 'Rumour', color: 'bg-[#555555]/20 text-[#999999] border-[#555555]/30' },
+      rumour: { label: 'Rumour', color: 'bg-[#555555]/20 text-[#a0a0a0] border-[#555555]/30' },
       unconfirmed: { label: 'Unconfirmed', color: 'bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30' },
-      confirmed: { label: 'Confirmed', color: 'bg-[#00FF87]/20 text-[#00FF87] border-[#00FF87]/30' }
+      confirmed: { label: 'Confirmed', color: 'bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30' }
     };
     return statuses[status?.toLowerCase()] || statuses.rumour;
   };
@@ -115,12 +115,12 @@ const NewsPage = () => {
   const filteredNews = getFilteredNews();
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="font-bebas text-5xl font-bold mb-4">News</h1>
-          <p className="text-xl text-[#999999]">Latest SLB player news, injuries and transfers</p>
+          <h1 className="text-white font-bold text-5xl uppercase tracking-wide mb-4">News</h1>
+          <p className="text-xl text-[#a0a0a0]">Latest SLB player news, injuries and transfers</p>
         </div>
       </div>
 
@@ -134,8 +134,8 @@ const NewsPage = () => {
                 onClick={() => setActiveFilter(filter)}
                 className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
                   activeFilter === filter
-                    ? 'bg-[#FF5500] text-white'
-                    : 'bg-[#141414] text-[#999999] hover:text-white'
+                    ? 'bg-[#FF6B00] text-white'
+                    : 'bg-[#141414] text-[#a0a0a0] hover:text-white'
                 }`}
               >
                 {filter}
@@ -156,7 +156,7 @@ const NewsPage = () => {
             </div>
           ) : filteredNews.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-2xl text-[#999999]">
+              <p className="text-2xl text-[#a0a0a0]">
                 {activeFilter === 'Injuries' ? 'No injury updates right now' : 
                  activeFilter === 'Transfers' ? 'No transfer news right now' : 
                  'No news right now'}
@@ -172,7 +172,7 @@ const NewsPage = () => {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-4">
                           <div>
-                            <h3 className="font-bebas text-2xl font-bold mb-1">
+                            <h3 className="text-white text-2xl font-bold mb-1">
                               {item.players?.name || 'Unknown Player'}
                             </h3>
                             <div className="flex items-center gap-3">
@@ -184,7 +184,7 @@ const NewsPage = () => {
                                   {item.players.position}
                                 </span>
                               )}
-                              <span className="text-[#999999]">{item.slb_teams?.name || 'Unknown Team'}</span>
+                              <span className="text-[#a0a0a0]">{item.slb_teams?.name || 'Unknown Team'}</span>
                             </div>
                           </div>
                           <span
@@ -196,7 +196,7 @@ const NewsPage = () => {
                         <span className="text-[#555555] text-sm">{getTimeAgo(item.created_at)}</span>
                       </div>
                       <h4 className="text-xl font-semibold mb-2">{item.headline}</h4>
-                      {item.body && <p className="text-[#999999]">{item.body}</p>}
+                      {item.body && <p className="text-[#a0a0a0]">{item.body}</p>}
                     </div>
                   ) : (
                     // Transfer Card
@@ -204,7 +204,7 @@ const NewsPage = () => {
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           {item.player_name && (
-                            <h3 className="font-bebas text-2xl font-bold mb-1">{item.player_name}</h3>
+                            <h3 className="text-white text-2xl font-bold mb-1">{item.player_name}</h3>
                           )}
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold border ${getTransferStatusInfo(item.status).color}`}
@@ -215,8 +215,8 @@ const NewsPage = () => {
                         <span className="text-[#555555] text-sm">{getTimeAgo(item.created_at)}</span>
                       </div>
                       <h4 className="text-xl font-semibold mb-2">{item.headline}</h4>
-                      {item.body && <p className="text-[#999999] mb-2">{item.body}</p>}
-                      {item.source && <p className="text-[#FF5500] text-sm">Source: {item.source}</p>}
+                      {item.body && <p className="text-[#a0a0a0] mb-2">{item.body}</p>}
+                      {item.source && <p className="text-[#FF6B00] text-sm">Source: {item.source}</p>}
                     </div>
                   )}
                 </div>

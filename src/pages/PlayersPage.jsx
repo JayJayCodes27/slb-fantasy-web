@@ -109,12 +109,12 @@ const PlayersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white font-dm-sans">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
       {/* Page Header */}
       <div className="pt-32 pb-12 px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="font-bebas text-5xl font-bold mb-4">Players</h1>
-          <p className="text-xl text-[#999999]">Full SLB player pool — stats, values and availability</p>
+          <h1 className="text-white font-bold text-5xl uppercase tracking-wide mb-4">Players</h1>
+          <p className="text-xl text-[#a0a0a0]">Full SLB player pool — stats, values and availability</p>
         </div>
       </div>
 
@@ -130,7 +130,7 @@ const PlayersPage = () => {
                   placeholder="Search players..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF5500]"
+                  className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00]"
                 />
               </div>
 
@@ -142,8 +142,8 @@ const PlayersPage = () => {
                     onClick={() => setPositionFilter(pos)}
                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                       positionFilter === pos
-                        ? 'bg-[#FF5500] text-white'
-                        : 'bg-[#1C1C1C] text-[#999999] hover:text-white'
+                        ? 'bg-[#FF6B00] text-white'
+                        : 'bg-[#1a1a1a] text-[#a0a0a0] hover:text-white'
                     }`}
                   >
                     {pos}
@@ -156,7 +156,7 @@ const PlayersPage = () => {
                 <select
                   value={teamFilter}
                   onChange={(e) => setTeamFilter(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#FF5500]"
+                  className="w-full bg-[#141414] border border-[#242424] rounded-button px-4 py-3 text-white focus:outline-none focus:border-[#FF6B00]"
                 >
                   <option value="All">All Teams</option>
                   {teams.map((team) => (
@@ -172,7 +172,7 @@ const PlayersPage = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#FF5500]"
+                  className="w-full bg-[#141414] border border-[#242424] rounded-button px-4 py-3 text-white focus:outline-none focus:border-[#FF6B00]"
                 >
                   <option value="value-desc">Value (high to low)</option>
                   <option value="value-asc">Value (low to high)</option>
@@ -196,19 +196,19 @@ const PlayersPage = () => {
             </div>
           ) : filteredPlayers.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-2xl text-[#999999]">No players found</p>
+              <p className="text-2xl text-[#a0a0a0]">No players found</p>
             </div>
           ) : (
             <div className="card overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#2A2A2A]">
-                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Player</th>
-                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Position</th>
-                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Team</th>
-                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Value</th>
-                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Season Points</th>
-                    <th className="text-left py-4 px-6 font-bebas text-lg text-[#999999]">Availability</th>
+                  <tr className="border-b border-[#242424]">
+                    <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Player</th>
+                    <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Position</th>
+                    <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Team</th>
+                    <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Value</th>
+                    <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Season Points</th>
+                    <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Availability</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -216,7 +216,7 @@ const PlayersPage = () => {
                     <tr
                       key={player.id}
                       onClick={() => setSelectedPlayer(player)}
-                      className="border-b border-[#2A2A2A]/5 hover:bg-[#1C1C1C] cursor-pointer transition-colors"
+                      className="border-b border-[#242424]/5 hover:bg-[#1a1a1a] cursor-pointer transition-colors"
                     >
                       <td className="py-4 px-6 font-semibold">{player.name}</td>
                       <td className="py-4 px-6">
@@ -273,21 +273,21 @@ const PlayersPage = () => {
           onClick={() => setSelectedPlayer(null)}
         >
           <div
-            className="absolute right-0 top-0 h-full w-full max-w-md bg-[#141414] border-l border-[#2A2A2A] overflow-y-auto"
+            className="absolute right-0 top-0 h-full w-full max-w-md bg-[#141414] border-l border-[#242424] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8">
               {/* Close Button */}
               <button
                 onClick={() => setSelectedPlayer(null)}
-                className="absolute top-6 right-6 text-[#999999] hover:text-white text-2xl"
+                className="absolute top-6 right-6 text-[#a0a0a0] hover:text-white text-2xl"
               >
                 ×
               </button>
 
               {/* Player Header */}
               <div className="mb-8">
-                <h2 className="font-bebas text-4xl font-bold mb-2">{selectedPlayer.name}</h2>
+                <h2 className="text-white text-4xl font-bold mb-2">{selectedPlayer.name}</h2>
                 <span
                   className="px-4 py-2 rounded-full text-sm font-semibold inline-block"
                   style={{ backgroundColor: getPositionColor(selectedPlayer.position) + '20', color: getPositionColor(selectedPlayer.position) }}
@@ -309,39 +309,39 @@ const PlayersPage = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
-                  <p className="text-[#999999] text-sm mb-1">Value</p>
-                  <p className="font-bebas text-2xl font-bold text-[#FF5500]">{formatValue(selectedPlayer.value)}</p>
+                <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424]">
+                  <p className="text-[#a0a0a0] text-sm mb-1">Value</p>
+                  <p className="text-2xl font-bold text-[#FF6B00]">{formatValue(selectedPlayer.value)}</p>
                 </div>
-                <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
-                  <p className="text-[#999999] text-sm mb-1">Season Points</p>
-                  <p className="font-bebas text-2xl font-bold">{selectedPlayer.total_season_points}</p>
+                <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424]">
+                  <p className="text-[#a0a0a0] text-sm mb-1">Season Points</p>
+                  <p className="text-2xl font-bold">{selectedPlayer.total_season_points}</p>
                 </div>
               </div>
 
               {/* Per Game Stats */}
               <div>
-                <h3 className="font-bebas text-xl font-bold mb-4">Per Game Stats</h3>
+                <h3 className="text-white text-xl font-bold mb-4">Per Game Stats</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
-                    <p className="text-[#999999] text-sm mb-1">Points</p>
-                    <p className="font-bebas text-2xl font-bold">0</p>
+                  <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424]">
+                    <p className="text-[#a0a0a0] text-sm mb-1">Points</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
-                    <p className="text-[#999999] text-sm mb-1">Assists</p>
-                    <p className="font-bebas text-2xl font-bold">0</p>
+                  <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424]">
+                    <p className="text-[#a0a0a0] text-sm mb-1">Assists</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
-                    <p className="text-[#999999] text-sm mb-1">Rebounds</p>
-                    <p className="font-bebas text-2xl font-bold">0</p>
+                  <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424]">
+                    <p className="text-[#a0a0a0] text-sm mb-1">Rebounds</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A]">
-                    <p className="text-[#999999] text-sm mb-1">Blocks</p>
-                    <p className="font-bebas text-2xl font-bold">0</p>
+                  <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424]">
+                    <p className="text-[#a0a0a0] text-sm mb-1">Blocks</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
-                  <div className="bg-[#1C1C1C] rounded-lg p-4 border border-[#2A2A2A] col-span-2">
-                    <p className="text-[#999999] text-sm mb-1">Steals</p>
-                    <p className="font-bebas text-2xl font-bold">0</p>
+                  <div className="bg-[#1a1a1a] rounded-button p-4 border border-[#242424] col-span-2">
+                    <p className="text-[#a0a0a0] text-sm mb-1">Steals</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
                 </div>
               </div>
