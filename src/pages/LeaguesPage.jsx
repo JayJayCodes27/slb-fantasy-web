@@ -121,7 +121,12 @@ const LeaguesPage = () => {
         .select()
         .single();
 
-      if (leagueError) throw leagueError;
+      if (leagueError) {
+        console.log('Create league error details:', JSON.stringify(leagueError, null, 2));
+        console.log('Current user id:', user.id);
+        console.log('Commissioner id being set:', user.id);
+        throw leagueError;
+      }
 
       // Add commissioner as member
       const { error: memberError } = await supabase
@@ -131,7 +136,12 @@ const LeaguesPage = () => {
           user_id: user.id
         });
 
-      if (memberError) throw memberError;
+      if (memberError) {
+        console.log('Add member error details:', JSON.stringify(memberError, null, 2));
+        console.log('Current user id:', user.id);
+        console.log('League id:', leagueData.id);
+        throw memberError;
+      }
 
       setCreateSuccess({
         leagueId: leagueData.id,
@@ -161,7 +171,10 @@ const LeaguesPage = () => {
         .eq('league_type', 'public')
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.log('Step 1 - Fetch public leagues error:', JSON.stringify(error, null, 2));
+        throw error;
+      }
 
       // Step 2 & 3: Find first league with space where user is not already a member
       let targetLeague = null;
@@ -192,10 +205,17 @@ const LeaguesPage = () => {
 
       if (targetLeague) {
         // Step 4: Join available league
-        await supabase
-          .from('league_members')
-          .insert({ league_id: targetLeague.id, user_id: user.id });
-        joinedLeague = targetLeague;
+        try {
+          await supabase
+            .from('league_members')
+            .insert({ league_id: targetLeague.id, user_id: user.id });
+          joinedLeague = targetLeague;
+        } catch (error) {
+          console.log('Step 4 - Join available league error:', JSON.stringify(error, null, 2));
+          console.log('Current user id:', user.id);
+          console.log('League id:', targetLeague.id);
+          throw error;
+        }
       } else {
         // Step 5: Create new public league
         const { count: totalPublic } = await supabase
@@ -203,7 +223,7 @@ const LeaguesPage = () => {
           .select('*', { count: 'exact', head: true })
           .eq('league_type', 'public');
 
-        const { data: newLeague } = await supabase
+        const { data: newLeague, error: createError } = await supabase
           .from('leagues')
           .insert({
             name: 'League ' + (totalPublic + 1),
@@ -216,11 +236,25 @@ const LeaguesPage = () => {
           .select()
           .single();
 
+        if (createError) {
+          console.log('Step 5 - Create new public league error:', JSON.stringify(createError, null, 2));
+          console.log('Current user id:', user.id);
+          console.log('Commissioner id being set:', user.id);
+          throw createError;
+        }
+
         // Join the new league
-        await supabase
-          .from('league_members')
-          .insert({ league_id: newLeague.id, user_id: user.id });
-        joinedLeague = newLeague;
+        try {
+          await supabase
+            .from('league_members')
+            .insert({ league_id: newLeague.id, user_id: user.id });
+          joinedLeague = newLeague;
+        } catch (error) {
+          console.log('Step 5 - Join new league error:', JSON.stringify(error, null, 2));
+          console.log('Current user id:', user.id);
+          console.log('League id:', newLeague.id);
+          throw error;
+        }
       }
 
       // Get member count for success message
