@@ -12,21 +12,50 @@ export const AuthProvider = ({ children }) => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchUserProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserProfile = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('username, team_name, avatar_url')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+
+      setUser((prevUser) => ({
+        ...prevUser,
+        username: data?.username,
+        team_name: data?.team_name,
+        avatar_url: data?.avatar_url
+      }));
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   const signOut = async () => {
     await supabase.auth.signOut();

@@ -1,3 +1,6 @@
+-- Add team_name column to users table
+-- alter table users add column if not exists team_name text;
+
 -- Enable RLS on users table
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 

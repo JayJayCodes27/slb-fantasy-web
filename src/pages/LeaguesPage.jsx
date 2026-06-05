@@ -49,39 +49,84 @@ const LeaguesPage = () => {
 
   const fetchMyLeagues = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch user's league memberships with league details
+      const { data: memberships, error: membershipError } = await supabase
         .from('league_members')
         .select(`
-          *,
+          league_id,
           leagues (
             id,
             name,
             max_managers,
             league_type,
-            draft_complete
+            draft_complete,
+            commissioner_id
+          ),
+          users (
+            username,
+            team_name
           )
         `)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (membershipError) throw membershipError;
 
-      // Count members for each league
-      const leaguesWithCounts = await Promise.all(
-        (data || []).map(async (member) => {
-          const { count } = await supabase
-            .from('league_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('league_id', member.leagues.id);
-          
-          return {
-            ...member.leagues,
-            member_count: count || 0,
-            is_commissioner: member.leagues.commissioner_id === user.id
-          };
-        })
-      );
+      if (!memberships || memberships.length === 0) {
+        setMyLeagues([]);
+        setLoading(false);
+        return;
+      }
 
-      setMyLeagues(leaguesWithCounts);
+      // Get all league IDs
+      const leagueIds = memberships.map(m => m.league_id);
+
+      // Fetch all members for all leagues in one query
+      const { data: allMembers, error: membersError } = await supabase
+        .from('league_members')
+        .select(`
+          league_id,
+          user_id,
+          total_points,
+          gameweek_points,
+          users (
+            username,
+            team_name
+          )
+        `)
+        .in('league_id', leagueIds);
+
+      if (membersError) throw membersError;
+
+      // Group members by league and sort by total_points
+      const membersByLeague = {};
+      (allMembers || []).forEach(member => {
+        if (!membersByLeague[member.league_id]) {
+          membersByLeague[member.league_id] = [];
+        }
+        membersByLeague[member.league_id].push(member);
+      });
+
+      // Sort each league's members by total_points
+      Object.keys(membersByLeague).forEach(leagueId => {
+        membersByLeague[leagueId].sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+      });
+
+      // Build leagues with standings data
+      const leaguesWithStandings = memberships.map(membership => {
+        const league = membership.leagues;
+        const leagueMembers = membersByLeague[league.id] || [];
+        const currentUserRank = leagueMembers.findIndex(m => m.user_id === user.id) + 1;
+
+        return {
+          ...league,
+          member_count: leagueMembers.length,
+          is_commissioner: league.commissioner_id === user.id,
+          members: leagueMembers,
+          current_user_rank: currentUserRank || '-'
+        };
+      });
+
+      setMyLeagues(leaguesWithStandings);
     } catch (error) {
       console.error('Error fetching leagues:', error);
     } finally {
@@ -415,30 +460,88 @@ const LeaguesPage = () => {
               <div className="space-y-4 mb-6">
                 {myLeagues.map((league) => {
                   const stateBadge = getSeasonStateBadge(league);
+                  const topMembers = league.members?.slice(0, 5) || [];
+                  const currentUserMember = league.members?.find(m => m.user_id === user.id);
+                  const moreManagers = league.member_count - 5;
+
                   return (
                     <div key={league.id} className="card p-4 sm:p-5">
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-white font-bold text-base sm:text-lg">{league.name}</h3>
-                        <span className={`text-xs px-2 py-1 rounded-pill ${
-                          league.league_type === 'public' 
-                            ? 'bg-blue-500/20 text-blue-500' 
-                            : 'bg-[#FF5500]/20 text-[#FF5500]'
-                        }`}>
-                          {league.league_type === 'public' ? 'Public' : 'Private'}
-                        </span>
+                      {/* Card Header */}
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-white font-oswald font-bold text-base sm:text-lg">{league.name}</h3>
+                            <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-pill ${
+                              league.league_type === 'public' 
+                                ? 'bg-blue-500/20 text-blue-500' 
+                                : 'bg-[#FF5500]/20 text-[#FF5500]'
+                            }`}>
+                              {league.league_type === 'public' ? 'Public' : 'Private'}
+                            </span>
+                            <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-pill ${stateBadge.color.replace('text-', 'bg-').replace('animate-pulse', '')} ${stateBadge.color.replace('text-', 'text-')}`}>
+                              {stateBadge.text}
+                            </span>
+                          </div>
+                        </div>
+                        <Link
+                          to={`/leagues/${league.id}`}
+                          className="text-[#FF5500] text-xs font-semibold border border-[#FF5500] px-3 py-1.5 rounded-button hover:bg-[#FF5500] hover:text-white transition-colors whitespace-nowrap"
+                        >
+                          Enter League
+                        </Link>
                       </div>
-                      <div className="flex items-center gap-3 sm:gap-4 mb-4">
-                        <span className="text-[#a0a0a0] text-xs sm:text-sm">{league.member_count} / {league.max_managers} managers</span>
-                        <span className={`text-xs sm:text-sm ${stateBadge.color}`}>
-                          {stateBadge.text}
-                        </span>
+
+                      {/* Mini Standings Table */}
+                      {!league.draft_complete ? (
+                        <div className="text-center py-6 bg-[#1a1a1a] rounded-lg mb-3">
+                          <p className="text-[#a0a0a0] text-xs sm:text-sm">Season starts soon — standings will appear here</p>
+                        </div>
+                      ) : (
+                        <div className="mb-3">
+                          <table className="w-full text-xs sm:text-sm">
+                            <thead>
+                              <tr className="text-left text-[#a0a0a0] text-[10px] uppercase tracking-wider">
+                                <th className="pb-2 pr-2 w-8">#</th>
+                                <th className="pb-2 pr-2">Team</th>
+                                <th className="pb-2 pr-2 text-right w-12">GW</th>
+                                <th className="pb-2 text-right w-12">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {topMembers.map((member, index) => {
+                                const isCurrentUser = member.user_id === user.id;
+                                return (
+                                  <tr
+                                    key={member.user_id}
+                                    className={`border-t border-[#242424] ${isCurrentUser ? 'bg-[#FF5500]/10 border-l-2 border-l-[#FF5500]' : ''}`}
+                                  >
+                                    <td className="py-2 pr-2 font-bold">{index + 1}</td>
+                                    <td className="py-2 pr-2">
+                                      <div className="text-white font-bold text-xs">{member.users?.team_name || member.users?.username || 'Unknown'}</div>
+                                      <div className="text-[#a0a0a0] text-[10px]">{member.users?.username || ''}</div>
+                                    </td>
+                                    <td className="py-2 pr-2 text-right">{member.gameweek_points || 0}</td>
+                                    <td className="py-2 text-right font-bold">{member.total_points || 0}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                          {moreManagers > 0 && (
+                            <Link
+                              to={`/leagues/${league.id}`}
+                              className="block text-center text-[#FF5500] text-xs font-semibold hover:underline mt-2"
+                            >
+                              + {moreManagers} more managers
+                            </Link>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Current User Rank */}
+                      <div className="text-[#a0a0a0] text-xs">
+                        You are <span className="text-white font-bold">{league.current_user_rank}th</span> of {league.member_count} managers
                       </div>
-                      <Link
-                        to={`/leagues/${league.id}`}
-                        className="block w-full border border-[#FF5500] text-[#FF5500] font-bold py-2 rounded-button text-center hover:bg-[#FF5500] hover:text-white transition-colors text-sm sm:text-base"
-                      >
-                        Enter League
-                      </Link>
                     </div>
                   );
                 })}

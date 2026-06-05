@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
+  const [teamName, setTeamName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -63,7 +64,8 @@ const SignUpPage = () => {
         .insert({
           id: authData.user.id,
           email: email,
-          username: username
+          username: username,
+          team_name: teamName
         });
 
       if (profileError) throw profileError;
@@ -108,6 +110,19 @@ const SignUpPage = () => {
               className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
               required
             />
+          </div>
+
+          {/* Team Name */}
+          <div>
+            <input
+              type="text"
+              placeholder="Team Name"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value.slice(0, 30))}
+              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
+              required
+            />
+            <p className="text-[#555555] text-xs mt-1">This is how you'll appear in league standings</p>
           </div>
 
           {/* Invite Code */}

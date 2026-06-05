@@ -7,18 +7,12 @@ const LeagueDetailPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { id: leagueId } = useParams();
-  const [activeTab, setActiveTab] = useState('standings');
   const [league, setLeague] = useState(null);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-
-  const chips = [
-    { name: 'Wildcard', description: 'Unlimited transfers', color: 'green', remaining: 2 },
-    { name: 'Full Rotation', description: 'Rotate entire squad', color: 'blue', remaining: 1 },
-    { name: 'Deep Squad', description: 'Extra bench slot', color: 'purple', remaining: 1 },
-    { name: 'Franchise Player', description: 'Double points on one player', color: 'orange', remaining: 1 }
-  ];
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [showSquadModal, setShowSquadModal] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -43,7 +37,7 @@ const LeagueDetailPage = () => {
       // Fetch league members with user details
       const { data: membersData, error: membersError } = await supabase
         .from('league_members')
-        .select('*, users(username, avatar_url)')
+        .select('*, users(username, team_name, avatar_url)')
         .eq('league_id', leagueId)
         .order('total_points', { ascending: false });
 
@@ -128,6 +122,14 @@ const LeagueDetailPage = () => {
                   </span>
                 )}
               </div>
+              
+              {/* User's Team Name */}
+              <div className="mb-4 pb-4 border-b border-[#242424]">
+                <p className="text-[#a0a0a0] text-xs uppercase tracking-wider mb-1">MY TEAM</p>
+                <p className="text-white font-oswald font-bold text-xl sm:text-2xl">{user?.team_name || user?.username || 'My Team'}</p>
+                <p className="text-[#a0a0a0] text-sm">{user?.username || ''}</p>
+              </div>
+
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-[#a0a0a0] text-sm">Managers</span>
@@ -186,155 +188,157 @@ const LeagueDetailPage = () => {
                 Manage My Squad
               </Link>
             </div>
-
-            {/* Chips Remaining Card */}
-            <div className="card p-4 sm:p-5">
-              <h2 className="text-white font-bold text-sm mb-3">My Chips</h2>
-              <div className="grid grid-cols-2 gap-2">
-                {chips.map((chip) => (
-                  <div key={chip.name} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-button p-2.5">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-white font-bold text-xs">{chip.name}</span>
-                      <span className="bg-[#FF6B00] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-pill">×{chip.remaining}</span>
-                    </div>
-                    <p className="text-[#a0a0a0] text-[11px]">Available</p>
-                    <p className="text-[#666] text-[11px]">{chip.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Right Column (65%) */}
           <div className="w-full lg:w-[65%]">
             <div className="card p-4 sm:p-6">
-              {/* Tab Bar */}
-              <div className="flex gap-4 sm:gap-6 mb-6 border-b border-[#242424]">
-                {['standings', 'fixtures', 'members'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`pb-3 text-sm sm:text-base font-semibold transition-colors ${
-                      activeTab === tab
-                        ? 'text-[#FF6B00] border-b-2 border-[#FF6B00]'
-                        : 'text-[#a0a0a0] hover:text-white'
-                    }`}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
-              </div>
+              {/* Standings Header */}
+              <h2 className="text-white font-oswald text-xl sm:text-2xl font-bold mb-6">Standings</h2>
 
-              {/* Standings Tab */}
-              {activeTab === 'standings' && (
-                <div>
-                  {!league.draft_complete ? (
-                    <div className="text-center py-12">
-                      <p className="text-[#a0a0a0]">Season hasn't started yet. Standings will appear here once the season begins.</p>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="text-left text-[#a0a0a0] text-xs uppercase tracking-wider">
-                            <th className="pb-3 pr-4">Rank</th>
-                            <th className="pb-3 pr-4">Manager</th>
-                            <th className="pb-3 pr-4 text-right">GW Points</th>
-                            <th className="pb-3 pr-4 text-right">Total Points</th>
-                            <th className="pb-3 text-right">+/-</th>
+              {/* Standings Table */}
+              {!league.draft_complete ? (
+                <div className="text-center py-12">
+                  <p className="text-[#a0a0a0]">Season hasn't started yet. Standings will appear here once the season begins.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-[#a0a0a0] text-xs uppercase tracking-wider">
+                        <th className="pb-3 pr-4 w-16">Rank</th>
+                        <th className="pb-3 pr-4">Team</th>
+                        <th className="pb-3 pr-4 text-right w-20">GW Pts</th>
+                        <th className="pb-3 pr-4 text-right w-20">Total Pts</th>
+                        <th className="pb-3 text-right w-16">+/-</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {members.map((member, index) => {
+                        const isCurrentUser = member.user_id === user?.id;
+                        const rankChange = member.rank_change || 0;
+                        const highestGwPoints = Math.max(...members.map(m => m.gameweek_points || 0));
+                        const isHighestGwPoints = member.gameweek_points === highestGwPoints;
+                        
+                        const getRankDisplay = (rank) => {
+                          if (rank === 0) return '🥇 1st';
+                          if (rank === 1) return '🥈 2nd';
+                          if (rank === 2) return '🥉 3rd';
+                          return `${rank + 1}th`;
+                        };
+
+                        return (
+                          <tr
+                            key={member.id}
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setShowSquadModal(true);
+                            }}
+                            className={`border-t border-[#242424] cursor-pointer hover:bg-[#1a1a1a] transition-colors ${isCurrentUser ? 'bg-[#FF6B00]/10 border-l-2 border-l-[#FF6B00]' : ''}`}
+                          >
+                            <td className="py-3 pr-4 font-bold text-sm">{getRankDisplay(index)}</td>
+                            <td className="py-3 pr-4">
+                              <div className="text-white font-bold text-sm">{member.users?.team_name || member.users?.username || 'Unknown'}</div>
+                              <div className="text-[#a0a0a0] text-xs">{member.users?.username || ''}</div>
+                            </td>
+                            <td className={`py-3 pr-4 text-right text-sm font-bold ${isHighestGwPoints ? 'text-[#FF6B00]' : ''}`}>{member.gameweek_points || 0}</td>
+                            <td className="py-3 pr-4 text-right text-sm font-bold">{member.total_points || 0}</td>
+                            <td className="py-3 text-right text-sm">
+                              {rankChange > 0 ? (
+                                <span className="text-green-500">▲ {rankChange}</span>
+                              ) : rankChange < 0 ? (
+                                <span className="text-red-500">▼ {Math.abs(rankChange)}</span>
+                              ) : (
+                                <span className="text-[#a0a0a0]">—</span>
+                              )}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {members.map((member, index) => {
-                            const isCurrentUser = member.user_id === user?.id;
-                            const rankChange = member.rank_change || 0;
-                            return (
-                              <tr
-                                key={member.id}
-                                className={`border-t border-[#242424] ${isCurrentUser ? 'bg-[#FF6B00]/10' : ''}`}
-                              >
-                                <td className="py-3 pr-4 font-bold text-sm">{index + 1}</td>
-                                <td className="py-3 pr-4 text-sm">{member.users?.username || 'Unknown'}</td>
-                                <td className="py-3 pr-4 text-right text-sm">{member.gameweek_points || 0}</td>
-                                <td className="py-3 pr-4 text-right text-sm font-bold">{member.total_points || 0}</td>
-                                <td className="py-3 text-right text-sm">
-                                  {rankChange > 0 ? (
-                                    <span className="text-green-500">↑{rankChange}</span>
-                                  ) : rankChange < 0 ? (
-                                    <span className="text-red-500">↓{Math.abs(rankChange)}</span>
-                                  ) : (
-                                    <span className="text-[#a0a0a0]">-</span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Fixtures Tab */}
-              {activeTab === 'fixtures' && (
-                <div>
-                  {!league.draft_complete ? (
-                    <div className="text-center py-12">
-                      <p className="text-[#a0a0a0]">Fixtures will appear once the season starts.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Placeholder for fixtures - will need to fetch actual fixture data */}
-                      <div className="text-center py-12">
-                        <p className="text-[#a0a0a0]">Head-to-head fixtures coming soon.</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Members Tab */}
-              {activeTab === 'members' && (
-                <div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {members.map((member) => {
-                      const isCommissioner = league.commissioner_id === member.user_id;
-                      const initials = member.users?.username?.slice(0, 2).toUpperCase() || '??';
-                      return (
-                        <div key={member.id} className="card p-4">
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-[#FF6B00] flex items-center justify-center font-bold text-white">
-                              {initials}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-white font-bold text-sm">{member.users?.username || 'Unknown'}</h3>
-                                {isCommissioner && (
-                                  <span className="text-xs px-2 py-0.5 rounded-pill bg-yellow-500/20 text-yellow-500">
-                                    Commissioner
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[#a0a0a0] text-xs">
-                                Joined {new Date(member.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-[#a0a0a0] text-xs">Total Points</span>
-                            <span className="text-white font-bold text-sm">{member.total_points || 0}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Squad Modal */}
+      {showSquadModal && selectedMember && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setShowSquadModal(false)}>
+          <div className="card max-w-lg w-full max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-white font-oswald text-xl font-bold">{selectedMember.users?.team_name || selectedMember.users?.username || 'Unknown Team'}</h3>
+                <p className="text-[#a0a0a0] text-sm">{selectedMember.users?.username || 'Unknown Manager'}</p>
+              </div>
+              <button
+                onClick={() => setShowSquadModal(false)}
+                className="text-[#a0a0a0] hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="text-[#FF6B00] text-xs mb-4">Showing {selectedMember.users?.team_name || selectedMember.users?.username}'s squad for Gameweek {settings?.current_gameweek || 1}</p>
+
+            {!league.draft_complete ? (
+              <div className="text-center py-8 bg-[#1a1a1a] rounded-lg">
+                <p className="text-[#a0a0a0] text-sm">Squad view will show live data once the season starts.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Starting 5 */}
+                <div>
+                  <h4 className="text-white font-bold text-sm mb-3">Starting 5</h4>
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg p-3">
+                        <div className="w-8 h-8 rounded-full bg-[#FF6B00] flex items-center justify-center text-xs font-bold text-white">
+                          {['PG', 'SG', 'SF', 'PF', 'C'][i]}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white font-bold text-sm">Player {i + 1}</p>
+                          <p className="text-[#a0a0a0] text-xs">Team</p>
+                        </div>
+                        <span className="text-[#FF6B00] font-bold text-sm">{Math.floor(Math.random() * 20)} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bench */}
+                <div>
+                  <h4 className="text-white font-bold text-sm mb-3">Bench</h4>
+                  <div className="space-y-2 opacity-60">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg p-3">
+                        <div className="w-8 h-8 rounded-full bg-[#555555] flex items-center justify-center text-xs font-bold text-white">
+                          {['PG', 'SG', 'SF', 'PF', 'C'][i]}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white font-bold text-sm">Bench {i + 1}</p>
+                          <p className="text-[#a0a0a0] text-xs">Team</p>
+                        </div>
+                        <span className="text-[#a0a0a0] font-bold text-sm">{Math.floor(Math.random() * 10)} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="border-t border-[#242424] pt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-white font-bold">Total GW Points</span>
+                    <span className="text-[#FF6B00] font-bold text-xl">{selectedMember.gameweek_points || 0}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
