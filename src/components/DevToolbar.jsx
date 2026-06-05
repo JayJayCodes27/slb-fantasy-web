@@ -8,13 +8,14 @@ const DevToolbar = () => {
   const [currentGameweek, setCurrentGameweek] = useState(0);
   const [settings, setSettings] = useState(null);
 
+  useEffect(() => {
+    if (!user || user.email !== 'jamaljohnson29@gmail.com') return;
+    fetchSettings();
+  }, [user]);
+
   if (!user || user.email !== 'jamaljohnson29@gmail.com') {
     return null;
   }
-
-  useEffect(() => {
-    fetchSettings();
-  }, [user]);
 
   const fetchSettings = async () => {
     try {
@@ -74,8 +75,6 @@ const DevToolbar = () => {
     setCurrentGameweek(4);
     updateSettings({ season_state: 'leagues_locked', current_gameweek: 4 });
   };
-
-  if (!isDevMode()) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#FF5500] h-12 flex items-center px-4 gap-6 z-50">
