@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -11,6 +12,7 @@ const SignUpPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [inviteCodeError, setInviteCodeError] = useState('');
   const navigate = useNavigate();
 
   const getPasswordStrength = (pwd) => {
@@ -30,6 +32,14 @@ const SignUpPage = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setInviteCodeError('');
+
+    // Validate invite code
+    if (inviteCode.toUpperCase() !== 'HRIS') {
+      setInviteCodeError('Invalid invite code. Please contact us at hello@slbfantasy.co.uk to request access.');
+      setLoading(false);
+      return;
+    }
 
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -100,6 +110,21 @@ const SignUpPage = () => {
               className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
               required
             />
+          </div>
+
+          {/* Invite Code */}
+          <div>
+            <input
+              type="text"
+              placeholder="Enter invite code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
+              required
+            />
+            {inviteCodeError && (
+              <p className="text-red-500 text-sm mt-1">{inviteCodeError}</p>
+            )}
           </div>
 
           {/* Email */}
