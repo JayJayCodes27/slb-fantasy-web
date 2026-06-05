@@ -252,6 +252,20 @@ const PlayersPage = () => {
         </div>
       </div>
 
+      {/* Official SLB Link */}
+      <div className="px-8 pb-8">
+        <div className="max-w-7xl mx-auto">
+          <a
+            href="https://www.superleaguebasketballm.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-500 hover:text-gray-400 transition-colors"
+          >
+            Official SLB player stats at <span className="text-[#FF5C00]">superleaguebasketballm.co.uk</span> →
+          </a>
+        </div>
+      </div>
+
       {/* Side Panel */}
       {selectedPlayer && (
         <div

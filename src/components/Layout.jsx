@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-dm-sans">
       {/* Live Scores Ticker */}
-      <div className="bg-[#111111] py-2 overflow-hidden border-b border-white/10">
+      <div className="bg-[#111111] py-2 overflow-hidden border-b border-white/10 relative">
         <div className="flex animate-ticker whitespace-nowrap">
           {[...scores, ...scores, ...scores].map((score, i) => (
             <span key={i} className="mx-6 text-xs">
@@ -39,11 +39,30 @@ const Layout = ({ children }) => {
             </span>
           ))}
         </div>
+        <a
+          href="https://www.superleaguebasketballm.co.uk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#FF5C00] hover:text-[#FF7700] transition-colors"
+          style={{ backgroundColor: '#111111', padding: '4px 16px' }}
+        >
+          Official SLB Site →
+        </a>
       </div>
 
       {/* Main Navigation */}
       <nav className="flex items-center justify-between px-8 py-6 bg-[#111111]/95 backdrop-blur-sm fixed w-full top-10 z-50 border-b border-white/10">
-        <Link to="/" className="font-oswald text-2xl font-bold text-orange">SLB FANTASY</Link>
+        <div className="flex items-center gap-3">
+          <Link to="/" className="font-oswald text-2xl font-bold text-orange">SLB FANTASY</Link>
+          <a
+            href="https://www.superleaguebasketballm.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-[#666666] hover:text-[#FF5C00] transition-colors"
+          >
+            ↗ Official Site
+          </a>
+        </div>
         <div className="flex items-center gap-8">
           <Link to="/" className="text-white hover:text-orange transition-colors">Home</Link>
           <Link to="/players" className="text-white hover:text-orange transition-colors">Players</Link>

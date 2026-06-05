@@ -165,6 +165,20 @@ const FixturesPage = () => {
         </div>
       </div>
 
+      {/* Official SLB Link */}
+      <div className="px-8 pb-8">
+        <div className="max-w-7xl mx-auto">
+          <a
+            href="https://www.superleaguebasketballm.co.uk/fixtures"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-500 hover:text-gray-400 transition-colors"
+          >
+            View full official fixture list at <span className="text-[#FF5C00]">superleaguebasketballm.co.uk</span> →
+          </a>
+        </div>
+      </div>
+
       {/* Difficulty Rating Key */}
       <div className="px-8 pb-20">
         <div className="max-w-7xl mx-auto">
