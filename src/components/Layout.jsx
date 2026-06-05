@@ -11,14 +11,34 @@ const Layout = ({ children }) => {
       {/* Results Ticker Bar */}
       <div className="bg-[#0D0D0D] border-b border-[#242424] h-8 flex items-center overflow-hidden">
         <div className="flex animate-scroll whitespace-nowrap">
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 London Lions 105 - 92 Manchester Giants</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Sheffield Sharks 98 - 87 Bristol Flyers</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Leicester Riders 102 - 95 Newcastle Eagles</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Surrey Scorchers 88 - 82 Plymouth City Patriots</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 London Lions 105 - 92 Manchester Giants</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Sheffield Sharks 98 - 87 Bristol Flyers</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Leicester Riders 102 - 95 Newcastle Eagles</span>
-          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Surrey Scorchers 88 - 82 Plymouth City Patriots</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 LON 104–81 CHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 MAN 92–89 LEI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 NEW 109–104 CAL</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 BRI 78–60 SHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 SUR 89–83 LON</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 LEI 72–79 LON</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 CHE 89–92 MAN</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 SHE 93–65 LEI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 MAN 92–67 BRI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 SHE 100–103 CHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 LON 89–83 CHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 NEW 85–91 LEI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 BRI 76–88 MAN</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 CAL 71–95 LON</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 LON 104–81 CHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 MAN 92–89 LEI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 NEW 109–104 CAL</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 BRI 78–60 SHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 SUR 89–83 LON</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 LEI 72–79 LON</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 CHE 89–92 MAN</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 SHE 93–65 LEI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 MAN 92–67 BRI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 SHE 100–103 CHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 LON 89–83 CHE</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 NEW 85–91 LEI</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 BRI 76–88 MAN</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 CAL 71–95 LON</span>
         </div>
       </div>
 
