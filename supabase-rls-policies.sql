@@ -24,3 +24,62 @@ CREATE POLICY "Users can delete their own row"
 ON users
 FOR DELETE
 USING (auth.uid() = id);
+
+-- Enable RLS on leagues table
+ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Anyone can read leagues (for invite code lookup)
+CREATE POLICY "Anyone can read leagues"
+ON leagues
+FOR SELECT
+USING (true);
+
+-- Policy: Authenticated users can insert leagues
+CREATE POLICY "Authenticated users can insert leagues"
+ON leagues
+FOR INSERT
+WITH CHECK (auth.uid() = commissioner_id);
+
+-- Policy: Users can update their own leagues
+CREATE POLICY "Users can update their own leagues"
+ON leagues
+FOR UPDATE
+USING (auth.uid() = commissioner_id);
+
+-- Policy: Users can delete their own leagues
+CREATE POLICY "Users can delete their own leagues"
+ON leagues
+FOR DELETE
+USING (auth.uid() = commissioner_id);
+
+-- Enable RLS on league_members table
+ALTER TABLE league_members ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Users can insert their own league_members row
+CREATE POLICY "Users can insert their own league_members row"
+ON league_members
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Policy: Users can read league_members for their leagues
+CREATE POLICY "Users can read league_members for their leagues"
+ON league_members
+FOR SELECT
+USING (
+  user_id = auth.uid()
+  OR league_id IN (
+    SELECT id FROM leagues WHERE commissioner_id = auth.uid()
+  )
+);
+
+-- Policy: Users can update their own league_members row
+CREATE POLICY "Users can update their own league_members row"
+ON league_members
+FOR UPDATE
+USING (auth.uid() = user_id);
+
+-- Policy: Users can delete their own league_members row
+CREATE POLICY "Users can delete their own league_members row"
+ON league_members
+FOR DELETE
+USING (auth.uid() = user_id);

@@ -83,7 +83,7 @@ const Layout = ({ children }) => {
                   <Link to="/" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Home</Link>
                   <Link to="/my-team" className={`text-sm font-medium ${location.pathname === '/my-team' ? 'text-white font-bold border-b-2 border-[#FF6B00] pb-0.5' : 'text-white hover:text-[#FF6B00] transition-colors'}`}>My Team</Link>
                   <Link to="/players" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Players</Link>
-                  <Link to="/leagues" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Leagues</Link>
+                  <Link to="/leagues" className={`text-sm font-medium ${location.pathname === '/leagues' ? 'text-white font-bold border-b-2 border-[#FF6B00] pb-0.5' : 'text-white hover:text-[#FF6B00] transition-colors'}`}>Leagues</Link>
                   <Link to="/fixtures" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Fixtures</Link>
                   <Link to="/news" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">News</Link>
                 </>
