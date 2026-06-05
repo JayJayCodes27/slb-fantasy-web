@@ -74,14 +74,13 @@ const LandingPage = () => {
             name,
             position,
             value,
-            total_season_points
-          ),
-          slb_teams (
-            name,
-            primary_colour
+            slb_teams (
+              name,
+              short_name,
+              primary_colour
+            )
           )
         `)
-        .order('created_at', { ascending: false })
         .limit(3);
 
       console.log('Scout picks data:', data);
@@ -203,10 +202,10 @@ const LandingPage = () => {
       </section>
 
       {/* Deadline Countdown */}
-      <div style={{ backgroundColor: '#111111' }} className="py-6 px-8">
-        <div className="max-w-6xl mx-auto flex items-center justify-center gap-8">
+      <div style={{backgroundColor: '#111111', padding: '20px 0'}}>
+        <div style={{textAlign: 'center'}}>
           <span className="text-gray-400 font-semibold">Next Deadline:</span>
-          <div className="flex gap-4">
+          <div className="flex gap-4 justify-center items-center mt-4">
             <div className="text-center">
               <div className="font-oswald text-4xl font-bold text-orange">{String(countdown.days).padStart(2, '0')}</div>
               <div className="text-xs text-gray-400">DD</div>
