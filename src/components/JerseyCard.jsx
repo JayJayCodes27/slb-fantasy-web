@@ -9,20 +9,20 @@ const JerseyCard = ({ playerName, position, teamColour, number, points, showRank
         <div className="absolute top-2 left-2 text-white font-bold text-xl">{rank}</div>
       )}
       <div className="flex flex-col items-center">
-        {/* Jersey SVG Silhouette */}
-        <svg width="90" height="90" viewBox="0 0 60 50" className="mb-3">
-          {/* Jersey body */}
+        {/* Jersey SVG Silhouette - proper basketball jersey shape */}
+        <svg width="90" height="100" viewBox="0 0 90 100" className="mb-3">
+          {/* Jersey body - wide shoulders, tapered sides, short sleeves */}
           <path
-            d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z"
+            d="M10 10 L80 10 L85 25 L75 35 L70 35 L70 95 L20 95 L20 35 L15 35 L5 25 Z"
             fill={teamColour}
           />
           {/* Jersey number */}
           <text
-            x="30"
-            y="30"
+            x="45"
+            y="60"
             textAnchor="middle"
             fill="white"
-            fontSize="16"
+            fontSize="20"
             fontWeight="bold"
           >
             {displayNumber}
@@ -48,12 +48,12 @@ const JerseyCard = ({ playerName, position, teamColour, number, points, showRank
         {showCaptain && (isCaptain || isViceCaptain) && (
           <div className="absolute top-2 right-2">
             {isCaptain && (
-              <div className="w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-[#FF6B00] flex items-center justify-center">
                 <span className="text-white text-[10px] font-bold">C</span>
               </div>
             )}
             {isViceCaptain && !isCaptain && (
-              <div className="w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-[#666666] flex items-center justify-center">
                 <span className="text-white text-[10px] font-bold">V</span>
               </div>
             )}

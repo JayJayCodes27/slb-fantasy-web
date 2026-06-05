@@ -164,7 +164,7 @@ const MyTeamPage = () => {
             </div>
 
             {/* Basketball Court */}
-            <div className="relative" style={{ height: '380px', backgroundColor: '#181818', borderRadius: '8px' }}>
+            <div className="relative w-full" style={{ height: '380px', backgroundColor: '#181818', borderRadius: '8px' }}>
               {/* Court Lines */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 380">
                 {/* Three point arc */}
@@ -176,59 +176,29 @@ const MyTeamPage = () => {
                 {/* Small circle at top of key */}
                 <circle cx="200" cy="100" r="15" fill="none" stroke="#2e2e2e" strokeWidth="2" />
                 {/* Baseline */}
-                <line x1="20" y1="380" x2="380" y2="380" stroke="#2e2e2e" strokeWidth="2" />
+                <line x1="0" y1="380" x2="400" y2="380" stroke="#2e2e2e" strokeWidth="2" />
+                {/* Sidelines */}
+                <line x1="0" y1="0" x2="0" y2="380" stroke="#2e2e2e" strokeWidth="2" />
+                <line x1="400" y1="0" x2="400" y2="380" stroke="#2e2e2e" strokeWidth="2" />
               </svg>
 
               {/* Player Jersey Positions */}
-              {/* PG - Bottom Centre */}
-              <div className="absolute" style={{ bottom: '20px', left: '50%', transform: 'translateX(-50%)' }}>
+              {/* C - Top Centre (near basket) */}
+              <div className="absolute" style={{ top: '30px', left: '50%', transform: 'translateX(-50%)' }}>
                 <div className="text-center cursor-pointer">
                   <div className="relative w-[60px] h-[50px] mx-auto mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
-                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[0].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">PG</text>
+                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[4].teamColour} />
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">C</text>
                     </svg>
-                    {startingPlayers[0].isCaptain && (
-                      <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                        <span className="text-white text-[10px] font-bold">C</span>
-                      </div>
-                    )}
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[0].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[0].points} pts</p>
+                  <p className="text-white font-bold text-xs">{startingPlayers[4].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[4].points} pts</p>
                 </div>
               </div>
 
-              {/* SG - Left Wing */}
-              <div className="absolute" style={{ bottom: '80px', left: '60px' }}>
-                <div className="text-center cursor-pointer">
-                  <div className="w-[60px] h-[50px] mx-auto mb-2">
-                    <svg viewBox="0 0 60 50" className="w-full h-full">
-                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[1].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">SG</text>
-                    </svg>
-                  </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[1].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[1].points} pts</p>
-                </div>
-              </div>
-
-              {/* SF - Right Wing */}
-              <div className="absolute" style={{ bottom: '80px', right: '60px' }}>
-                <div className="text-center cursor-pointer">
-                  <div className="w-[60px] h-[50px] mx-auto mb-2">
-                    <svg viewBox="0 0 60 50" className="w-full h-full">
-                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[2].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">SF</text>
-                    </svg>
-                  </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[2].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[2].points} pts</p>
-                </div>
-              </div>
-
-              {/* PF - Left Post */}
-              <div className="absolute" style={{ bottom: '140px', left: '100px' }}>
+              {/* PF - Top Left of Paint */}
+              <div className="absolute" style={{ top: '100px', left: '130px' }}>
                 <div className="text-center cursor-pointer">
                   <div className="relative w-[60px] h-[50px] mx-auto mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
@@ -246,17 +216,50 @@ const MyTeamPage = () => {
                 </div>
               </div>
 
-              {/* C - Centre Post */}
-              <div className="absolute" style={{ bottom: '140px', left: '50%', transform: 'translateX(-50%)' }}>
+              {/* SF - Left Wing Outside Arc */}
+              <div className="absolute" style={{ top: '180px', left: '40px' }}>
                 <div className="text-center cursor-pointer">
                   <div className="w-[60px] h-[50px] mx-auto mb-2">
                     <svg viewBox="0 0 60 50" className="w-full h-full">
-                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[4].teamColour} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">C</text>
+                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[2].teamColour} />
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">SF</text>
                     </svg>
                   </div>
-                  <p className="text-white font-bold text-xs">{startingPlayers[4].name}</p>
-                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[4].points} pts</p>
+                  <p className="text-white font-bold text-xs">{startingPlayers[2].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[2].points} pts</p>
+                </div>
+              </div>
+
+              {/* SG - Right Wing Outside Arc */}
+              <div className="absolute" style={{ top: '180px', right: '40px' }}>
+                <div className="text-center cursor-pointer">
+                  <div className="w-[60px] h-[50px] mx-auto mb-2">
+                    <svg viewBox="0 0 60 50" className="w-full h-full">
+                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[1].teamColour} />
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">SG</text>
+                    </svg>
+                  </div>
+                  <p className="text-white font-bold text-xs">{startingPlayers[1].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[1].points} pts</p>
+                </div>
+              </div>
+
+              {/* PG - Bottom Centre (ball handler) */}
+              <div className="absolute" style={{ bottom: '20px', left: '50%', transform: 'translateX(-50%)' }}>
+                <div className="text-center cursor-pointer">
+                  <div className="relative w-[60px] h-[50px] mx-auto mb-2">
+                    <svg viewBox="0 0 60 50" className="w-full h-full">
+                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[0].teamColour} />
+                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">PG</text>
+                    </svg>
+                    {startingPlayers[0].isCaptain && (
+                      <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                        <span className="text-white text-[10px] font-bold">C</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-white font-bold text-xs">{startingPlayers[0].name}</p>
+                  <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[0].points} pts</p>
                 </div>
               </div>
             </div>

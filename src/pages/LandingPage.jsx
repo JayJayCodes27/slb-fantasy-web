@@ -219,17 +219,30 @@ const LandingPage = () => {
                 
                 {/* Jersey illustration */}
                 <div className="relative transform rotate-[-10deg]">
-                  <svg viewBox="0 0 280 350" className="w-full h-full">
-                    {/* Jersey base */}
-                    <path d="M40 20 L240 20 L260 60 L260 180 L240 220 L140 240 L40 220 L20 180 L20 60 Z" fill="#111" />
-                    {/* Orange shoulder/side trim */}
-                    <path d="M40 20 L240 20 L260 60 L240 80 L40 80 L20 60 Z" fill="#FF6B00" />
-                    <path d="M20 60 L40 80 L40 220 L20 180 Z" fill="#FF6B00" />
-                    <path d="M240 20 L260 60 L260 180 L240 220 L240 80 Z" fill="#FF6B00" />
-                    {/* SLB logo */}
-                    <text x="140" y="120" textAnchor="middle" fill="white" fontSize="30" fontWeight="bold">SLB</text>
-                    {/* Number */}
-                    <text x="140" y="200" textAnchor="middle" fill="white" fontSize="80" fontWeight="bold">23</text>
+                  <svg viewBox="0 0 280 350" className="w-full h-full" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 107, 0, 0.3))' }}>
+                    {/* Jersey body - proper basketball jersey shape */}
+                    <path d="M30 20 L250 20 L270 50 L270 180 L250 220 L140 240 L30 220 L10 180 L10 50 Z" fill="#0a0a0a" />
+                    
+                    {/* Orange shoulders */}
+                    <path d="M30 20 L250 20 L270 50 L250 70 L30 70 L10 50 Z" fill="#FF6B00" />
+                    
+                    {/* Orange side trim */}
+                    <path d="M10 50 L30 70 L30 220 L10 180 Z" fill="#FF6B00" />
+                    <path d="M250 20 L270 50 L270 180 L250 220 L250 70 Z" fill="#FF6B00" />
+                    
+                    {/* Orange collar/neckline */}
+                    <path d="M100 20 L140 40 L180 20" fill="none" stroke="#FF6B00" strokeWidth="4" />
+                    
+                    {/* SLB text at chest level */}
+                    <text x="140" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold" fontFamily="sans-serif">SLB</text>
+                    
+                    {/* Number 23 large in centre */}
+                    <text x="140" y="180" textAnchor="middle" fill="white" fontSize="100" fontWeight="bold" fontFamily="sans-serif">23</text>
+                    
+                    {/* Subtle texture lines */}
+                    <line x1="140" y1="50" x2="140" y2="240" stroke="#1a1a1a" strokeWidth="1" />
+                    <line x1="80" y1="60" x2="80" y2="230" stroke="#1a1a1a" strokeWidth="1" />
+                    <line x1="200" y1="60" x2="200" y2="230" stroke="#1a1a1a" strokeWidth="1" />
                   </svg>
                 </div>
               </div>
@@ -299,16 +312,16 @@ const LandingPage = () => {
       </section>
 
       {/* News Ticker */}
-      <div className="bg-[#FF6B00]/10 border-y border-[#FF6B00]/20 overflow-hidden">
+      <div className="bg-[#0D0D0D] overflow-hidden">
         <div className="flex animate-scroll whitespace-nowrap py-3">
           {newsItems.length > 0 ? (
             [...newsItems, ...newsItems].map((item, i) => (
-              <span key={i} className="mx-8 text-[#FF6B00] font-semibold">
+              <span key={i} className="mx-8 text-[#a0a0a0] font-semibold">
                 🏀 {item.text}
               </span>
             ))
           ) : (
-            <span className="mx-8 text-[#FF6B00] font-semibold">🏀 Loading news...</span>
+            <span className="mx-8 text-[#a0a0a0] font-semibold">🏀 Loading news...</span>
           )}
         </div>
       </div>

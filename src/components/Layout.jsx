@@ -8,8 +8,22 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
+      {/* Results Ticker Bar */}
+      <div className="bg-[#0D0D0D] border-b border-[#242424] h-8 flex items-center overflow-hidden">
+        <div className="flex animate-scroll whitespace-nowrap">
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 London Lions 105 - 92 Manchester Giants</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Sheffield Sharks 98 - 87 Bristol Flyers</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Leicester Riders 102 - 95 Newcastle Eagles</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Surrey Scorchers 88 - 82 Plymouth City Patriots</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 London Lions 105 - 92 Manchester Giants</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Sheffield Sharks 98 - 87 Bristol Flyers</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Leicester Riders 102 - 95 Newcastle Eagles</span>
+          <span className="mx-8 text-[#a0a0a0] text-xs">🏀 Surrey Scorchers 88 - 82 Plymouth City Patriots</span>
+        </div>
+      </div>
+
       {/* Main Navigation */}
-      <nav className="flex items-center justify-between px-8 h-14 bg-[#0a0a0a] fixed w-full top-0 z-50 border-b border-[#242424]">
+      <nav className="flex items-center justify-between px-8 h-14 bg-[#0a0a0a] fixed w-full top-8 z-50 border-b border-[#242424]">
         {/* Left Cluster - Logo */}
         <div className="flex items-center gap-8">
           <Link to="/" className="flex flex-col leading-none">
@@ -71,7 +85,7 @@ const Layout = ({ children }) => {
       </nav>
 
       {/* Main Content */}
-      <div className="pt-14">
+      <div className="pt-22">
         {children}
       </div>
     </div>
