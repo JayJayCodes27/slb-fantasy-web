@@ -8,14 +8,11 @@ const DevToolbar = () => {
   const [currentGameweek, setCurrentGameweek] = useState(0);
   const [settings, setSettings] = useState(null);
 
-  // Check if dev mode is enabled
-  const isDevMode = () => {
-    return user?.email?.includes('jamaljohnson') || localStorage.getItem('slb_dev_mode') === 'true';
-  };
+  if (!user || user.email !== 'jamaljohnson29@gmail.com') {
+    return null;
+  }
 
   useEffect(() => {
-    if (!isDevMode()) return;
-
     fetchSettings();
   }, [user]);
 
