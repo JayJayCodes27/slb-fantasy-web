@@ -13,14 +13,30 @@ const LeagueDetailPage = () => {
   const [copied, setCopied] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showSquadModal, setShowSquadModal] = useState(false);
+  const [settings, setSettings] = useState(null);
 
   useEffect(() => {
     if (!user) {
       navigate('/signin');
       return;
     }
+    fetchSettings();
     fetchLeagueData();
   }, [user, navigate, leagueId]);
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      setSettings(data);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
 
   const fetchLeagueData = async () => {
     try {
