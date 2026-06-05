@@ -154,18 +154,19 @@ const LeaguesPage = () => {
     setJoinError('');
 
     try {
-      // Find public leagues with space
-      const { data: publicLeagues, error: leaguesError } = await supabase
+      // Step 1: Fetch all public leagues
+      const { data: publicLeagues, error } = await supabase
         .from('leagues')
-        .select('id, name, max_managers')
+        .select('id, name, max_managers, league_type')
         .eq('league_type', 'public')
         .order('created_at', { ascending: true });
 
-      if (leaguesError) throw leaguesError;
+      if (error) throw error;
 
-      // Find first league with space where user is not already a member
+      // Step 2 & 3: Find first league with space where user is not already a member
       let targetLeague = null;
       for (const league of publicLeagues || []) {
+        // Get member count
         const { count } = await supabase
           .from('league_members')
           .select('*', { count: 'exact', head: true })
@@ -173,14 +174,14 @@ const LeaguesPage = () => {
 
         if (count < league.max_managers) {
           // Check if user is already a member
-          const { data: existingMember } = await supabase
+          const { data: existing } = await supabase
             .from('league_members')
-            .select('*')
+            .select('id')
             .eq('league_id', league.id)
             .eq('user_id', user.id)
             .single();
 
-          if (!existingMember) {
+          if (!existing) {
             targetLeague = league;
             break;
           }
@@ -190,49 +191,35 @@ const LeaguesPage = () => {
       let joinedLeague = null;
 
       if (targetLeague) {
-        // Join existing league
-        const { error: memberError } = await supabase
+        // Step 4: Join available league
+        await supabase
           .from('league_members')
-          .insert({
-            league_id: targetLeague.id,
-            user_id: user.id
-          });
-
-        if (memberError) throw memberError;
+          .insert({ league_id: targetLeague.id, user_id: user.id });
         joinedLeague = targetLeague;
       } else {
-        // Create new public league
-        const { count } = await supabase
+        // Step 5: Create new public league
+        const { count: totalPublic } = await supabase
           .from('leagues')
           .select('*', { count: 'exact', head: true })
           .eq('league_type', 'public');
 
-        const newLeagueName = `League ${count + 1}`;
-
-        const { data: newLeague, error: createError } = await supabase
+        const { data: newLeague } = await supabase
           .from('leagues')
           .insert({
-            name: newLeagueName,
-            commissioner_id: user.id,
+            name: 'League ' + (totalPublic + 1),
             league_type: 'public',
-            format: 'total_points',
             max_managers: 20,
+            format: 'total_points',
+            commissioner_id: user.id,
             draft_complete: false
           })
           .select()
           .single();
 
-        if (createError) throw createError;
-
-        // Add user as member
-        const { error: memberError } = await supabase
+        // Join the new league
+        await supabase
           .from('league_members')
-          .insert({
-            league_id: newLeague.id,
-            user_id: user.id
-          });
-
-        if (memberError) throw memberError;
+          .insert({ league_id: newLeague.id, user_id: user.id });
         joinedLeague = newLeague;
       }
 

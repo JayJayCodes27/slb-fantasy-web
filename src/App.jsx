@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
+import DevToolbar from './components/DevToolbar.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import PlayersPage from './pages/PlayersPage.jsx';
 import FixturesPage from './pages/FixturesPage.jsx';
@@ -23,6 +24,7 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
       </Routes>
+      <DevToolbar />
     </AuthProvider>
   );
 }
