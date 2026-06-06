@@ -21,43 +21,45 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
-      {/* Results Ticker Bar - Fixed */}
-      <div className="fixed top-0 left-0 right-0 bg-[#0D0D0D] border-b border-[#242424] h-6 sm:h-8 flex items-center overflow-hidden z-[51]">
-        <div className="flex animate-scroll whitespace-nowrap">
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 104–81 CHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–89 LEI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 109–104 CAL</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 78–60 SHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SUR 89–83 LON</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LEI 72–79 LON</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CHE 89–92 MAN</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 93–65 LEI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–67 BRI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 100–103 CHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 89–83 CHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 85–91 LEI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 76–88 MAN</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CAL 71–95 LON</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 104–81 CHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–89 LEI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 109–104 CAL</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 78–60 SHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SUR 89–83 LON</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LEI 72–79 LON</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CHE 89–92 MAN</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 93–65 LEI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–67 BRI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 100–103 CHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 89–83 CHE</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 85–91 LEI</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 76–88 MAN</span>
-          <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CAL 71–95 LON</span>
+      {/* Fixed Header Wrapper */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}>
+        {/* Results Ticker Bar - Fixed */}
+        <div className="bg-[#0D0D0D] border-b border-[#242424] h-6 sm:h-8 flex items-center overflow-hidden">
+          <div className="flex animate-scroll whitespace-nowrap">
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 104–81 CHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–89 LEI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 109–104 CAL</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 78–60 SHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SUR 89–83 LON</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LEI 72–79 LON</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CHE 89–92 MAN</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 93–65 LEI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–67 BRI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 100–103 CHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 89–83 CHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 85–91 LEI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 76–88 MAN</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CAL 71–95 LON</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 104–81 CHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–89 LEI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 109–104 CAL</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 78–60 SHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SUR 89–83 LON</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LEI 72–79 LON</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CHE 89–92 MAN</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 93–65 LEI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 MAN 92–67 BRI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 SHE 100–103 CHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 LON 89–83 CHE</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 NEW 85–91 LEI</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 BRI 76–88 MAN</span>
+            <span className="mx-4 sm:mx-8 text-[#a0a0a0] text-[10px] sm:text-xs">🏀 CAL 71–95 LON</span>
+          </div>
         </div>
-      </div>
 
-      {/* Main Navigation - Fixed */}
-      {!isAuthPage && (
-        <nav className="fixed top-6 sm:top-8 left-0 right-0 flex items-center justify-between px-4 sm:px-8 h-12 sm:h-14 bg-[#0a0a0a] z-50 border-b border-[#242424]">
+        {/* Main Navigation - Fixed */}
+        {!isAuthPage && (
+          <nav className="flex items-center justify-between px-4 sm:px-8 h-12 sm:h-14 bg-[#0a0a0a] border-b border-[#242424]">
           {/* Left Cluster - Logo */}
           <div className="flex items-center gap-4 sm:gap-8">
             <Link to="/" className="flex flex-col leading-none">
@@ -82,8 +84,6 @@ const Layout = ({ children }) => {
                   <Link to="/" className={`text-white text-sm font-medium ${location.pathname === '/' ? 'border-b-2 border-[#FF6B00] pb-0.5' : 'hover:text-[#FF6B00] transition-colors'}`}>Home</Link>
                   <Link to="/fixtures" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Fixtures</Link>
                   <Link to="/news" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">News</Link>
-                  <Link to="/signin" className="text-white text-sm font-medium">Sign In</Link>
-                  <Link to="/signup" className="bg-[#FF6B00] text-white text-sm font-bold px-4 sm:px-5 py-2 rounded-button hover:bg-[#e05f00] transition-colors">Sign Up</Link>
                 </>
               )}
             </div>
@@ -180,8 +180,15 @@ const Layout = ({ children }) => {
         </div>
       )}
 
+      {/* Close Fixed Header Wrapper */}
+      </div>
+
+      {/* Spacer to account for fixed header */}
+      {!isAuthPage && <div style={{ height: '72px' }} className="sm:hidden" />}
+      {!isAuthPage && <div style={{ height: '88px' }} className="hidden sm:block" />}
+
       {/* Main Content */}
-      <div className={isAuthPage ? '' : 'pt-18 sm:pt-22'}>
+      <div className={isAuthPage ? '' : ''}>
         {children}
       </div>
     </div>

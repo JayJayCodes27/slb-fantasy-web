@@ -49,6 +49,21 @@ const FantasyPage = () => {
 
   const allPlayers = [...startingPlayers, ...benchPlayers.filter(p => p.name)];
 
+  const getJerseyImage = (team) => {
+    const jerseyMap = {
+      'LDN': 'jersey-red-blank.svg',
+      'NEW': 'jersey-blue-blank.svg',
+      'LEI': 'jersey-blue-blank.svg',
+      'MAN': 'jersey-blue-blank.svg',
+      'CHE': 'jersey-orange-blank.svg',
+      'BRI': 'jersey-red-blank.svg',
+      'SHE': 'jersey-dark-blank.svg',
+      'SUR': 'jersey-green-blank.svg',
+      'CAL': 'jersey-purple-blank.svg'
+    };
+    return jerseyMap[team] || 'jersey-empty.svg';
+  };
+
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -474,103 +489,132 @@ const FantasyPage = () => {
                 </div>
 
                 {/* Basketball Court */}
-                <div className="relative w-full" style={{ height: '280px sm:380px', backgroundColor: '#181818', borderRadius: '8px' }}>
-                  {/* Court Lines */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 380">
-                    {/* Three point arc */}
-                    <ellipse cx="200" cy="320" rx="150" ry="120" fill="none" stroke="#2e2e2e" strokeWidth="2" />
-                    {/* Paint area */}
-                    <rect x="120" y="240" width="160" height="140" fill="none" stroke="#2e2e2e" strokeWidth="2" />
-                    {/* Free throw circle */}
-                    <circle cx="200" cy="240" r="40" fill="none" stroke="#2e2e2e" strokeWidth="2" />
-                    {/* Small circle at top of key */}
-                    <circle cx="200" cy="100" r="15" fill="none" stroke="#2e2e2e" strokeWidth="2" />
-                    {/* Baseline */}
-                    <line x1="0" y1="380" x2="400" y2="380" stroke="#2e2e2e" strokeWidth="2" />
-                    {/* Sidelines */}
-                    <line x1="0" y1="0" x2="0" y2="380" stroke="#2e2e2e" strokeWidth="2" />
-                    <line x1="400" y1="0" x2="400" y2="380" stroke="#2e2e2e" strokeWidth="2" />
-                  </svg>
-
-                  {/* Player Jersey Positions */}
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '16/10',
+                    backgroundImage: 'url(/src/assets/half-court.svg)',
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundColor: '#181818',
+                    borderRadius: '8px'
+                  }}
+                >
                   {/* C - Top Centre (near basket) */}
-                  <div className="absolute" style={{ top: '20px sm:30px', left: '50%', transform: 'translateX(-50%)' }}>
-                    <div className="text-center cursor-pointer">
-                      <div className="relative w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
-                        <svg viewBox="0 0 60 50" className="w-full h-full">
-                          <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[4].teamColour} />
-                          <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">C</text>
-                        </svg>
-                      </div>
-                      <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[4].name}</p>
-                      <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[4].points} pts</p>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      transform: 'translate(-50%, -50%)',
+                      top: '15%',
+                      left: '50%'
+                    }}
+                    className="text-center cursor-pointer"
+                  >
+                    <div className="relative w-[50px] h-[45px] mx-auto mb-1">
+                      <img
+                        src={`/src/assets/${getJerseyImage(startingPlayers[4].team)}`}
+                        alt={startingPlayers[4].position}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
+                    <p className="text-white font-bold text-xs">{startingPlayers[4].name}</p>
+                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[4].points} pts</p>
                   </div>
 
                   {/* PF - Top Left of Paint */}
-                  <div className="absolute" style={{ top: '70px sm:100px', left: '100px sm:130px' }}>
-                    <div className="text-center cursor-pointer">
-                      <div className="relative w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
-                        <svg viewBox="0 0 60 50" className="w-full h-full">
-                          <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[3].teamColour} />
-                          <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">PF</text>
-                        </svg>
-                        {startingPlayers[3].isViceCaptain && (
-                          <div className="absolute -top-2 -right-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                            <span className="text-white text-[8px] sm:text-[10px] font-bold">V</span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[3].name}</p>
-                      <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[3].points} pts</p>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      transform: 'translate(-50%, -50%)',
+                      top: '35%',
+                      left: '25%'
+                    }}
+                    className="text-center cursor-pointer"
+                  >
+                    <div className="relative w-[50px] h-[45px] mx-auto mb-1">
+                      <img
+                        src={`/src/assets/${getJerseyImage(startingPlayers[3].team)}`}
+                        alt={startingPlayers[3].position}
+                        className="w-full h-full object-contain"
+                      />
+                      {startingPlayers[3].isViceCaptain && (
+                        <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                          <span className="text-white text-[10px] font-bold">V</span>
+                        </div>
+                      )}
                     </div>
+                    <p className="text-white font-bold text-xs">{startingPlayers[3].name}</p>
+                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[3].points} pts</p>
                   </div>
 
-                  {/* SF - Left Wing Outside Arc */}
-                  <div className="absolute" style={{ top: '130px sm:180px', left: '20px sm:40px' }}>
-                    <div className="text-center cursor-pointer">
-                      <div className="w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
-                        <svg viewBox="0 0 60 50" className="w-full h-full">
-                          <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[2].teamColour} />
-                          <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">SF</text>
-                        </svg>
-                      </div>
-                      <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[2].name}</p>
-                      <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[2].points} pts</p>
+                  {/* SF - Right Wing */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      transform: 'translate(-50%, -50%)',
+                      top: '35%',
+                      left: '75%'
+                    }}
+                    className="text-center cursor-pointer"
+                  >
+                    <div className="w-[50px] h-[45px] mx-auto mb-1">
+                      <img
+                        src={`/src/assets/${getJerseyImage(startingPlayers[2].team)}`}
+                        alt={startingPlayers[2].position}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
+                    <p className="text-white font-bold text-xs">{startingPlayers[2].name}</p>
+                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[2].points} pts</p>
                   </div>
 
-                  {/* SG - Right Wing Outside Arc */}
-                  <div className="absolute" style={{ top: '130px sm:180px', right: '20px sm:40px' }}>
-                    <div className="text-center cursor-pointer">
-                      <div className="w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
-                        <svg viewBox="0 0 60 50" className="w-full h-full">
-                          <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[1].teamColour} />
-                          <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">SG</text>
-                        </svg>
-                      </div>
-                      <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[1].name}</p>
-                      <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[1].points} pts</p>
+                  {/* SG - Left Wing */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      transform: 'translate(-50%, -50%)',
+                      top: '65%',
+                      left: '20%'
+                    }}
+                    className="text-center cursor-pointer"
+                  >
+                    <div className="w-[50px] h-[45px] mx-auto mb-1">
+                      <img
+                        src={`/src/assets/${getJerseyImage(startingPlayers[1].team)}`}
+                        alt={startingPlayers[1].position}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
+                    <p className="text-white font-bold text-xs">{startingPlayers[1].name}</p>
+                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[1].points} pts</p>
                   </div>
 
                   {/* PG - Bottom Centre (ball handler) */}
-                  <div className="absolute" style={{ bottom: '15px sm:20px', left: '50%', transform: 'translateX(-50%)' }}>
-                    <div className="text-center cursor-pointer">
-                      <div className="relative w-[45px] sm:w-[60px] h-[40px] sm:h-[50px] mx-auto mb-1 sm:mb-2">
-                        <svg viewBox="0 0 60 50" className="w-full h-full">
-                          <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={startingPlayers[0].teamColour} />
-                          <text x="30" y="30" textAnchor="middle" fill="white" fontSize="14 sm:16" fontWeight="bold">PG</text>
-                        </svg>
-                        {startingPlayers[0].isCaptain && (
-                          <div className="absolute -top-2 -right-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                            <span className="text-white text-[8px] sm:text-[10px] font-bold">C</span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-white font-bold text-[10px] sm:text-xs">{startingPlayers[0].name}</p>
-                      <p className="text-[#FF6B00] font-bold text-[10px] sm:text-xs">{startingPlayers[0].points} pts</p>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      transform: 'translate(-50%, -50%)',
+                      top: '65%',
+                      left: '50%'
+                    }}
+                    className="text-center cursor-pointer"
+                  >
+                    <div className="relative w-[50px] h-[45px] mx-auto mb-1">
+                      <img
+                        src={`/src/assets/${getJerseyImage(startingPlayers[0].team)}`}
+                        alt={startingPlayers[0].position}
+                        className="w-full h-full object-contain"
+                      />
+                      {startingPlayers[0].isCaptain && (
+                        <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
+                          <span className="text-white text-[10px] font-bold">C</span>
+                        </div>
+                      )}
                     </div>
+                    <p className="text-white font-bold text-xs">{startingPlayers[0].name}</p>
+                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[0].points} pts</p>
                   </div>
                 </div>
 
