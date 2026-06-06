@@ -13,8 +13,7 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        setUser(session.user);
-        fetchUserProfile(session.user.id);
+        fetchUserProfile(session.user);
       } else {
         setUser(null);
       }
@@ -27,8 +26,7 @@ export const AuthProvider = ({ children }) => {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session?.user) {
-        setUser(session.user);
-        await fetchUserProfile(session.user.id);
+        await fetchUserProfile(session.user);
       } else {
         setUser(null);
       }
@@ -38,26 +36,26 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId) => {
+  const fetchUserProfile = async (authUser) => {
     try {
       const { data, error } = await supabase
         .from('users')
         .select('username, team_name, avatar_url')
-        .eq('id', userId)
+        .eq('id', authUser.id)
         .single();
 
       if (error) throw error;
 
-      setUser((prevUser) => ({
-        ...prevUser,
+      setUser({
+        ...authUser,
         username: data?.username,
         team_name: data?.team_name,
         avatar_url: data?.avatar_url
-      }));
+      });
     } catch (error) {
       console.error('Error fetching user profile:', error);
       // If profile fetch fails, still set the user with auth data
-      // This ensures user.id is always available
+      setUser(authUser);
     }
   };
 
