@@ -120,6 +120,15 @@ const Layout = ({ children }) => {
                   </button>
                   {showDropdown && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-[#141414] border border-[#242424] rounded-lg shadow-lg overflow-hidden">
+                      {user?.email === 'jamaljohnson29@gmail.com' && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setShowDropdown(false)}
+                          className="block px-4 py-3 text-white text-sm hover:bg-[#1a1a1a] transition-colors"
+                        >
+                          🔧 Admin Panel
+                        </Link>
+                      )}
                       <Link
                         to="/fantasy"
                         onClick={() => setShowDropdown(false)}
