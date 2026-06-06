@@ -249,6 +249,20 @@ const SquadSelectionPage = () => {
     return getTeamCount(teamId) >= 2;
   };
 
+  // Calculate club counts upfront for proactive visual indicators
+  const clubCounts = [...squad.guards, ...squad.forwards, ...squad.centres].reduce((acc, p) => {
+    const id = p.slb_teams?.id;
+    if (id) acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {});
+
+  const isClubLimited = (player) => {
+    const teamId = player.slb_teams?.id;
+    const count = clubCounts[teamId] || 0;
+    const isPlayerInSquad = [...squad.guards, ...squad.forwards, ...squad.centres].some(p => p.id === player.id);
+    return count >= 2 && !isPlayerInSquad;
+  };
+
   // Filter and sort players
   const filteredPlayers = useCallback(() => {
     let filtered = [...players];
@@ -631,14 +645,14 @@ const SquadSelectionPage = () => {
                 ) : (
                   filteredPlayers().map((player) => {
                     const inSquad = isPlayerInSquad(player.id);
-                    const clubLimitReached = isClubLimitReached(player.slb_teams?.id);
-                    const canAdd = !inSquad && !clubLimitReached && isPositionSlotAvailable(player.position) && remainingBudget >= player.value;
+                    const clubLimited = isClubLimited(player);
+                    const canAdd = !inSquad && !clubLimited && isPositionSlotAvailable(player.position) && remainingBudget >= player.value;
 
                     return (
                       <div
                         key={player.id}
                         className={`bg-[#1a1a1a] border rounded-lg p-4 flex items-center justify-between ${
-                          inSquad ? 'border-[#2A2A2A] opacity-50' : clubLimitReached ? 'border-orange-500 opacity-50' : 'border-[#242424]'
+                          inSquad ? 'border-[#2A2A2A] opacity-50' : clubLimited ? 'border-orange-500 opacity-50' : 'border-[#242424]'
                         }`}
                       >
                         <div className="flex items-center gap-4">
@@ -655,7 +669,7 @@ const SquadSelectionPage = () => {
                             <div className="flex items-center gap-2 text-sm text-[#a0a0a0]">
                               <span className="px-2 py-0.5 rounded bg-[#2A2A2A] text-xs">{player.position}</span>
                               <span>{player.slb_teams?.name}</span>
-                              {clubLimitReached && (
+                              {clubLimited && (
                                 <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-500 text-xs">Club limit reached</span>
                               )}
                             </div>
@@ -665,7 +679,7 @@ const SquadSelectionPage = () => {
                           <span className="text-[#FF5500] font-bold">{formatValue(player.value)}</span>
                           {inSquad ? (
                             <span className="text-green-500 text-sm">✓</span>
-                          ) : clubLimitReached ? (
+                          ) : clubLimited ? (
                             <button
                               disabled
                               className="bg-[#2A2A2A] text-[#a0a0a0] px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"

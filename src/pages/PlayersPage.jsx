@@ -1,10 +1,9 @@
 // PlayersPage.jsx — Player listing with search, filters, and team selection
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 const PlayersPage = () => {
   const [players, setPlayers] = useState([]);
-  const [filteredPlayers, setFilteredPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [positionFilter, setPositionFilter] = useState('All');
@@ -17,48 +16,26 @@ const PlayersPage = () => {
     fetchPlayers();
   }, []);
 
-  const applyFilters = useCallback(() => {
-    let filtered = [...players];
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(player =>
-        player.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Position filter
-    if (positionFilter !== 'All') {
-      filtered = filtered.filter(player => player.position === positionFilter);
-    }
-
-    // Team filter
-    if (teamFilter !== 'All') {
-      filtered = filtered.filter(player => player.slb_teams?.name === teamFilter);
-    }
-
-    // Sort
+  // Derive filtered list directly — no useEffect needed
+  const filtered = players.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchPos = positionFilter === 'All' || p.position === positionFilter;
+    const matchTeam = teamFilter === 'All' || p.slb_teams?.name === teamFilter;
+    return matchSearch && matchPos && matchTeam;
+  }).sort((a, b) => {
     switch (sortBy) {
       case 'value-desc':
-        filtered.sort((a, b) => b.value - a.value);
-        break;
+        return b.value - a.value;
       case 'value-asc':
-        filtered.sort((a, b) => a.value - b.value);
-        break;
+        return a.value - b.value;
       case 'points-desc':
-        filtered.sort((a, b) => b.total_season_points - a.total_season_points);
-        break;
+        return b.total_season_points - a.total_season_points;
       case 'alphabetical':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
+        return a.name.localeCompare(b.name);
+      default:
+        return 0;
     }
-
-    setFilteredPlayers(filtered);
-  }, [players, searchTerm, positionFilter, teamFilter, sortBy]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
+  });
 
   const fetchPlayers = async () => {
     try {
@@ -190,7 +167,7 @@ const PlayersPage = () => {
                 <div key={i} className="card h-16 animate-pulse" />
               ))}
             </div>
-          ) : filteredPlayers.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-xl sm:text-2xl text-[#a0a0a0]">No players found</p>
             </div>
@@ -198,7 +175,7 @@ const PlayersPage = () => {
             <>
               {/* Mobile: Player Cards */}
               <div className="grid grid-cols-1 sm:hidden gap-4">
-                {filteredPlayers.map((player) => (
+                {filtered.map((player) => (
                   <div
                     key={player.id}
                     onClick={() => setSelectedPlayer(player)}
@@ -247,7 +224,7 @@ const PlayersPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredPlayers.map((player) => (
+                    {filtered.map((player) => (
                       <tr
                         key={player.id}
                         onClick={() => setSelectedPlayer(player)}

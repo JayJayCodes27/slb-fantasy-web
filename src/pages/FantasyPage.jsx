@@ -19,6 +19,8 @@ const FantasyPage = () => {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState(null);
   const [hasSquad, setHasSquad] = useState(false);
+  const [squadValue, setSquadValue] = useState(0);
+  const [bank, setBank] = useState(100000000);
 
   // Create Private League form state
   const [leagueName, setLeagueName] = useState('');
@@ -102,6 +104,19 @@ const FantasyPage = () => {
 
       if (userError) throw userError;
       setHasSquad(userData?.squad_confirmed || false);
+
+      // Fetch user squad with player values
+      const { data: squadData, error: squadError } = await supabase
+        .from('user_squads')
+        .select('*, players(value)')
+        .eq('user_id', user.id);
+
+      if (squadError) throw squadError;
+
+      // Calculate squad value
+      const calculatedSquadValue = squadData?.reduce((sum, s) => sum + (s.players?.value || 0), 0) || 0;
+      setSquadValue(calculatedSquadValue);
+      setBank(100000000 - calculatedSquadValue);
     } catch (error) {
       // Silent error handling
     }
@@ -418,7 +433,11 @@ const FantasyPage = () => {
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-white font-bold text-sm">My SLB Squad</h2>
-              <span className="text-[#FF6B00] text-xs cursor-pointer">Edit Team</span>
+              {settings?.season_state === 'pre_season' ? (
+                <Link to="/squad-selection" className="text-[#FF6B00] text-xs cursor-pointer hover:underline">Edit Team</Link>
+              ) : settings?.season_state === 'season_active' ? (
+                <Link to="/transfers" className="text-[#FF6B00] text-xs cursor-pointer hover:underline">Make Transfer</Link>
+              ) : null}
             </div>
             <div className="border-t border-[#242424] my-3"></div>
             <div className="space-y-3">
@@ -472,15 +491,15 @@ const FantasyPage = () => {
             <div className="space-y-3">
               <div className="flex justify-between h-8">
                 <span className="text-[#a0a0a0] text-xs">Squad value</span>
-                <span className="text-white font-bold text-sm">£10.0m</span>
+                <span className="text-white font-bold text-sm">£{(squadValue / 1000000).toFixed(1)}m</span>
               </div>
               <div className="flex justify-between h-8">
                 <span className="text-[#a0a0a0] text-xs">In the bank</span>
-                <span className="text-white font-bold text-sm">£0.0m</span>
+                <span className="text-white font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
               </div>
               <div className="flex justify-between h-8">
                 <span className="text-[#a0a0a0] text-xs">Total budget</span>
-                <span className="text-white font-bold text-sm">£10.0m</span>
+                <span className="text-white font-bold text-sm">£100.0m</span>
               </div>
             </div>
           </div>
@@ -544,7 +563,8 @@ const FantasyPage = () => {
                   style={{
                     position: 'relative',
                     width: '100%',
-                    minHeight: '480px'
+                    minHeight: '480px',
+                    backgroundColor: '#1a472a'
                   }}
                 >
                   {/* Court image as background layer */}
@@ -555,9 +575,9 @@ const FantasyPage = () => {
                       top: 0, left: 0,
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover',
+                      objectFit: 'fill',
                       objectPosition: 'center',
-                      opacity: 0.6,
+                      opacity: 0.9,
                       zIndex: 0,
                       pointerEvents: 'none'
                     }}
