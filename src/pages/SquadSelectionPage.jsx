@@ -61,13 +61,17 @@ const SquadSelectionPage = () => {
 
   const fetchPlayers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: playersData, error } = await supabase
         .from('players')
-        .select('*, slb_teams(*)')
-        .eq('available', true)
+        .select('id, name, position, value, is_available, slb_teams(id, name, short_name, primary_colour)')
+        .eq('is_available', true)
         .order('value', { ascending: false });
+
+      console.log('Players fetch error:', error);
+      console.log('Players data count:', playersData?.length);
+
       if (error) throw error;
-      setPlayers(data || []);
+      setPlayers(playersData || []);
     } catch (error) {
       // Silent error handling
     } finally {
