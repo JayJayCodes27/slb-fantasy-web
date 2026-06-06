@@ -254,27 +254,27 @@ const LandingPage = () => {
       {/* Feature Icons Row */}
       <section className="px-4 sm:px-12 pb-8">
         <div className="max-w-7xl mx-auto">
-          <div className="card p-4 sm:p-5 h-auto sm:h-[100px]">
+          <div className="card p-6 h-auto">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 h-full">
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="text-2xl mb-2">👥</div>
-                <h3 className="text-white font-bold text-xs sm:text-sm mb-1">Create or Join Leagues</h3>
-                <p className="text-[#a0a0a0] text-[10px] sm:text-xs">Compete with friends</p>
+              <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
+                <div className="text-3xl mb-2">👥</div>
+                <h3 className="text-white font-bold text-base mb-1">Create or Join Leagues</h3>
+                <p className="text-[#a0a0a0] text-sm">Compete with friends</p>
               </div>
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="text-2xl mb-2">📅</div>
-                <h3 className="text-white font-bold text-xs sm:text-sm mb-1">Weekly Gameweeks</h3>
-                <p className="text-[#a0a0a0] text-[10px] sm:text-xs">Real matchups, real points</p>
+              <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
+                <div className="text-3xl mb-2">📅</div>
+                <h3 className="text-white font-bold text-base mb-1">Weekly Gameweeks</h3>
+                <p className="text-[#a0a0a0] text-sm">Real matchups, real points</p>
               </div>
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="text-2xl mb-2">🏆</div>
-                <h3 className="text-white font-bold text-xs sm:text-sm mb-1">Climb the Rankings</h3>
-                <p className="text-[#a0a0a0] text-[10px] sm:text-xs">Top the leaderboard</p>
+              <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
+                <div className="text-3xl mb-2">🏆</div>
+                <h3 className="text-white font-bold text-base mb-1">Climb the Rankings</h3>
+                <p className="text-[#a0a0a0] text-sm">Top the leaderboard</p>
               </div>
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="text-2xl mb-2">🎁</div>
-                <h3 className="text-white font-bold text-xs sm:text-sm mb-1">Free to Play</h3>
-                <p className="text-[#a0a0a0] text-[10px] sm:text-xs">No entry fees. Ever.</p>
+              <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
+                <div className="text-3xl mb-2">🎁</div>
+                <h3 className="text-white font-bold text-base mb-1">Free to Play</h3>
+                <p className="text-[#a0a0a0] text-sm">No entry fees. Ever.</p>
               </div>
             </div>
           </div>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-44 -8 88 148" width="88" height="148">
+  <defs>
+    
+  <linearGradient id="sh" x1="30%" y1="0%" x2="70%" y2="100%">
+    <stop offset="0%" stop-color="#fff" stop-opacity="0.07"/>
+    <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.3"/>
+  </linearGradient>
+
+    <linearGradient id="g-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f9448"/>
+      <stop offset="100%" stop-color="#0a3d1c"/>
+    </linearGradient>
+  </defs>
+  <!-- Body -->
+  <path d="M -20,0 L -20,12 L -36,36 L -36,128 L 36,128 L 36,36 L 20,12 L 20,0 Q 8,15 0,15 Q -8,15 -20,0 Z" fill="url(#g-green)" />
+  <!-- Side panels -->
+  <rect x="-36" y="56" width="10" height="72" fill="#0d0d0d" opacity="0.35"/>
+  <rect x="26" y="56" width="10" height="72" fill="#0d0d0d" opacity="0.35"/>
+  <!-- Collar -->
+  <path d="M -20,0 Q -8,17 0,17 Q 8,17 20,0" fill="none" stroke="#062210" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Shade overlay -->
+  <path d="M -20,0 L -20,12 L -36,36 L -36,128 L 36,128 L 36,36 L 20,12 L 20,0 Q 8,15 0,15 Q -8,15 -20,0 Z" fill="url(#sh)"/>
+  <!-- Number -->
+  <text x="0" y="88" font-family="Arial Black, Impact, sans-serif" font-size="36" font-weight="900" fill="white" text-anchor="middle" dominant-baseline="middle" letter-spacing="-1">8</text>
+</svg>

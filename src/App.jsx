@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import DevToolbar from './components/DevToolbar.jsx';
 import LandingPage from './pages/LandingPage.jsx';
@@ -8,6 +8,7 @@ import NewsPage from './pages/NewsPage.jsx';
 import MyTeamPage from './pages/MyTeamPage.jsx';
 import LeaguesPage from './pages/LeaguesPage.jsx';
 import LeagueDetailPage from './pages/LeagueDetailPage.jsx';
+import FantasyPage from './pages/FantasyPage.jsx';
 import SignInPage from './pages/SignInPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
@@ -17,11 +18,12 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Layout><LandingPage /></Layout>} />
-        <Route path="/my-team" element={<Layout><MyTeamPage /></Layout>} />
+        <Route path="/fantasy" element={<Layout><FantasyPage /></Layout>} />
+        <Route path="/my-team" element={<Navigate to="/fantasy" replace />} />
+        <Route path="/leagues" element={<Navigate to="/fantasy" replace />} />
         <Route path="/players" element={<Layout><PlayersPage /></Layout>} />
         <Route path="/fixtures" element={<Layout><FixturesPage /></Layout>} />
         <Route path="/news" element={<Layout><NewsPage /></Layout>} />
-        <Route path="/leagues" element={<Layout><LeaguesPage /></Layout>} />
         <Route path="/leagues/:id" element={<Layout><LeagueDetailPage /></Layout>} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
