@@ -1,3 +1,4 @@
+// FantasyPage.jsx — Main fantasy hub: My Team court view and My Leagues tab
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -81,14 +82,13 @@ const FantasyPage = () => {
       if (error) throw error;
       setSettings(data);
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      // Silent error handling
     }
   };
 
   const fetchMyLeagues = async () => {
     try {
       if (!user?.id) {
-        console.log('fetchMyLeagues: user.id is undefined, skipping');
         return;
       }
 
@@ -171,7 +171,7 @@ const FantasyPage = () => {
 
       setMyLeagues(leaguesWithStandings);
     } catch (error) {
-      console.error('Error fetching leagues:', error);
+      // Silent error handling
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,6 @@ const FantasyPage = () => {
       setLeagueName('');
       fetchMyLeagues();
     } catch (error) {
-      console.error('Error creating league:', error);
       setCreateSuccess(null);
     } finally {
       setCreating(false);
@@ -279,7 +278,6 @@ const FantasyPage = () => {
 
       setJoinError('No available public leagues at the moment. Try creating a private league instead.');
     } catch (error) {
-      console.error('Error joining public league:', error);
       setJoinError('Failed to join public league. Please try again.');
     } finally {
       setJoiningPublic(false);
@@ -338,7 +336,6 @@ const FantasyPage = () => {
       setPrivateInviteCode('');
       fetchMyLeagues();
     } catch (error) {
-      console.error('Error joining private league:', error);
       setJoinError('Invalid invite code or league not found.');
     } finally {
       setJoiningPrivate(false);

@@ -1,3 +1,4 @@
+// DevToolbar.jsx — Developer toolbar for managing season state and gameweek
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
@@ -20,7 +21,7 @@ export default function DevToolbar() {
       setSeasonState(data?.season_state || 'off_season');
       setCurrentGameweek(data?.current_gameweek || 0);
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      // Silent error handling
     }
   };
 
@@ -34,7 +35,7 @@ export default function DevToolbar() {
       if (error) throw error;
       fetchSettings();
     } catch (error) {
-      console.error('Error updating settings:', error);
+      // Silent error handling
     }
   };
 
@@ -71,15 +72,11 @@ export default function DevToolbar() {
     fetchSettings();
   }, []);
 
-  console.log('DevToolbar render, user:', user?.email);
-
   if (!user) {
-    console.log('DevToolbar: no user');
     return null;
   }
 
   if (user.email !== 'jamaljohnson29@gmail.com') {
-    console.log('DevToolbar: wrong email', user.email);
     return null;
   }
 

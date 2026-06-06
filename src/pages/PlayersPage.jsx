@@ -1,3 +1,4 @@
+// PlayersPage.jsx — Player listing with search, filters, and team selection
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -35,9 +36,6 @@ const PlayersPage = () => {
         `)
         .order('name');
 
-      console.log('Players data:', data);
-      console.log('Players error:', error);
-
       if (error) throw error;
 
       const { data: teamsData } = await supabase
@@ -48,7 +46,7 @@ const PlayersPage = () => {
       if (teamsData) setTeams(teamsData);
       if (data) setPlayers(data);
     } catch (error) {
-      console.error('Error fetching players:', error);
+      // Silent error handling
     } finally {
       setLoading(false);
     }

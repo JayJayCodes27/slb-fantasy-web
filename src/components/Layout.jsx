@@ -1,3 +1,4 @@
+// Layout.jsx — Main layout component with fixed header navigation and ticker
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -125,13 +126,6 @@ const Layout = ({ children }) => {
                         className="block px-4 py-3 text-white text-sm hover:bg-[#1a1a1a] transition-colors"
                       >
                         Fantasy
-                      </Link>
-                      <Link
-                        to="/settings"
-                        onClick={() => setShowDropdown(false)}
-                        className="block px-4 py-3 text-white text-sm hover:bg-[#1a1a1a] transition-colors"
-                      >
-                        Settings
                       </Link>
                       <button
                         onClick={() => {

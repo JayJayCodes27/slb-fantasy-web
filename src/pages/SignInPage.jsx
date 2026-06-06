@@ -1,3 +1,4 @@
+// SignInPage.jsx — User authentication page with email/password login
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';

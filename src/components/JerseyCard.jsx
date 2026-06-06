@@ -1,3 +1,4 @@
+// JerseyCard.jsx — Jersey card component for displaying player info with team colour
 import React from 'react';
 
 const JerseyCard = ({ playerName, position, teamColour, number, points, showRank, rank, showCaptain, isCaptain, isViceCaptain }) => {

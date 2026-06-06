@@ -1,3 +1,4 @@
+// LeagueDetailPage.jsx — League detail page with standings and squad view modal
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -25,7 +26,7 @@ const LeagueDetailPage = () => {
       if (error) throw error;
       setSettings(data);
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      // Silent error handling
     }
   };
 
@@ -51,7 +52,7 @@ const LeagueDetailPage = () => {
       if (membersError) throw membersError;
       setMembers(membersData || []);
     } catch (error) {
-      console.error('Error fetching league data:', error);
+      // Silent error handling
     } finally {
       setLoading(false);
     }

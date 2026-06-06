@@ -1,3 +1,4 @@
+// NewsPage.jsx — News feed with player news and transfer updates
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -28,9 +29,6 @@ const NewsPage = () => {
         `)
         .order('created_at', { ascending: false });
 
-      console.log('Player news data:', playerData);
-      console.log('Player news error:', playerError);
-
       if (playerError) throw playerError;
       if (playerData) setPlayerNews(playerData);
 
@@ -40,13 +38,10 @@ const NewsPage = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      console.log('Transfer news data:', transferData);
-      console.log('Transfer news error:', transferError);
-
       if (transferError) throw transferError;
       if (transferData) setTransferNews(transferData);
     } catch (error) {
-      console.error('Error fetching news:', error);
+      // Silent error handling
     } finally {
       setLoading(false);
     }

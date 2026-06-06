@@ -1,3 +1,4 @@
+// App.jsx — Main application router with all page routes
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import DevToolbar from './components/DevToolbar.jsx';
@@ -5,8 +6,6 @@ import LandingPage from './pages/LandingPage.jsx';
 import PlayersPage from './pages/PlayersPage.jsx';
 import FixturesPage from './pages/FixturesPage.jsx';
 import NewsPage from './pages/NewsPage.jsx';
-import MyTeamPage from './pages/MyTeamPage.jsx';
-import LeaguesPage from './pages/LeaguesPage.jsx';
 import LeagueDetailPage from './pages/LeagueDetailPage.jsx';
 import FantasyPage from './pages/FantasyPage.jsx';
 import SignInPage from './pages/SignInPage.jsx';
@@ -19,8 +18,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><LandingPage /></Layout>} />
         <Route path="/fantasy" element={<Layout><FantasyPage /></Layout>} />
-        <Route path="/my-team" element={<Navigate to="/fantasy" replace />} />
-        <Route path="/leagues" element={<Navigate to="/fantasy" replace />} />
         <Route path="/players" element={<Layout><PlayersPage /></Layout>} />
         <Route path="/fixtures" element={<Layout><FixturesPage /></Layout>} />
         <Route path="/news" element={<Layout><NewsPage /></Layout>} />

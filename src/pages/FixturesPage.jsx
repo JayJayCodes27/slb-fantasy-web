@@ -1,3 +1,4 @@
+// FixturesPage.jsx — Fixtures display with gameweek selection and difficulty ratings
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -32,13 +33,10 @@ const FixturesPage = () => {
         .eq('gameweek_number', selectedGameweek)
         .order('match_date');
 
-      console.log('Fixtures data:', data);
-      console.log('Fixtures error:', error);
-
       if (error) throw error;
       if (data) setFixtures(data);
     } catch (error) {
-      console.error('Error fetching fixtures:', error);
+      // Silent error handling
     } finally {
       setLoading(false);
     }

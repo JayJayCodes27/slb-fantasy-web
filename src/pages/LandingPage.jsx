@@ -1,3 +1,4 @@
+// LandingPage.jsx — Public landing page with features, countdown, and waitlist signup
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -55,13 +56,10 @@ const LandingPage = () => {
         .order('total_season_points', { ascending: false })
         .limit(5);
 
-      console.log('Top players data:', data);
-      console.log('Top players error:', error);
-
       if (error) throw error;
       if (data) setTopPlayers(data);
     } catch (error) {
-      console.error('Error fetching top players:', error);
+      // Silent error handling
     }
   };
 
@@ -84,13 +82,10 @@ const LandingPage = () => {
         `)
         .limit(3);
 
-      console.log('Scout picks data:', data);
-      console.log('Scout picks error:', error);
-
       if (error) throw error;
       if (data) setScoutPicks(data);
     } catch (error) {
-      console.error('Error fetching scout picks:', error);
+      // Silent error handling
     }
   };
 
@@ -122,7 +117,7 @@ const LandingPage = () => {
 
       setNewsItems(newsItems);
     } catch (error) {
-      console.error('Error fetching news:', error);
+      // Silent error handling
     }
   };
 
@@ -148,7 +143,7 @@ const LandingPage = () => {
         setEmail('');
       }
     } catch (error) {
-      console.error('Error adding to waitlist:', error);
+      // Silent error handling
       setWaitlistError('Something went wrong. Please try again.');
     }
   };

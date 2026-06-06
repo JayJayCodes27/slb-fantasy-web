@@ -1,3 +1,4 @@
+// SignUpPage.jsx — User registration page with email, username, team name, and password
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
