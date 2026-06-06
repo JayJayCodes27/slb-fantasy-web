@@ -71,7 +71,7 @@ const SignUpPage = () => {
 
       if (profileError) throw profileError;
 
-      navigate('/my-team');
+      navigate('/fantasy');
     } catch (error) {
       if (error.message.includes('duplicate key')) {
         setError('Email or username already taken');

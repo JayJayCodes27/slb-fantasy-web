@@ -24,7 +24,7 @@ const SignInPage = () => {
 
       if (error) throw error;
 
-      navigate('/my-team');
+      navigate('/fantasy');
     } catch (error) {
       setError(error.message || 'Failed to sign in');
     } finally {
