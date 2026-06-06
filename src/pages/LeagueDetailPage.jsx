@@ -15,12 +15,6 @@ const LeagueDetailPage = () => {
   const [showSquadModal, setShowSquadModal] = useState(false);
   const [settings, setSettings] = useState(null);
 
-  useEffect(() => {
-    if (!user) return;
-    fetchSettings();
-    fetchLeagueData();
-  }, [user, leagueId]);
-
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -62,6 +56,12 @@ const LeagueDetailPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchSettings();
+    fetchLeagueData();
+  }, [user, leagueId]);
 
   const copyToClipboard = (code) => {
     navigator.clipboard.writeText(code);

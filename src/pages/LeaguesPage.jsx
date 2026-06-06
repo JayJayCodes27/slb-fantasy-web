@@ -24,12 +24,6 @@ const LeaguesPage = () => {
   const [joinSuccess, setJoinSuccess] = useState(null);
   const [joinError, setJoinError] = useState('');
 
-  useEffect(() => {
-    if (!user) return;
-    fetchSettings();
-    fetchMyLeagues();
-  }, [user]);
-
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -135,6 +129,12 @@ const LeaguesPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchSettings();
+    fetchMyLeagues();
+  }, [user]);
 
   const generateInviteCode = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
