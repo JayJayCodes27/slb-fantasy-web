@@ -93,13 +93,15 @@ const FantasyPage = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('user_squads')
-        .select('*')
-        .eq('user_id', user.id);
+      // Fetch squad_confirmed from users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('squad_confirmed')
+        .eq('id', user.id)
+        .single();
 
-      if (error) throw error;
-      setHasSquad(data && data.length > 0);
+      if (userError) throw userError;
+      setHasSquad(userData?.squad_confirmed || false);
     } catch (error) {
       // Silent error handling
     }
@@ -504,7 +506,7 @@ const FantasyPage = () => {
         <div className="flex-1 p-4 sm:p-6 space-y-3">
           {activeTab === 'team' ? (
             <>
-              {!hasSquad && (
+              {!hasSquad && settings?.season_state === 'pre_season' && (
                 <div className="card p-6 text-center">
                   <h2 className="text-white font-bold text-xl mb-2">Build Your Squad</h2>
                   <p className="text-[#a0a0a0] text-sm mb-4">Select 10 players within £100m budget to get started</p>
@@ -514,6 +516,18 @@ const FantasyPage = () => {
                   >
                     Build Your Squad →
                   </Link>
+                </div>
+              )}
+
+              {hasSquad && (
+                <div className="card p-6 text-center">
+                  <h2 className="text-white font-bold text-xl mb-2">Transfers</h2>
+                  <p className="text-[#a0a0a0] text-sm mb-4">Make changes to your squad</p>
+                  <button
+                    className="inline-block bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#e05f00] transition-colors"
+                  >
+                    Make Transfer →
+                  </button>
                 </div>
               )}
 

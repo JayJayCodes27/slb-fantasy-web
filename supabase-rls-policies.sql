@@ -1,6 +1,9 @@
 -- Add team_name column to users table
 -- alter table users add column if not exists team_name text;
 
+-- Add squad_confirmed column to users table
+-- alter table users add column if not exists squad_confirmed boolean default false;
+
 -- Enable RLS on users table
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 

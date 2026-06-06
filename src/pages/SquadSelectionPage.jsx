@@ -38,8 +38,26 @@ const SquadSelectionPage = () => {
 
   // Fetch players
   useEffect(() => {
+    checkExistingSquad();
     fetchPlayers();
   }, []);
+
+  const checkExistingSquad = async () => {
+    try {
+      const { data: existingSquad } = await supabase
+        .from('user_squads')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      if (existingSquad && existingSquad.length > 0) {
+        showToast('Your squad is already set. Use Transfers to make changes.', 'error');
+        setTimeout(() => navigate('/fantasy'), 2000);
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  };
 
   const fetchPlayers = async () => {
     try {
@@ -233,6 +251,12 @@ const SquadSelectionPage = () => {
       // Insert squad
       const { error } = await supabase.from('user_squads').insert(squadData);
       if (error) throw error;
+
+      // Update user's squad_confirmed status
+      await supabase
+        .from('users')
+        .update({ squad_confirmed: true })
+        .eq('id', user.id);
 
       showToast('Squad saved! Head to Fantasy to set your captain.');
       setTimeout(() => navigate('/fantasy'), 2000);
