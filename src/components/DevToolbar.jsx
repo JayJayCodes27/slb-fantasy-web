@@ -8,6 +8,10 @@ export default function DevToolbar() {
   const [currentGameweek, setCurrentGameweek] = useState(0);
   const [settings, setSettings] = useState(null);
 
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
   console.log('DevToolbar render, user:', user?.email);
 
   if (!user) {
@@ -19,10 +23,6 @@ export default function DevToolbar() {
     console.log('DevToolbar: wrong email', user.email);
     return null;
   }
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
 
   const fetchSettings = async () => {
     try {
