@@ -1,4 +1,4 @@
-// SquadSelectionPage.jsx — Squad selection page for users to pick 10 players within £100m budget
+// SquadSelectionPage.jsx — Squad selection page for users to pick 9 players within £100m budget
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -13,6 +13,8 @@ const SquadSelectionPage = () => {
   const [positionFilter, setPositionFilter] = useState('All');
   const [sortBy, setSortBy] = useState('value-desc');
   const [toast, setToast] = useState(null);
+  const [settings, setSettings] = useState(null);
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
 
   // Squad state
   const [squad, setSquad] = useState({
@@ -38,21 +40,46 @@ const SquadSelectionPage = () => {
 
   // Fetch players
   useEffect(() => {
+    fetchSettings();
     checkExistingSquad();
     fetchPlayers();
   }, []);
 
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      setSettings(data);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
   const checkExistingSquad = async () => {
     try {
-      const { data: existingSquad } = await supabase
-        .from('user_squads')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
+      const { data: settingsData } = await supabase
+        .from('app_settings')
+        .select('season_state')
+        .single();
 
-      if (existingSquad && existingSquad.length > 0) {
-        showToast('Your squad is already set. Use Transfers to make changes.', 'error');
+      if (settingsData?.season_state === 'season_active') {
+        showToast('The season has started. Use Transfers to make changes.', 'error');
         setTimeout(() => navigate('/fantasy'), 2000);
+        return;
+      }
+
+      if (settingsData?.season_state === 'off_season') {
+        showToast('Leagues aren\'t open yet', 'error');
+        return;
+      }
+
+      // During pre_season, allow editing regardless of squad_confirmed status
+      if (settingsData?.season_state === 'pre_season') {
+        return;
       }
     } catch (error) {
       // Silent error handling
@@ -98,7 +125,7 @@ const SquadSelectionPage = () => {
       case 'G':
         return squad.guards.length < 4;
       case 'F':
-        return squad.forwards.length < 4;
+        return squad.forwards.length < 3;
       case 'C':
         return squad.centres.length < 2;
       default:
@@ -116,8 +143,10 @@ const SquadSelectionPage = () => {
     }
 
     // Check club limit
-    const teamCount = getTeamCount(player.slb_teams?.id);
-    if (teamCount >= 2) {
+    const clubCount = [...squad.guards, ...squad.forwards, ...squad.centres].filter(p =>
+      p.slb_teams?.id === player.slb_teams?.id
+    ).length;
+    if (clubCount >= 2) {
       showToast(`Club limit reached for ${player.slb_teams?.name}`, 'error');
       return;
     }
@@ -212,12 +241,18 @@ const SquadSelectionPage = () => {
   // Confirm squad
   const confirmSquad = async () => {
     const totalPlayers = squad.guards.length + squad.forwards.length + squad.centres.length;
-    if (totalPlayers !== 10) {
-      showToast('Please fill all 10 squad slots', 'error');
+    if (totalPlayers !== 9) {
+      showToast('Please fill all 9 squad slots', 'error');
       return;
     }
 
     try {
+      // Delete existing squad if any
+      await supabase
+        .from('user_squads')
+        .delete()
+        .eq('user_id', user.id);
+
       // Prepare squad data
       const squadData = [];
       const allPlayers = [...squad.guards, ...squad.forwards, ...squad.centres];
@@ -262,8 +297,7 @@ const SquadSelectionPage = () => {
         .update({ squad_confirmed: true })
         .eq('id', user.id);
 
-      showToast('Squad saved! Head to Fantasy to set your captain.');
-      setTimeout(() => navigate('/fantasy'), 2000);
+      setShowSuccessScreen(true);
     } catch (error) {
       showToast('Failed to save squad', 'error');
     }
@@ -278,10 +312,37 @@ const SquadSelectionPage = () => {
     return `£${(value / 1000000).toFixed(1)}m`;
   };
 
-  const isSquadComplete = squad.guards.length === 4 && squad.forwards.length === 4 && squad.centres.length === 2;
+  const isSquadComplete = squad.guards.length === 4 && squad.forwards.length === 3 && squad.centres.length === 2;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-inter">
+      {/* Success Screen Overlay */}
+      {showSuccessScreen && (
+        <div className="fixed inset-0 bg-[#0A0A0A] bg-opacity-95 flex items-center justify-center z-50">
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="text-green-500 text-6xl mb-4">✓</div>
+            <h2 className="text-white font-bold text-2xl mb-2">Squad Saved!</h2>
+            <p className="text-[#a0a0a0] text-sm mb-6">
+              Your squad is locked in for now. You can keep editing until the 2026/27 season tips off.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/fantasy')}
+                className="w-full bg-[#FF5500] text-white py-3 rounded-lg font-bold hover:bg-[#e04a00] transition-colors"
+              >
+                View My Fantasy
+              </button>
+              <button
+                onClick={() => setShowSuccessScreen(false)}
+                className="w-full bg-[#2A2A2A] text-white py-3 rounded-lg font-bold hover:bg-[#3A3A3A] transition-colors"
+              >
+                Keep Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Notification */}
       {toast && (
         <div
@@ -369,9 +430,9 @@ const SquadSelectionPage = () => {
 
               {/* Forwards */}
               <div className="mb-6">
-                <h3 className="text-lg font-bold text-white mb-3">FORWARDS ({squad.forwards.length}/4)</h3>
+                <h3 className="text-lg font-bold text-white mb-3">FORWARDS ({squad.forwards.length}/3)</h3>
                 <div className="space-y-2">
-                  {[...Array(4)].map((_, i) => (
+                  {[...Array(3)].map((_, i) => (
                     <div key={`forward-${i}`}>
                       {squad.forwards[i] ? (
                         <div className="bg-[#1a1a1a] border border-[#2A2A2A] rounded-lg p-3 flex items-center justify-between">
@@ -521,14 +582,14 @@ const SquadSelectionPage = () => {
                 ) : (
                   filteredPlayers().map((player) => {
                     const inSquad = isPlayerInSquad(player.id);
-                    const clubLimitReached = isClubLimitReached(player.team_id);
+                    const clubLimitReached = isClubLimitReached(player.slb_teams?.id);
                     const canAdd = !inSquad && !clubLimitReached && isPositionSlotAvailable(player.position) && remainingBudget >= player.value;
 
                     return (
                       <div
                         key={player.id}
                         className={`bg-[#1a1a1a] border rounded-lg p-4 flex items-center justify-between ${
-                          inSquad ? 'border-[#2A2A2A] opacity-50' : clubLimitReached ? 'border-orange-500' : 'border-[#242424]'
+                          inSquad ? 'border-[#2A2A2A] opacity-50' : clubLimitReached ? 'border-orange-500 opacity-50' : 'border-[#242424]'
                         }`}
                       >
                         <div className="flex items-center gap-4">
@@ -545,6 +606,9 @@ const SquadSelectionPage = () => {
                             <div className="flex items-center gap-2 text-sm text-[#a0a0a0]">
                               <span className="px-2 py-0.5 rounded bg-[#2A2A2A] text-xs">{player.position}</span>
                               <span>{player.slb_teams?.name}</span>
+                              {clubLimitReached && (
+                                <span className="px-2 py-0.5 rounded bg-orange-500/20 text-orange-500 text-xs">Club limit reached</span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -553,7 +617,12 @@ const SquadSelectionPage = () => {
                           {inSquad ? (
                             <span className="text-green-500 text-sm">✓</span>
                           ) : clubLimitReached ? (
-                            <span className="text-orange-500 text-sm">Club limit</span>
+                            <button
+                              disabled
+                              className="bg-[#2A2A2A] text-[#a0a0a0] px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+                            >
+                              Add
+                            </button>
                           ) : !isPositionSlotAvailable(player.position) ? (
                             <span className="text-[#a0a0a0] text-sm">Full</span>
                           ) : remainingBudget < player.value ? (
