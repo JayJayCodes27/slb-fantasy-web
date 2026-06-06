@@ -500,14 +500,36 @@ const FantasyPage = () => {
                   style={{
                     position: 'relative',
                     width: '100%',
-                    minHeight: '480px',
-                    backgroundImage: `url(${halfCourt})`,
-                    backgroundSize: 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center top',
-                    backgroundColor: '#1a472a'
+                    minHeight: '480px'
                   }}
                 >
+                  {/* Court image as background layer */}
+                  <img
+                    src={halfCourt}
+                    style={{
+                      position: 'absolute',
+                      top: 0, left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                      opacity: 0.6,
+                      zIndex: 0,
+                      pointerEvents: 'none'
+                    }}
+                    alt=""
+                  />
+
+                  {/* Players layer on top */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0, left: 0,
+                      width: '100%',
+                      height: '100%',
+                      zIndex: 1
+                    }}
+                  >
                   {/* C - Top Centre (near basket) */}
                   <div
                     style={{
@@ -642,6 +664,7 @@ const FantasyPage = () => {
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
 
                 {/* Bench Section */}
@@ -652,13 +675,12 @@ const FantasyPage = () => {
                       <div key={player?.id || index} className="text-center flex-shrink-0 flex-1 sm:flex-none">
                         {player.name ? (
                           <div className="cursor-pointer">
-                            <div className="w-[45px] sm:w-[55px] h-[40px] sm:h-[50px] mx-auto mb-1">
-                              <svg viewBox="0 0 60 50" className="w-full h-full">
-                                <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={player.teamColour} />
-                                <text x="30" y="30" textAnchor="middle" fill="white" fontSize="12 sm:14" fontWeight="bold">{player.position}</text>
-                              </svg>
-                            </div>
-                            <p className="text-white font-bold text-[10px] sm:text-[11px]">{player.name}</p>
+                            <img
+                              src={getJerseyForTeam(player.team)}
+                              style={{width: '48px', height: '60px', objectFit: 'contain'}}
+                              alt={player.position}
+                            />
+                            <p className="text-white font-bold text-[10px] sm:text-[11px] mt-1">{player.name}</p>
                             <p className="text-[#FF6B00] font-bold text-[10px] sm:text-[11px]">{player.points} pts</p>
                           </div>
                         ) : (

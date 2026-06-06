@@ -22,7 +22,7 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
       {/* Fixed Header Wrapper */}
-      <div className="fixed top-0 left-0 right-0 z-50">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]">
         {/* Results Ticker Bar - Fixed */}
         <div className="bg-[#0D0D0D] border-b border-[#242424] h-6 sm:h-8 flex items-center overflow-hidden">
           <div className="flex animate-scroll whitespace-nowrap">
@@ -182,9 +182,6 @@ const Layout = ({ children }) => {
 
       {/* Close Fixed Header Wrapper */}
       </div>
-
-      {/* Spacer to account for fixed header */}
-      {!isAuthPage && <div className="h-18 sm:h-22" />}
 
       {/* Main Content */}
       <div className={isAuthPage ? '' : 'pt-24'}>
