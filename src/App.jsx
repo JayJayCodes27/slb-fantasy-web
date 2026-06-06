@@ -11,6 +11,7 @@ import FantasyPage from './pages/FantasyPage.jsx';
 import SignInPage from './pages/SignInPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
+import SquadSelectionPage from './pages/SquadSelectionPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/squad-selection" element={<Layout><SquadSelectionPage /></Layout>} />
       </Routes>
       <DevToolbar />
     </AuthProvider>

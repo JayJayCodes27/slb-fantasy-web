@@ -18,6 +18,7 @@ const FantasyPage = () => {
   const [myLeagues, setMyLeagues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState(null);
+  const [hasSquad, setHasSquad] = useState(false);
 
   // Create Private League form state
   const [leagueName, setLeagueName] = useState('');
@@ -81,6 +82,24 @@ const FantasyPage = () => {
 
       if (error) throw error;
       setSettings(data);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  const fetchUserSquad = async () => {
+    try {
+      if (!user?.id) {
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('user_squads')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setHasSquad(data && data.length > 0);
     } catch (error) {
       // Silent error handling
     }
@@ -180,6 +199,7 @@ const FantasyPage = () => {
   useEffect(() => {
     fetchSettings();
     fetchMyLeagues();
+    fetchUserSquad();
   }, [user]);
 
   const generateInviteCode = () => {
@@ -484,6 +504,19 @@ const FantasyPage = () => {
         <div className="flex-1 p-4 sm:p-6 space-y-3">
           {activeTab === 'team' ? (
             <>
+              {!hasSquad && (
+                <div className="card p-6 text-center">
+                  <h2 className="text-white font-bold text-xl mb-2">Build Your Squad</h2>
+                  <p className="text-[#a0a0a0] text-sm mb-4">Select 10 players within £100m budget to get started</p>
+                  <Link
+                    to="/squad-selection"
+                    className="inline-block bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#e05f00] transition-colors"
+                  >
+                    Build Your Squad →
+                  </Link>
+                </div>
+              )}
+
               {/* Court Panel */}
               <div className="card p-4 sm:p-5 h-auto sm:h-[520px]">
                 {/* Panel Header */}
