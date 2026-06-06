@@ -86,3 +86,17 @@ CREATE POLICY "Users can delete their own league_members row"
 ON league_members
 FOR DELETE
 USING (auth.uid() = user_id);
+
+-- ============================================================================
+-- ADMIN RLS POLICIES (for AdminPage.jsx)
+-- ============================================================================
+-- NOTE: The following policies are needed for the admin panel to function:
+-- - Admin can insert/update/delete players
+-- - Admin can insert/update/delete player_news
+-- - Admin can insert/update/delete weekly_picks
+-- - Admin can insert/update/delete fixture_difficulty
+-- - Admin can update app_settings
+--
+-- These policies should be implemented using a check for the admin email:
+-- auth.email() = 'jamaljohnson29@gmail.com'
+-- ============================================================================
