@@ -1,5 +1,5 @@
 // PlayersPage.jsx — Player listing with search, filters, and team selection
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
 const PlayersPage = () => {
@@ -17,42 +17,7 @@ const PlayersPage = () => {
     fetchPlayers();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [players, searchTerm, positionFilter, teamFilter, sortBy]);
-
-  const fetchPlayers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('players')
-        .select(`
-          *,
-          slb_teams (
-            name,
-            short_name,
-            primary_colour,
-            secondary_colour
-          )
-        `)
-        .order('name');
-
-      if (error) throw error;
-
-      const { data: teamsData } = await supabase
-        .from('slb_teams')
-        .select('id, name, short_name')
-        .order('name');
-
-      if (teamsData) setTeams(teamsData);
-      if (data) setPlayers(data);
-    } catch (error) {
-      // Silent error handling
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...players];
 
     // Search filter
@@ -89,6 +54,41 @@ const PlayersPage = () => {
     }
 
     setFilteredPlayers(filtered);
+  }, [players, searchTerm, positionFilter, teamFilter, sortBy]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  const fetchPlayers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('players')
+        .select(`
+          *,
+          slb_teams (
+            name,
+            short_name,
+            primary_colour,
+            secondary_colour
+          )
+        `)
+        .order('name');
+
+      if (error) throw error;
+
+      const { data: teamsData } = await supabase
+        .from('slb_teams')
+        .select('id, name, short_name')
+        .order('name');
+
+      if (teamsData) setTeams(teamsData);
+      if (data) setPlayers(data);
+    } catch (error) {
+      // Silent error handling
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatValue = (value) => {
