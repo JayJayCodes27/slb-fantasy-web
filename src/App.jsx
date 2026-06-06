@@ -12,6 +12,7 @@ import SignInPage from './pages/SignInPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import SquadSelectionPage from './pages/SquadSelectionPage.jsx';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/squad-selection" element={<Layout><SquadSelectionPage /></Layout>} />
+        <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />
       </Routes>
       <DevToolbar />
     </AuthProvider>
