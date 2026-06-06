@@ -15,6 +15,7 @@ const SquadSelectionPage = () => {
   const [toast, setToast] = useState(null);
   const [settings, setSettings] = useState(null);
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [isEditingExistingSquad, setIsEditingExistingSquad] = useState(false);
 
   // Squad state
   const [squad, setSquad] = useState({
@@ -41,7 +42,7 @@ const SquadSelectionPage = () => {
   // Fetch players
   useEffect(() => {
     fetchSettings();
-    checkExistingSquad();
+    checkSeasonAndLoadSquad();
     fetchPlayers();
   }, []);
 
@@ -59,14 +60,15 @@ const SquadSelectionPage = () => {
     }
   };
 
-  const checkExistingSquad = async () => {
+  const checkSeasonAndLoadSquad = async () => {
     try {
       const { data: settingsData } = await supabase
         .from('app_settings')
         .select('season_state')
         .single();
 
-      if (settingsData?.season_state === 'season_active') {
+      // Only block editing if season has started
+      if (settingsData?.season_state === 'season_active' || settingsData?.season_state === 'leagues_locked') {
         showToast('The season has started. Use Transfers to make changes.', 'error');
         setTimeout(() => navigate('/fantasy'), 2000);
         return;
@@ -77,9 +79,50 @@ const SquadSelectionPage = () => {
         return;
       }
 
-      // During pre_season, allow editing regardless of squad_confirmed status
+      // During pre_season, always allow editing regardless of squad_confirmed value
+      // Load existing squad if it exists and pre-populate the slots
       if (settingsData?.season_state === 'pre_season') {
-        return;
+        await loadExistingSquad();
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  const loadExistingSquad = async () => {
+    try {
+      const { data: userSquad, error } = await supabase
+        .from('user_squads')
+        .select('*, players(*, slb_teams(*))')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      if (userSquad && userSquad.length > 0) {
+        setIsEditingExistingSquad(true);
+
+        const guards = [];
+        const forwards = [];
+        const centres = [];
+
+        userSquad.forEach(squadMember => {
+          const player = squadMember.players;
+          if (player) {
+            switch (player.position) {
+              case 'G':
+                guards.push(player);
+                break;
+              case 'F':
+                forwards.push(player);
+                break;
+              case 'C':
+                centres.push(player);
+                break;
+            }
+          }
+        });
+
+        setSquad({ guards, forwards, centres });
       }
     } catch (error) {
       // Silent error handling
@@ -297,6 +340,7 @@ const SquadSelectionPage = () => {
         .update({ squad_confirmed: true })
         .eq('id', user.id);
 
+      setIsEditingExistingSquad(true);
       setShowSuccessScreen(true);
     } catch (error) {
       showToast('Failed to save squad', 'error');
@@ -321,9 +365,14 @@ const SquadSelectionPage = () => {
         <div className="fixed inset-0 bg-[#0A0A0A] bg-opacity-95 flex items-center justify-center z-50">
           <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-8 max-w-md w-full mx-4 text-center">
             <div className="text-green-500 text-6xl mb-4">✓</div>
-            <h2 className="text-white font-bold text-2xl mb-2">Squad Saved!</h2>
+            <h2 className="text-white font-bold text-2xl mb-2">
+              {isEditingExistingSquad ? 'Changes Saved!' : 'Squad Saved!'}
+            </h2>
             <p className="text-[#a0a0a0] text-sm mb-6">
-              Your squad is locked in for now. You can keep editing until the 2026/27 season tips off.
+              {isEditingExistingSquad
+                ? 'Changes saved! Keep editing or view your Fantasy page.'
+                : 'Your squad is locked in for now. You can keep editing until the 2026/27 season tips off.'
+              }
             </p>
             <div className="space-y-3">
               <button
@@ -522,7 +571,7 @@ const SquadSelectionPage = () => {
                     : 'bg-[#2A2A2A] text-[#a0a0a0] cursor-not-allowed'
                 }`}
               >
-                Confirm Squad
+                {isEditingExistingSquad ? 'Save Changes' : 'Confirm Squad'}
               </button>
             </div>
           </div>
