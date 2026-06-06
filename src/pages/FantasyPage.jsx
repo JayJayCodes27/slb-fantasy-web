@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
+import halfCourt from '../assets/half-court.svg';
+import jerseyBlue from '../assets/jersey-blue-blank.svg';
+import jerseyDark from '../assets/jersey-dark-blank.svg';
+import jerseyOrange from '../assets/jersey-orange-blank.svg';
+import jerseyGreen from '../assets/jersey-green-blank.svg';
+import jerseyPurple from '../assets/jersey-purple-blank.svg';
+import jerseyRed from '../assets/jersey-red-blank.svg';
 
 const FantasyPage = () => {
   const { user } = useAuth();
@@ -49,19 +56,19 @@ const FantasyPage = () => {
 
   const allPlayers = [...startingPlayers, ...benchPlayers.filter(p => p.name)];
 
-  const getJerseyImage = (team) => {
-    const jerseyMap = {
-      'LDN': 'jersey-red-blank.svg',
-      'NEW': 'jersey-blue-blank.svg',
-      'LEI': 'jersey-blue-blank.svg',
-      'MAN': 'jersey-blue-blank.svg',
-      'CHE': 'jersey-orange-blank.svg',
-      'BRI': 'jersey-red-blank.svg',
-      'SHE': 'jersey-dark-blank.svg',
-      'SUR': 'jersey-green-blank.svg',
-      'CAL': 'jersey-purple-blank.svg'
+  const getJerseyForTeam = (shortName) => {
+    const map = {
+      'LDN': jerseyRed,
+      'NEW': jerseyBlue,
+      'LEI': jerseyBlue,
+      'MAN': jerseyBlue,
+      'CHE': jerseyOrange,
+      'BRI': jerseyRed,
+      'SHE': jerseyDark,
+      'SUR': jerseyGreen,
+      'CAL': jerseyPurple,
     };
-    return jerseyMap[team] || 'jersey-empty.svg';
+    return map[shortName] || jerseyDark;
   };
 
   const fetchSettings = async () => {
@@ -493,13 +500,12 @@ const FantasyPage = () => {
                   style={{
                     position: 'relative',
                     width: '100%',
-                    aspectRatio: '16/10',
-                    backgroundImage: 'url(/src/assets/half-court.svg)',
+                    minHeight: '480px',
+                    backgroundImage: `url(${halfCourt})`,
                     backgroundSize: 'contain',
                     backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    backgroundColor: '#181818',
-                    borderRadius: '8px'
+                    backgroundPosition: 'center top',
+                    backgroundColor: '#1a472a'
                   }}
                 >
                   {/* C - Top Centre (near basket) */}
@@ -512,15 +518,19 @@ const FantasyPage = () => {
                     }}
                     className="text-center cursor-pointer"
                   >
-                    <div className="relative w-[50px] h-[45px] mx-auto mb-1">
+                    <div style={{textAlign: 'center'}}>
                       <img
-                        src={`/src/assets/${getJerseyImage(startingPlayers[4].team)}`}
+                        src={getJerseyForTeam(startingPlayers[4].team)}
+                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
                         alt={startingPlayers[4].position}
-                        className="w-full h-full object-contain"
                       />
+                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
+                        {startingPlayers[4].name.split(' ')[0]}
+                      </div>
+                      <div style={{color: '#FF5500', fontSize: '12px'}}>
+                        {startingPlayers[4].points} pts
+                      </div>
                     </div>
-                    <p className="text-white font-bold text-xs">{startingPlayers[4].name}</p>
-                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[4].points} pts</p>
                   </div>
 
                   {/* PF - Top Left of Paint */}
@@ -533,20 +543,24 @@ const FantasyPage = () => {
                     }}
                     className="text-center cursor-pointer"
                   >
-                    <div className="relative w-[50px] h-[45px] mx-auto mb-1">
+                    <div style={{textAlign: 'center'}}>
                       <img
-                        src={`/src/assets/${getJerseyImage(startingPlayers[3].team)}`}
+                        src={getJerseyForTeam(startingPlayers[3].team)}
+                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
                         alt={startingPlayers[3].position}
-                        className="w-full h-full object-contain"
                       />
                       {startingPlayers[3].isViceCaptain && (
-                        <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                          <span className="text-white text-[10px] font-bold">V</span>
+                        <div style={{position: 'absolute', top: '-8px', right: '-8px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#FF5500', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <span style={{color: 'white', fontSize: '10px', fontWeight: 'bold'}}>V</span>
                         </div>
                       )}
+                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
+                        {startingPlayers[3].name.split(' ')[0]}
+                      </div>
+                      <div style={{color: '#FF5500', fontSize: '12px'}}>
+                        {startingPlayers[3].points} pts
+                      </div>
                     </div>
-                    <p className="text-white font-bold text-xs">{startingPlayers[3].name}</p>
-                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[3].points} pts</p>
                   </div>
 
                   {/* SF - Right Wing */}
@@ -559,15 +573,19 @@ const FantasyPage = () => {
                     }}
                     className="text-center cursor-pointer"
                   >
-                    <div className="w-[50px] h-[45px] mx-auto mb-1">
+                    <div style={{textAlign: 'center'}}>
                       <img
-                        src={`/src/assets/${getJerseyImage(startingPlayers[2].team)}`}
+                        src={getJerseyForTeam(startingPlayers[2].team)}
+                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
                         alt={startingPlayers[2].position}
-                        className="w-full h-full object-contain"
                       />
+                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
+                        {startingPlayers[2].name.split(' ')[0]}
+                      </div>
+                      <div style={{color: '#FF5500', fontSize: '12px'}}>
+                        {startingPlayers[2].points} pts
+                      </div>
                     </div>
-                    <p className="text-white font-bold text-xs">{startingPlayers[2].name}</p>
-                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[2].points} pts</p>
                   </div>
 
                   {/* SG - Left Wing */}
@@ -580,15 +598,19 @@ const FantasyPage = () => {
                     }}
                     className="text-center cursor-pointer"
                   >
-                    <div className="w-[50px] h-[45px] mx-auto mb-1">
+                    <div style={{textAlign: 'center'}}>
                       <img
-                        src={`/src/assets/${getJerseyImage(startingPlayers[1].team)}`}
+                        src={getJerseyForTeam(startingPlayers[1].team)}
+                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
                         alt={startingPlayers[1].position}
-                        className="w-full h-full object-contain"
                       />
+                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
+                        {startingPlayers[1].name.split(' ')[0]}
+                      </div>
+                      <div style={{color: '#FF5500', fontSize: '12px'}}>
+                        {startingPlayers[1].points} pts
+                      </div>
                     </div>
-                    <p className="text-white font-bold text-xs">{startingPlayers[1].name}</p>
-                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[1].points} pts</p>
                   </div>
 
                   {/* PG - Bottom Centre (ball handler) */}
@@ -601,20 +623,24 @@ const FantasyPage = () => {
                     }}
                     className="text-center cursor-pointer"
                   >
-                    <div className="relative w-[50px] h-[45px] mx-auto mb-1">
+                    <div style={{textAlign: 'center'}}>
                       <img
-                        src={`/src/assets/${getJerseyImage(startingPlayers[0].team)}`}
+                        src={getJerseyForTeam(startingPlayers[0].team)}
+                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
                         alt={startingPlayers[0].position}
-                        className="w-full h-full object-contain"
                       />
                       {startingPlayers[0].isCaptain && (
-                        <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FF6B00] flex items-center justify-center">
-                          <span className="text-white text-[10px] font-bold">C</span>
+                        <div style={{position: 'absolute', top: '-8px', right: '-8px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#FF5500', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <span style={{color: 'white', fontSize: '10px', fontWeight: 'bold'}}>C</span>
                         </div>
                       )}
+                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
+                        {startingPlayers[0].name.split(' ')[0]}
+                      </div>
+                      <div style={{color: '#FF5500', fontSize: '12px'}}>
+                        {startingPlayers[0].points} pts
+                      </div>
                     </div>
-                    <p className="text-white font-bold text-xs">{startingPlayers[0].name}</p>
-                    <p className="text-[#FF6B00] font-bold text-xs">{startingPlayers[0].points} pts</p>
                   </div>
                 </div>
 
