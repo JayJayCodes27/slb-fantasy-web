@@ -8,22 +8,6 @@ export default function DevToolbar() {
   const [currentGameweek, setCurrentGameweek] = useState(0);
   const [settings, setSettings] = useState(null);
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  console.log('DevToolbar render, user:', user?.email);
-
-  if (!user) {
-    console.log('DevToolbar: no user');
-    return null;
-  }
-
-  if (user.email !== 'jamaljohnson29@gmail.com') {
-    console.log('DevToolbar: wrong email', user.email);
-    return null;
-  }
-
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -82,6 +66,22 @@ export default function DevToolbar() {
     setCurrentGameweek(4);
     updateSettings({ season_state: 'leagues_locked', current_gameweek: 4 });
   };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  console.log('DevToolbar render, user:', user?.email);
+
+  if (!user) {
+    console.log('DevToolbar: no user');
+    return null;
+  }
+
+  if (user.email !== 'jamaljohnson29@gmail.com') {
+    console.log('DevToolbar: wrong email', user.email);
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#FF5500] h-12 flex items-center px-4 gap-6 z-50">
