@@ -97,10 +97,8 @@ const PlayersPage = () => {
 
   const getPositionColor = (position) => {
     const colors = {
-      PG: '#3B82F6',
-      SG: '#10B981',
-      SF: '#F59E0B',
-      PF: '#EF4444',
+      G: '#3B82F6',
+      F: '#F59E0B',
       C: '#8B5CF6'
     };
     return colors[position] || '#6B7280';
@@ -134,7 +132,7 @@ const PlayersPage = () => {
 
               {/* Position Filter */}
               <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
-                {['All', 'PG', 'SG', 'SF', 'PF', 'C'].map((pos) => (
+                {['All', 'G', 'F', 'C'].map((pos) => (
                   <button
                     key={pos}
                     onClick={() => setPositionFilter(pos)}
