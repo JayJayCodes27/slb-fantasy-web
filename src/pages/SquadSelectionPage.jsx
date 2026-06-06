@@ -89,7 +89,7 @@ const SquadSelectionPage = () => {
 
   // Get count of players from each team
   const getTeamCount = (teamId) => {
-    return [...squad.guards, ...squad.forwards, ...squad.centres].filter(p => p.team_id === teamId).length;
+    return [...squad.guards, ...squad.forwards, ...squad.centres].filter(p => p.slb_teams?.id === teamId).length;
   };
 
   // Check if position slot is available
@@ -116,7 +116,7 @@ const SquadSelectionPage = () => {
     }
 
     // Check club limit
-    const teamCount = getTeamCount(player.team_id);
+    const teamCount = getTeamCount(player.slb_teams?.id);
     if (teamCount >= 2) {
       showToast(`Club limit reached for ${player.slb_teams?.name}`, 'error');
       return;
