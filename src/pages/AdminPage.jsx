@@ -1,22 +1,27 @@
 // AdminPage.jsx — Admin panel for managing players, news, injuries, scout picks, fixtures, and settings
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
 
 const AdminPage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('players');
   const [toast, setToast] = useState(null);
   const [settings, setSettings] = useState(null);
 
-  // Authentication check
-  useEffect(() => {
-    if (!user || user.email !== 'jamaljohnson29@gmail.com') {
-      navigate('/');
-    }
-  }, [user, navigate]);
+  // Wait for auth to load before checking
+  if (loading) return (
+    <div style={{color: 'white', padding: '40px'}}>
+      Loading...
+    </div>
+  );
+
+  // Then check email
+  if (!user || user.email !== 'jamaljohnson29@gmail.com') {
+    return <Navigate to="/" replace />;
+  }
 
   // Fetch settings
   useEffect(() => {
@@ -40,10 +45,6 @@ const AdminPage = () => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
-
-  if (!user || user.email !== 'jamaljohnson29@gmail.com') {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-inter">
