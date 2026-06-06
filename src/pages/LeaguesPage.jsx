@@ -46,6 +46,11 @@ const LeaguesPage = () => {
 
   const fetchMyLeagues = async () => {
     try {
+      if (!user?.id) {
+        console.log('fetchMyLeagues: user.id is undefined, skipping');
+        return;
+      }
+
       // Fetch user's league memberships with league details
       const { data: memberships, error: membershipError } = await supabase
         .from('league_members')

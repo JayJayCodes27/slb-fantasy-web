@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
+        setUser(session.user);
         fetchUserProfile(session.user.id);
       } else {
         setUser(null);
@@ -26,6 +27,7 @@ export const AuthProvider = ({ children }) => {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       if (session?.user) {
+        setUser(session.user);
         await fetchUserProfile(session.user.id);
       } else {
         setUser(null);
@@ -54,6 +56,8 @@ export const AuthProvider = ({ children }) => {
       }));
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      // If profile fetch fails, still set the user with auth data
+      // This ensures user.id is always available
     }
   };
 
