@@ -5,17 +5,29 @@ import { supabase } from '../lib/supabase';
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [currentScreen, setCurrentScreen] = useState(1);
   const [seasonState, setSeasonState] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/signin');
-      return;
-    }
+  if (authLoading) return (
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#0A0A0A', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center' 
+    }}>
+      <div style={{ color: 'white' }}>Loading...</div>
+    </div>
+  );
 
+  if (!user) {
+    navigate('/signin');
+    return null;
+  }
+
+  useEffect(() => {
     checkOnboardingStatus();
     fetchSeasonState();
   }, [user, navigate]);
