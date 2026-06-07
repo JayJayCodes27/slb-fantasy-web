@@ -17,6 +17,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx';
 import OnboardingPage from './pages/OnboardingPage.jsx';
 import GameweekResultsPage from './pages/GameweekResultsPage.jsx';
 import LeaderboardPage from './pages/LeaderboardPage.jsx';
+import ScorerPage from './pages/ScorerPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/transfers" element={<Layout><TransfersPage /></Layout>} />
         <Route path="/results" element={<Layout><GameweekResultsPage /></Layout>} />
         <Route path="/leaderboard" element={<Layout><LeaderboardPage /></Layout>} />
+        <Route path="/scorer" element={<ScorerPage />} />
         <Route path="/players" element={<Layout><PlayersPage /></Layout>} />
         <Route path="/fixtures" element={<Layout><FixturesPage /></Layout>} />
         <Route path="/news" element={<Layout><NewsPage /></Layout>} />
