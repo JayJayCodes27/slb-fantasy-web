@@ -799,6 +799,12 @@ const FantasyPage = () => {
           >
             MY TEAM
           </button>
+          <Link
+            to="/results"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors bg-[#1a1a1a] text-white border border-[#242424] hover:bg-[#2a2a2a]"
+          >
+            RESULTS
+          </Link>
           <button
             onClick={() => setActiveTab('leagues')}
             className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors ${

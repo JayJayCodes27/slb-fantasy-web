@@ -15,6 +15,8 @@ import SquadSelectionPage from './pages/SquadSelectionPage.jsx';
 import TransfersPage from './pages/TransfersPage.jsx';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx';
 import OnboardingPage from './pages/OnboardingPage.jsx';
+import GameweekResultsPage from './pages/GameweekResultsPage.jsx';
+import LeaderboardPage from './pages/LeaderboardPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/fantasy" element={<Layout><FantasyPage /></Layout>} />
         <Route path="/transfers" element={<Layout><TransfersPage /></Layout>} />
+        <Route path="/results" element={<Layout><GameweekResultsPage /></Layout>} />
+        <Route path="/leaderboard" element={<Layout><LeaderboardPage /></Layout>} />
         <Route path="/players" element={<Layout><PlayersPage /></Layout>} />
         <Route path="/fixtures" element={<Layout><FixturesPage /></Layout>} />
         <Route path="/news" element={<Layout><NewsPage /></Layout>} />

@@ -77,6 +77,7 @@ const Layout = ({ children }) => {
                 <>
                   <Link to="/" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Home</Link>
                   <Link to="/fantasy" className={`text-sm font-medium ${location.pathname === '/fantasy' ? 'text-white font-bold border-b-2 border-[#FF6B00] pb-0.5' : 'text-white hover:text-[#FF6B00] transition-colors'}`}>Fantasy</Link>
+                  <Link to="/leaderboard" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Leaderboard</Link>
                   <Link to="/fixtures" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Fixtures</Link>
                   <Link to="/news" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">News</Link>
                 </>
@@ -167,6 +168,7 @@ const Layout = ({ children }) => {
               <>
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Home</Link>
                 <Link to="/fantasy" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Fantasy</Link>
+                <Link to="/leaderboard" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Leaderboard</Link>
                 <Link to="/fixtures" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Fixtures</Link>
                 <Link to="/news" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3">News</Link>
               </>
