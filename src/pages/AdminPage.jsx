@@ -854,7 +854,14 @@ const FixturesTab = ({ showToast }) => {
   const fetchData = async () => {
     try {
       const [fixturesData, teamsData] = await Promise.all([
-        supabase.from('fixture_difficulty').select('*, home_team:slb_teams(*), away_team:slb_teams(*)').order('gameweek'),
+        supabase
+          .from('fixture_difficulty')
+          .select(`
+            *,
+            home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
+            away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
+          `)
+          .order('gameweek', { ascending: true }),
         supabase.from('slb_teams').select('id, name').order('name')
       ]);
       if (fixturesData.error) throw fixturesData.error;
