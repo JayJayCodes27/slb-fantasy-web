@@ -63,7 +63,7 @@ const FantasyPage = () => {
     { name: 'Franchise Player', description: 'Double points on one player', color: 'orange', remaining: 1 }
   ];
 
-  const allPlayers = [...startingPlayers, ...benchPlayers.filter(p => p.name)];
+  const allPlayers = [...startingPlayers, ...mockBenchPlayers.filter(p => p.name)];
 
   const getJerseyForTeam = (shortName) => {
     const map = {
