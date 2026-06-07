@@ -14,6 +14,7 @@ import AdminPage from './pages/AdminPage.jsx';
 import SquadSelectionPage from './pages/SquadSelectionPage.jsx';
 import TransfersPage from './pages/TransfersPage.jsx';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx';
+import OnboardingPage from './pages/OnboardingPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Layout><LandingPage /></Layout>} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/fantasy" element={<Layout><FantasyPage /></Layout>} />
         <Route path="/transfers" element={<Layout><TransfersPage /></Layout>} />
         <Route path="/players" element={<Layout><PlayersPage /></Layout>} />
