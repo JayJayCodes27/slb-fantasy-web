@@ -12,6 +12,7 @@ import SignInPage from './pages/SignInPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import SquadSelectionPage from './pages/SquadSelectionPage.jsx';
+import TransfersPage from './pages/TransfersPage.jsx';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
@@ -21,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><LandingPage /></Layout>} />
         <Route path="/fantasy" element={<Layout><FantasyPage /></Layout>} />
+        <Route path="/transfers" element={<Layout><TransfersPage /></Layout>} />
         <Route path="/players" element={<Layout><PlayersPage /></Layout>} />
         <Route path="/fixtures" element={<Layout><FixturesPage /></Layout>} />
         <Route path="/news" element={<Layout><NewsPage /></Layout>} />

@@ -689,9 +689,9 @@ const FantasyPage = () => {
               <span className="text-[#a0a0a0] text-xs">Free transfers available</span>
               <span className="text-white font-bold text-sm">1</span>
             </div>
-            <button className="w-full bg-[#FF6B00] text-white font-bold text-sm h-10 rounded-button hover:bg-[#e05f00] transition-colors">
+            <Link to="/transfers" className="block w-full bg-[#FF6B00] text-white font-bold text-sm h-10 rounded-button hover:bg-[#e05f00] transition-colors text-center leading-10">
               Make Transfer →
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -716,11 +716,12 @@ const FantasyPage = () => {
                 <div className="card p-6 text-center">
                   <h2 className="text-white font-bold text-xl mb-2">Transfers</h2>
                   <p className="text-[#a0a0a0] text-sm mb-4">Make changes to your squad</p>
-                  <button
+                  <Link
+                    to="/transfers"
                     className="inline-block bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#e05f00] transition-colors"
                   >
                     Make Transfer →
-                  </button>
+                  </Link>
                 </div>
               )}
 
