@@ -848,33 +848,35 @@ const FixturesTab = ({ showToast }) => {
   });
 
   useEffect(() => {
-    fetchData();
+    const fetchTeams = async () => {
+      const { data, error } = await supabase
+        .from('slb_teams')
+        .select('id, name')
+        .order('name');
+      console.log('Teams:', data, error);
+      if (data) setTeams(data);
+    };
+    fetchTeams();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const [fixturesData, teamsData] = await Promise.all([
-        supabase
-          .from('fixture_difficulty')
-          .select(`
-            *,
-            home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
-            away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
-          `)
-          .order('gameweek', { ascending: true }),
-        supabase.from('slb_teams').select('id, name').order('name')
-      ]);
-      if (fixturesData.error) throw fixturesData.error;
-      if (teamsData.error) throw teamsData.error;
-      setFixtures(fixturesData.data || []);
-      setTeams(teamsData.data || []);
-      console.log('Teams loaded:', teamsData.data);
-    } catch (error) {
-      console.error('Error fetching fixtures data:', error);
-    } finally {
+  useEffect(() => {
+    const fetchFixtures = async () => {
+      const { data, error } = await supabase
+        .from('fixture_difficulty')
+        .select(`
+          id, gameweek, match_date,
+          home_difficulty, away_difficulty,
+          home_team_id, away_team_id,
+          home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
+          away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
+        `)
+        .order('gameweek', { ascending: true });
+      console.log('Fixtures:', data, error);
+      if (data) setFixtures(data);
       setLoading(false);
-    }
-  };
+    };
+    fetchFixtures();
+  }, []);
 
   const handleSave = async () => {
     try {
