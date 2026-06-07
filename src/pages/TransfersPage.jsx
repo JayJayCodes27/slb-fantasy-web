@@ -26,6 +26,10 @@ const TransfersPage = () => {
   const [fixtures, setFixtures] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [settings, setSettings] = useState(null);
+  const [emptySlots, setEmptySlots] = useState([]);
+  const [showToast, setShowToast] = useState(null);
+  const [showBuyConfirm, setShowBuyConfirm] = useState(false);
+  const [buyingPlayer, setBuyingPlayer] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -120,6 +124,15 @@ const TransfersPage = () => {
     fetchFixtures(player.players?.slb_teams?.id);
   };
 
+  const calculateSellPrice = (player, purchasePrice) => {
+    const currentValue = player.value;
+    if (currentValue <= purchasePrice) {
+      return currentValue;
+    }
+    const profit = currentValue - purchasePrice;
+    return purchasePrice + Math.floor(profit * 0.5);
+  };
+
   const handleSellClick = () => {
     setShowConfirmDialog(true);
   };
@@ -135,12 +148,9 @@ const TransfersPage = () => {
 
       if (deleteError) throw deleteError;
 
-      // Calculate sell price
-      const purchasePrice = selectedPlayer.purchase_price || 0;
-      const currentValue = selectedPlayer.players?.value || 0;
-      const sellPrice = currentValue <= purchasePrice 
-        ? currentValue 
-        : purchasePrice + (currentValue - purchasePrice) * 0.5;
+      // Calculate sell price with correct formula
+      const purchasePrice = selectedPlayer.purchase_price || selectedPlayer.players?.value || 0;
+      const sellPrice = calculateSellPrice(selectedPlayer.players, purchasePrice);
 
       // Update user transfers and bank
       const newFreeTransfers = Math.max(0, (userData.free_transfers_available || 1) - 1);
@@ -156,44 +166,62 @@ const TransfersPage = () => {
 
       if (updateError) throw updateError;
 
-      // Show success
-      alert(`Sold ${selectedPlayer.players?.name} for £${(sellPrice / 1000000).toFixed(1)}m`);
+      // Add empty slot instead of redirecting
+      setEmptySlots([...emptySlots, { position: selectedPlayer.players?.position, slotIndex: emptySlots.length }]);
+      
+      // Show success toast
+      setShowToast(`Sold ${selectedPlayer.players?.name} for £${(sellPrice / 1000000).toFixed(1)}m`);
+      setTimeout(() => setShowToast(null), 3000);
 
-      // Set sold player and switch to replacement mode
-      setSoldPlayer({ ...selectedPlayer, sellPrice });
+      // Close panel and refresh
       setSelectedPlayer(null);
-      setViewMode('replacement');
-      fetchAvailablePlayers(selectedPlayer.players?.position);
-
-      // Refresh data
+      setShowConfirmDialog(false);
       fetchData();
 
     } catch (error) {
       console.error('Error selling player:', error);
-      alert('Error selling player. Please try again.');
-    } finally {
+      setShowToast('Error selling player. Please try again.');
+      setTimeout(() => setShowToast(null), 3000);
       setShowConfirmDialog(false);
     }
   };
 
-  const handleBuyClick = async (player) => {
+  const handleBuyClick = (player) => {
+    setBuyingPlayer(player);
+    setShowBuyConfirm(true);
+  };
+
+  const handleConfirmBuy = async () => {
     try {
+      const player = buyingPlayer;
+      if (!player) return;
+
       // Validate budget
       const playerValue = player.value || 0;
       const currentBank = userData.bank_balance || 0;
 
       if (playerValue > currentBank) {
-        alert(`You need £${((playerValue - currentBank) / 1000000).toFixed(1)}m more`);
+        setShowToast(`You need £${((playerValue - currentBank) / 1000000).toFixed(1)}m more`);
+        setTimeout(() => setShowToast(null), 3000);
+        setShowBuyConfirm(false);
         return;
       }
 
-      // Check club limit
-      const clubCount = squadData.filter(
-        s => s.players?.slb_teams?.id === player.slb_teams?.id && s.player_id !== selectedPlayer?.player_id
-      ).length;
+      // Check club limit (exclude sold player)
+      const clubCounts = squadData.reduce((acc, s) => {
+        const teamId = s.players?.slb_teams?.id;
+        if (teamId) acc[teamId] = (acc[teamId] || 0) + 1;
+        return acc;
+      }, {});
 
-      if (clubCount >= 3) {
-        alert('Club limit reached (max 3 players per team)');
+      const teamId = player.slb_teams?.id;
+      const count = clubCounts[teamId] || 0;
+      const isClubLimited = count >= 2;
+
+      if (isClubLimited) {
+        setShowToast('Club limit reached (max 2 players per team)');
+        setTimeout(() => setShowToast(null), 3000);
+        setShowBuyConfirm(false);
         return;
       }
 
@@ -203,7 +231,7 @@ const TransfersPage = () => {
         .insert({
           user_id: user.id,
           player_id: player.id,
-          is_starter: soldPlayer?.is_starter || true,
+          is_starter: true,
           purchase_price: player.value
         });
 
@@ -219,12 +247,30 @@ const TransfersPage = () => {
 
       if (updateError) throw updateError;
 
-      alert(`${player.name} added to your squad!`);
-      navigate('/fantasy');
+      // Remove empty slot
+      const slotIndex = emptySlots.findIndex(slot => slot.position === player.position);
+      if (slotIndex !== -1) {
+        const newEmptySlots = [...emptySlots];
+        newEmptySlots.splice(slotIndex, 1);
+        setEmptySlots(newEmptySlots);
+      }
+
+      // Show success toast
+      setShowToast(`${player.name} added to your squad!`);
+      setTimeout(() => setShowToast(null), 3000);
+
+      // Close panel and refresh
+      setSelectedPlayer(null);
+      setViewMode('own');
+      setShowBuyConfirm(false);
+      setBuyingPlayer(null);
+      fetchData();
 
     } catch (error) {
       console.error('Error buying player:', error);
-      alert('Error buying player. Please try again.');
+      setShowToast('Error buying player. Please try again.');
+      setTimeout(() => setShowToast(null), 3000);
+      setShowBuyConfirm(false);
     }
   };
 
@@ -248,6 +294,13 @@ const TransfersPage = () => {
     const forwards = squadData.filter(s => s.players?.position === 'F');
     const centres = squadData.filter(s => s.players?.position === 'C');
     return { guards, forwards, centres };
+  };
+
+  const handleEmptySlotClick = (slot) => {
+    setSelectedPlayer(null);
+    setViewMode('replacement');
+    setSoldPlayer({ players: { position: slot.position } });
+    fetchAvailablePlayers(slot.position);
   };
 
   const filterAndSortPlayers = () => {
@@ -297,6 +350,8 @@ const TransfersPage = () => {
   const { guards, forwards, centres } = groupPlayersByPosition();
   const freeTransfers = userData?.free_transfers_available || 1;
   const bankBalance = userData?.bank_balance || 0;
+  const usedTransfers = 1 - freeTransfers;
+  const totalBudget = 100000000;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
@@ -306,20 +361,46 @@ const TransfersPage = () => {
       </div>
 
       {/* Section 1 - Transfer Status Bar */}
-      <div className="bg-[#141414] p-4 border-b border-[#2a2a2a]">
-        <div className="flex flex-wrap items-center gap-4 sm:gap-8">
-          <div className={freeTransfers > 0 ? 'text-green-400' : 'text-red-400'}>
-            {freeTransfers} free transfer{freeTransfers !== 1 ? 's' : ''} available
+      <div className="bg-[#141414] border-b border-[#2a2a2a]">
+        {/* Row 1: Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
+          <div className="bg-[#0a0a0a] rounded-lg p-3">
+            <p className="text-[#a0a0a0] text-xs mb-1">Free Transfers</p>
+            <p className={freeTransfers > 0 ? 'text-green-400 font-bold text-lg' : 'text-red-400 font-bold text-lg'}>
+              {freeTransfers}
+            </p>
           </div>
-          <div className="text-white">
-            {formatValue(bankBalance)} in the bank
+          <div className="bg-[#0a0a0a] rounded-lg p-3">
+            <p className="text-[#a0a0a0] text-xs mb-1">Used This Week</p>
+            <p className="text-white font-bold text-lg">{usedTransfers}</p>
           </div>
-          {freeTransfers === 0 && (
-            <div className="bg-orange-900/50 text-orange-400 px-3 py-1 rounded text-sm">
-              Next transfer costs -4 points
-            </div>
-          )}
+          <div className="bg-[#0a0a0a] rounded-lg p-3">
+            <p className="text-[#a0a0a0] text-xs mb-1">Bank Balance</p>
+            <p className="text-[#FF5500] font-bold text-lg">{formatValue(bankBalance)}</p>
+          </div>
+          <div className="bg-[#0a0a0a] rounded-lg p-3">
+            <p className="text-[#a0a0a0] text-xs mb-1">Total Budget</p>
+            <p className="text-white font-bold text-lg">{formatValue(totalBudget)}</p>
+          </div>
         </div>
+
+        {/* Row 2: Warning if no free transfers */}
+        {freeTransfers === 0 && (
+          <div className="bg-orange-900/30 border-t border-b border-orange-900/50 px-4 py-3">
+            <p className="text-orange-400 text-sm text-center">
+              ⚠️ You have no free transfers. Each transfer costs -4 points this gameweek.
+            </p>
+          </div>
+        )}
+
+        {/* Row 3: Empty slots info */}
+        {emptySlots.length > 0 && (
+          <div className="bg-blue-900/30 border-t border-b border-blue-900/50 px-4 py-3">
+            <p className="text-blue-400 text-sm text-center">
+              You have {emptySlots.length} empty slot{emptySlots.length !== 1 ? 's' : ''}. Click an empty slot to choose a replacement.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Section 2 - Your Squad */}
@@ -353,6 +434,21 @@ const TransfersPage = () => {
                 <p className="text-[#FF5500] font-bold text-sm">{formatValue(squadPlayer.players?.value)}</p>
               </div>
             ))}
+            {emptySlots.filter(s => s.position === 'G').map((slot, idx) => (
+              <div
+                key={`empty-g-${idx}`}
+                onClick={() => handleEmptySlotClick(slot)}
+                className="bg-[#141414] border-2 border-dashed border-[#FF5500] rounded-lg p-3 cursor-pointer animate-pulse"
+              >
+                <div className="flex items-center justify-center h-full min-h-[60px]">
+                  <div className="text-center">
+                    <p className="text-[#FF5500] font-bold text-2xl mb-1">+</p>
+                    <p className="text-[#a0a0a0] text-xs">Guard</p>
+                    <p className="text-[#a0a0a0] text-xs">Click to buy</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -383,6 +479,21 @@ const TransfersPage = () => {
                 <p className="text-[#FF5500] font-bold text-sm">{formatValue(squadPlayer.players?.value)}</p>
               </div>
             ))}
+            {emptySlots.filter(s => s.position === 'F').map((slot, idx) => (
+              <div
+                key={`empty-f-${idx}`}
+                onClick={() => handleEmptySlotClick(slot)}
+                className="bg-[#141414] border-2 border-dashed border-[#FF5500] rounded-lg p-3 cursor-pointer animate-pulse"
+              >
+                <div className="flex items-center justify-center h-full min-h-[60px]">
+                  <div className="text-center">
+                    <p className="text-[#FF5500] font-bold text-2xl mb-1">+</p>
+                    <p className="text-[#a0a0a0] text-xs">Forward</p>
+                    <p className="text-[#a0a0a0] text-xs">Click to buy</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -411,6 +522,21 @@ const TransfersPage = () => {
                   </div>
                 </div>
                 <p className="text-[#FF5500] font-bold text-sm">{formatValue(squadPlayer.players?.value)}</p>
+              </div>
+            ))}
+            {emptySlots.filter(s => s.position === 'C').map((slot, idx) => (
+              <div
+                key={`empty-c-${idx}`}
+                onClick={() => handleEmptySlotClick(slot)}
+                className="bg-[#141414] border-2 border-dashed border-[#FF5500] rounded-lg p-3 cursor-pointer animate-pulse"
+              >
+                <div className="flex items-center justify-center h-full min-h-[60px]">
+                  <div className="text-center">
+                    <p className="text-[#FF5500] font-bold text-2xl mb-1">+</p>
+                    <p className="text-[#a0a0a0] text-xs">Centre</p>
+                    <p className="text-[#a0a0a0] text-xs">Click to buy</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -489,13 +615,14 @@ const TransfersPage = () => {
                 <h4 className="text-white font-bold text-lg mb-4">SELL PRICE</h4>
                 <p className="text-[#FF5500] font-bold text-3xl mb-2">
                   {formatValue(
-                    (selectedPlayer.players?.value || 0) <= (selectedPlayer.purchase_price || 0)
-                      ? (selectedPlayer.players?.value || 0)
-                      : (selectedPlayer.purchase_price || 0) + ((selectedPlayer.players?.value || 0) - (selectedPlayer.purchase_price || 0)) * 0.5
+                    calculateSellPrice(
+                      selectedPlayer.players,
+                      selectedPlayer.purchase_price || selectedPlayer.players?.value || 0
+                    )
                   )}
                 </p>
                 <p className="text-[#a0a0a0] text-sm mb-4">
-                  You paid {formatValue(selectedPlayer.purchase_price || 0)}
+                  You paid {formatValue(selectedPlayer.purchase_price || selectedPlayer.players?.value || 0)}
                 </p>
 
                 <div className="mb-4">
@@ -529,6 +656,16 @@ const TransfersPage = () => {
       {viewMode === 'replacement' && (
         <div className="fixed bottom-0 left-0 right-0 bg-[#141414] border-t border-[#2a2a2a] p-4 sm:p-6 max-h-[70vh] overflow-y-auto">
           <div className="max-w-6xl mx-auto">
+            <button
+              onClick={() => {
+                setViewMode('own');
+                setSoldPlayer(null);
+                setAvailablePlayers([]);
+              }}
+              className="text-[#a0a0a0] text-sm hover:text-white mb-4 flex items-center gap-2"
+            >
+              ← Back to squad
+            </button>
             <h3 className="text-white font-bold text-lg mb-4">
               CHOOSE A {soldPlayer?.players?.position} — {formatValue(bankBalance)} available
             </h3>
@@ -558,17 +695,24 @@ const TransfersPage = () => {
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {filterAndSortPlayers().map((player) => {
                 const canAfford = player.value <= bankBalance;
-                const clubCount = squadData.filter(
-                  s => s.players?.slb_teams?.id === player.slb_teams?.id
-                ).length;
-                const clubLimit = clubCount >= 3;
+                
+                // Check club limit (exclude sold player from count)
+                const clubCounts = squadData.reduce((acc, s) => {
+                  const teamId = s.players?.slb_teams?.id;
+                  if (teamId) acc[teamId] = (acc[teamId] || 0) + 1;
+                  return acc;
+                }, {});
+                
+                const teamId = player.slb_teams?.id;
+                const count = clubCounts[teamId] || 0;
+                const isClubLimited = count >= 2;
 
                 return (
                   <div
                     key={player.id}
-                    onClick={() => canAfford && !clubLimit && setSelectedPlayer(player)}
+                    onClick={() => canAfford && !isClubLimited && handleBuyClick(player)}
                     className={`bg-[#0a0a0a] border border-[#2a2a2a] rounded-lg p-3 flex items-center gap-3 ${
-                      canAfford && !clubLimit ? 'cursor-pointer hover:border-[#FF5500]' : 'opacity-50 cursor-not-allowed'
+                      canAfford && !isClubLimited ? 'cursor-pointer hover:border-[#FF5500]' : 'opacity-50 cursor-not-allowed'
                     }`}
                   >
                     <div 
@@ -585,10 +729,10 @@ const TransfersPage = () => {
                         £{((player.value - bankBalance) / 1000000).toFixed(1)}m needed
                       </span>
                     )}
-                    {clubLimit && (
+                    {isClubLimited && (
                       <span className="text-orange-400 text-xs">Club limit</span>
                     )}
-                    {canAfford && !clubLimit && (
+                    {canAfford && !isClubLimited && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -618,31 +762,71 @@ const TransfersPage = () => {
         </div>
       )}
 
-      {/* Confirm Dialog */}
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full font-bold z-50">
+          {showToast}
+        </div>
+      )}
+
+      {/* Sell Confirmation Dialog */}
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#141414] border border-[#2a2a2a] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-white font-bold text-lg mb-4">Confirm Transfer</h3>
-            <p className="text-[#a0a0a0] mb-4">
-              Sell {selectedPlayer?.players?.name} for {formatValue(
-                (selectedPlayer?.players?.value || 0) <= (selectedPlayer?.purchase_price || 0)
-                  ? (selectedPlayer?.players?.value || 0)
-                  : (selectedPlayer?.purchase_price || 0) + ((selectedPlayer?.players?.value || 0) - (selectedPlayer?.purchase_price || 0)) * 0.5
-              )}?
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-white font-bold text-lg mb-2">Confirm Transfer</h3>
+            <p className="text-gray-400 mb-1">
+              Sell {selectedPlayer?.players?.name} for £{(
+                calculateSellPrice(
+                  selectedPlayer?.players,
+                  selectedPlayer?.purchase_price || selectedPlayer?.players?.value || 0
+                ) / 1000000
+              ).toFixed(1)}m?
             </p>
             {freeTransfers === 0 && (
-              <p className="text-red-400 text-sm mb-4">This will cost -4 points</p>
+              <p className="text-red-400 text-sm mb-4">⚠️ This will cost -4 points</p>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-4">
               <button
                 onClick={handleConfirmSell}
-                className="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold"
               >
-                Confirm
+                Confirm Sale
               </button>
               <button
                 onClick={() => setShowConfirmDialog(false)}
-                className="flex-1 bg-[#2a2a2a] text-white font-bold py-2 rounded-lg hover:bg-[#3a3a3a] transition-colors"
+                className="flex-1 bg-[#2A2A2A] text-gray-400 py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Buy Confirmation Dialog */}
+      {showBuyConfirm && buyingPlayer && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-white font-bold text-lg mb-2">Confirm Transfer</h3>
+            <p className="text-gray-400 mb-1">
+              Buy {buyingPlayer.name} for £{(buyingPlayer.value / 1000000).toFixed(1)}m?
+            </p>
+            {freeTransfers === 0 && (
+              <p className="text-red-400 text-sm mb-4">⚠️ This will cost -4 points</p>
+            )}
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleConfirmBuy}
+                className="flex-1 bg-green-600 text-white py-2 rounded-lg font-bold"
+              >
+                Confirm Buy
+              </button>
+              <button
+                onClick={() => {
+                  setShowBuyConfirm(false);
+                  setBuyingPlayer(null);
+                }}
+                className="flex-1 bg-[#2A2A2A] text-gray-400 py-2 rounded-lg"
               >
                 Cancel
               </button>
