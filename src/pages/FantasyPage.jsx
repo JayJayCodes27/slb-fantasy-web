@@ -26,11 +26,11 @@ const FantasyPage = () => {
   const [viceCaptain, setViceCaptain] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [squadData, setSquadData] = useState([]);
-  const [draggedPlayer, setDraggedPlayer] = useState(null);
+  const [draggedId, setDraggedId] = useState(null);
   const [dragOverTarget, setDragOverTarget] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const [tapToSwapPlayer, setTapToSwapPlayer] = useState(null);
+  const [selectedForSwap, setSelectedForSwap] = useState(null);
 
   // Create Private League form state
   const [leagueName, setLeagueName] = useState('');
@@ -342,15 +342,15 @@ const FantasyPage = () => {
   };
 
   // Drag and drop handlers
-  const handleDragStart = (e, player) => {
-    setDraggedPlayer(player);
+  const handleDragStart = (e, squadItem) => {
+    setDraggedId(squadItem.id);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e, player) => {
+  const handleDragOver = (e, squadItem) => {
     e.preventDefault();
-    if (player && player.player_id !== draggedPlayer?.player_id) {
-      setDragOverTarget(player);
+    if (squadItem && squadItem.id !== draggedId) {
+      setDragOverTarget(squadItem);
     }
   };
 
@@ -358,37 +358,50 @@ const FantasyPage = () => {
     setDragOverTarget(null);
   };
 
-  const handleDrop = async (e, targetPlayer) => {
+  const handleDrop = async (e, targetItem) => {
     e.preventDefault();
     setDragOverTarget(null);
 
-    if (!draggedPlayer || draggedPlayer.player_id === targetPlayer.player_id) {
-      setDraggedPlayer(null);
+    if (!draggedId || draggedId === targetItem.id) {
+      setDraggedId(null);
       return;
     }
 
-    // Swap is_starter values
-    const newSquad = [...squadData];
-    const dragIdx = newSquad.findIndex(s => s.player_id === draggedPlayer.player_id);
-    const targetIdx = newSquad.findIndex(s => s.player_id === targetPlayer.player_id);
-
-    if (dragIdx === -1 || targetIdx === -1) {
-      setDraggedPlayer(null);
+    const draggedItem = squadData.find(s => s.id === draggedId);
+    if (!draggedItem) {
+      setDraggedId(null);
       return;
     }
 
-    const dragStarter = newSquad[dragIdx].is_starter;
-    newSquad[dragIdx].is_starter = newSquad[targetIdx].is_starter;
-    newSquad[targetIdx].is_starter = dragStarter;
+    // Swap is_starter between the two players
+    const draggedStarter = draggedItem.is_starter;
+    const targetStarter = targetItem.is_starter;
 
-    setSquadData(newSquad);
-    setDraggedPlayer(null);
+    // Update local state immediately
+    setSquadData(prev => prev.map(s => {
+      if (s.id === draggedId) 
+        return { ...s, is_starter: targetStarter };
+      if (s.id === targetItem.id) 
+        return { ...s, is_starter: draggedStarter };
+      return s;
+    }));
 
-    // Save to Supabase
-    await saveFormationToSupabase(newSquad);
+    // Save both to Supabase
+    try {
+      await supabase
+        .from('user_squads')
+        .update({ is_starter: targetStarter })
+        .eq('id', draggedId);
 
-    // Auto-detect and update formation
-    detectAndUpdateFormation(newSquad);
+      await supabase
+        .from('user_squads')
+        .update({ is_starter: draggedStarter })
+        .eq('id', targetItem.id);
+    } catch (error) {
+      console.error('Error saving formation:', error);
+    }
+
+    setDraggedId(null);
   };
 
   const saveFormationToSupabase = async (squad) => {
@@ -431,28 +444,58 @@ const FantasyPage = () => {
   };
 
   // Mobile tap-to-swap
-  const handlePlayerTap = (player, e) => {
-    if (!isMobile) {
-      // Desktop: show captain popup
-      setSelectedPlayer(player);
-      const rect = e.currentTarget.getBoundingClientRect();
-      setPopupPosition({
-        top: rect.bottom + 8,
-        left: rect.left
-      });
+  const handleTap = async (squadItem) => {
+    // If nothing selected, select this player
+    if (!selectedForSwap) {
+      setSelectedForSwap(squadItem.id);
       return;
     }
 
-    // Mobile: tap-to-swap
-    if (!tapToSwapPlayer) {
-      setTapToSwapPlayer(player);
-    } else {
-      if (tapToSwapPlayer.player_id !== player.player_id) {
-        // Swap
-        handleDrop(e, player);
-      }
-      setTapToSwapPlayer(null);
+    // If tapping the same player, deselect
+    if (selectedForSwap === squadItem.id) {
+      setSelectedForSwap(null);
+      return;
     }
+
+    // Swap the two players
+    const firstItem = squadData.find(s => s.id === selectedForSwap);
+    if (!firstItem) return;
+
+    const firstStarter = firstItem.is_starter;
+    const secondStarter = squadItem.is_starter;
+
+    setSquadData(prev => prev.map(s => {
+      if (s.id === selectedForSwap)
+        return { ...s, is_starter: secondStarter };
+      if (s.id === squadItem.id)
+        return { ...s, is_starter: firstStarter };
+      return s;
+    }));
+
+    try {
+      await supabase
+        .from('user_squads')
+        .update({ is_starter: secondStarter })
+        .eq('id', selectedForSwap);
+
+      await supabase
+        .from('user_squads')
+        .update({ is_starter: firstStarter })
+        .eq('id', squadItem.id);
+    } catch (error) {
+      console.error('Error saving formation:', error);
+    }
+
+    setSelectedForSwap(null);
+  };
+
+  const handlePlayerClick = (squadItem, e) => {
+    setSelectedPlayer(squadItem);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPopupPosition({
+      top: rect.bottom + 8,
+      left: rect.left
+    });
   };
 
   // Detect mobile
@@ -536,6 +579,13 @@ const FantasyPage = () => {
   };
 
   const { courtPlayers, benchPlayers } = getCourtAndBenchPlayers();
+
+  // Calculate formation label from squadData
+  const starters = squadData.filter(s => s.is_starter);
+  const gCount = starters.filter(s => s.players?.position === 'G').length;
+  const fCount = starters.filter(s => s.players?.position === 'F').length;
+  const cCount = starters.filter(s => s.players?.position === 'C').length;
+  const formationLabel = `${gCount}G · ${fCount}F · ${cCount}C`;
 
   // Calculate total points with captain double
   const totalPoints = courtPlayers.reduce((sum, s) => {
@@ -895,7 +945,7 @@ const FantasyPage = () => {
 
                 {/* Formation Label */}
                 <div className="mb-4 sm:mb-6">
-                  <p className="text-[#a0a0a0] text-xs">Formation: {formation.replace('-', ' · ')}</p>
+                  <p className="text-[#a0a0a0] text-xs">Formation: {formationLabel}</p>
                 </div>
 
                 {/* Basketball Court */}
@@ -941,14 +991,14 @@ const FantasyPage = () => {
                       
                       const isCaptain = captain === player.player_id;
                       const isViceCaptain = viceCaptain === player.player_id;
-                      const isDragged = draggedPlayer?.player_id === player.player_id;
-                      const isDragOver = dragOverTarget?.player_id === player.player_id;
-                      const isTapSelected = tapToSwapPlayer?.player_id === player.player_id;
+                      const isDragged = draggedId === player.id;
+                      const isDragOver = dragOverTarget?.id === player.id;
+                      const isSelectedForSwap = selectedForSwap === player.id;
                       
                       return (
                         <div
                           key={player.player_id}
-                          draggable={!isMobile}
+                          draggable={true}
                           onDragStart={(e) => handleDragStart(e, player)}
                           onDragOver={(e) => handleDragOver(e, player)}
                           onDragLeave={handleDragLeave}
@@ -959,14 +1009,19 @@ const FantasyPage = () => {
                             top: pos.top,
                             left: pos.left,
                             opacity: isDragged ? 0.5 : 1,
-                            border: isDragOver ? '2px dashed #FF5500' : 'none',
+                            border: isDragOver || isSelectedForSwap ? '2px dashed #FF5500' : 'none',
                             borderRadius: '8px',
-                            padding: '4px'
+                            padding: '4px',
+                            animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
                           }}
                           className="text-center cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handlePlayerTap(player, e);
+                            if (window.innerWidth < 768) {
+                              handleTap(player);
+                            } else {
+                              handlePlayerClick(player, e);
+                            }
                           }}
                         >
                           <div style={{textAlign: 'center', position: 'relative'}}>
@@ -1081,35 +1136,42 @@ const FantasyPage = () => {
                 <div className="border-t border-[#242424] mt-3 sm:mt-4 pt-3 sm:pt-4">
                   <h3 className="text-white font-bold text-xs sm:text-sm mb-2 sm:mb-3">Bench</h3>
                   {isMobile && (
-                    <p className="text-[#a0a0a0] text-xs mb-2">Tap a player to move them</p>
+                    <p className="text-[#a0a0a0] text-xs mb-2">
+                      {selectedForSwap ? "Tap another player to swap" : "Tap a player to move them"}
+                    </p>
                   )}
                   <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
                     {benchPlayers.map((player, index) => {
                       if (!player || !player.players) return null;
                       const isCaptain = captain === player.player_id;
                       const isViceCaptain = viceCaptain === player.player_id;
-                      const isDragged = draggedPlayer?.player_id === player.player_id;
-                      const isDragOver = dragOverTarget?.player_id === player.player_id;
-                      const isTapSelected = tapToSwapPlayer?.player_id === player.player_id;
+                      const isDragged = draggedId === player.id;
+                      const isDragOver = dragOverTarget?.id === player.id;
+                      const isSelectedForSwap = selectedForSwap === player.id;
                       
                       return (
                         <div 
                           key={player.player_id} 
                           className="text-center flex-shrink-0 flex-1 sm:flex-none cursor-pointer"
-                          draggable={!isMobile}
+                          draggable={true}
                           onDragStart={(e) => handleDragStart(e, player)}
                           onDragOver={(e) => handleDragOver(e, player)}
                           onDragLeave={handleDragLeave}
                           onDrop={(e) => handleDrop(e, player)}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handlePlayerTap(player, e);
+                            if (window.innerWidth < 768) {
+                              handleTap(player);
+                            } else {
+                              handlePlayerClick(player, e);
+                            }
                           }}
                           style={{
                             opacity: isDragged ? 0.5 : 1,
-                            border: isDragOver || isTapSelected ? '2px dashed #FF5500' : 'none',
+                            border: isDragOver || isSelectedForSwap ? '2px dashed #FF5500' : 'none',
                             borderRadius: '8px',
-                            padding: '4px'
+                            padding: '4px',
+                            animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
                           }}
                         >
                           <div style={{position: 'relative', display: 'inline-block'}}>
