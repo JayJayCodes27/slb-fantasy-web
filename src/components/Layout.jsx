@@ -124,18 +124,18 @@ const Layout = ({ children }) => {
                       {user?.email === 'jamaljohnson29@gmail.com' && (
                         <>
                           <Link
+                            to="/scorer"
+                            onClick={() => setShowDropdown(false)}
+                            className="block w-full text-left px-4 py-2 bg-[#FF5500] text-white font-bold rounded-lg text-sm mb-2 text-center"
+                          >
+                            🏀 Live Scorer
+                          </Link>
+                          <Link
                             to="/admin"
                             onClick={() => setShowDropdown(false)}
                             className="block px-4 py-3 text-white text-sm hover:bg-[#1a1a1a] transition-colors"
                           >
                             🔧 Admin Panel
-                          </Link>
-                          <Link
-                            to="/scorer"
-                            onClick={() => setShowDropdown(false)}
-                            className="block px-4 py-3 text-white text-sm hover:bg-[#1a1a1a] transition-colors"
-                          >
-                            🏀 Scorer
                           </Link>
                         </>
                       )}

@@ -1,5 +1,6 @@
 // DevToolbar.jsx — Developer toolbar for managing season state and gameweek
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
 
@@ -119,6 +120,12 @@ export default function DevToolbar() {
 
       {/* Quick Action Buttons */}
       <div className="flex items-center gap-2">
+        <Link
+          to="/scorer"
+          className="bg-[#0a0a0a] border border-[#FF5500] text-white text-xs px-3 py-1 rounded hover:bg-[#FF5500] transition-colors"
+        >
+          Open Scorer
+        </Link>
         <button
           onClick={handleResetToOffSeason}
           className="bg-[#0a0a0a] border border-[#FF5500] text-white text-xs px-3 py-1 rounded hover:bg-[#FF5500] transition-colors"
