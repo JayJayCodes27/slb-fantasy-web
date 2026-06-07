@@ -21,6 +21,11 @@ const FantasyPage = () => {
   const [hasSquad, setHasSquad] = useState(false);
   const [squadValue, setSquadValue] = useState(0);
   const [bank, setBank] = useState(100000000);
+  const [formation, setFormation] = useState('2G-2F-1C');
+  const [captain, setCaptain] = useState(null);
+  const [viceCaptain, setViceCaptain] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [squadData, setSquadData] = useState([]);
 
   // Create Private League form state
   const [leagueName, setLeagueName] = useState('');
@@ -43,7 +48,7 @@ const FantasyPage = () => {
     { id: 5, name: 'Devon Bell', position: 'C', team: 'CHE', teamColour: '#0066CC', points: 17, isCaptain: false, isViceCaptain: false }
   ];
 
-  const benchPlayers = [
+  const mockBenchPlayers = [
     { id: 6, name: 'Chris Tye', position: 'PG', team: 'SHE', teamColour: '#CC0000', points: 3 },
     { id: 7, name: 'Nate Williams', position: 'SG', team: 'MAN', teamColour: '#000000', points: 9 },
     { id: 8, name: 'Darius King', position: 'SF', team: 'SUR', teamColour: '#9900CC', points: 5 },
@@ -95,28 +100,39 @@ const FantasyPage = () => {
         return;
       }
 
-      // Fetch squad_confirmed from users table
+      // Fetch squad_confirmed and formation from users table
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('squad_confirmed')
+        .select('squad_confirmed, formation')
         .eq('id', user.id)
         .single();
 
       if (userError) throw userError;
       setHasSquad(userData?.squad_confirmed || false);
+      if (userData?.formation) {
+        setFormation(userData.formation);
+      }
 
-      // Fetch user squad with player values
+      // Fetch user squad with player values and captain/vice captain
       const { data: squadData, error: squadError } = await supabase
         .from('user_squads')
-        .select('*, players(value)')
+        .select('*, players(*, slb_teams(*))')
         .eq('user_id', user.id);
 
       if (squadError) throw squadError;
+
+      setSquadData(squadData || []);
 
       // Calculate squad value
       const calculatedSquadValue = squadData?.reduce((sum, s) => sum + (s.players?.value || 0), 0) || 0;
       setSquadValue(calculatedSquadValue);
       setBank(100000000 - calculatedSquadValue);
+
+      // Load captain and vice captain
+      const captainData = squadData?.find(s => s.is_captain);
+      const viceCaptainData = squadData?.find(s => s.is_vice_captain);
+      setCaptain(captainData?.player_id || null);
+      setViceCaptain(viceCaptainData?.player_id || null);
     } catch (error) {
       // Silent error handling
     }
@@ -212,6 +228,164 @@ const FantasyPage = () => {
       setLoading(false);
     }
   };
+
+  const handleFormationChange = async (newFormation) => {
+    setFormation(newFormation);
+    try {
+      await supabase
+        .from('users')
+        .update({ formation: newFormation })
+        .eq('id', user.id);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  const handleCaptainChange = async (playerId) => {
+    setCaptain(playerId);
+    try {
+      // Remove old captain
+      await supabase
+        .from('user_squads')
+        .update({ is_captain: false })
+        .eq('user_id', user.id);
+
+      // Set new captain
+      await supabase
+        .from('user_squads')
+        .update({ is_captain: true })
+        .eq('user_id', user.id)
+        .eq('player_id', playerId);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  const handleViceCaptainChange = async (playerId) => {
+    setViceCaptain(playerId);
+    try {
+      // Remove old vice captain
+      await supabase
+        .from('user_squads')
+        .update({ is_vice_captain: false })
+        .eq('user_id', user.id);
+
+      // Set new vice captain
+      await supabase
+        .from('user_squads')
+        .update({ is_vice_captain: true })
+        .eq('user_id', user.id)
+        .eq('player_id', playerId);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  const handleRemoveCaptain = async () => {
+    setCaptain(null);
+    try {
+      await supabase
+        .from('user_squads')
+        .update({ is_captain: false })
+        .eq('user_id', user.id);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  const handleRemoveViceCaptain = async () => {
+    setViceCaptain(null);
+    try {
+      await supabase
+        .from('user_squads')
+        .update({ is_vice_captain: false })
+        .eq('user_id', user.id);
+    } catch (error) {
+      // Silent error handling
+    }
+  };
+
+  // Formation positions configuration
+  const formationPositions = {
+    '2G-2F-1C': [
+      { position: 'C', top: '15%', left: '50%' },
+      { position: 'F', top: '38%', left: '22%' },
+      { position: 'F', top: '38%', left: '78%' },
+      { position: 'G', top: '65%', left: '25%' },
+      { position: 'G', top: '65%', left: '65%' }
+    ],
+    '3G-1F-1C': [
+      { position: 'C', top: '15%', left: '50%' },
+      { position: 'G', top: '35%', left: '15%' },
+      { position: 'G', top: '35%', left: '85%' },
+      { position: 'G', top: '65%', left: '50%' },
+      { position: 'F', top: '50%', left: '50%' }
+    ],
+    '1G-3F-1C': [
+      { position: 'C', top: '15%', left: '50%' },
+      { position: 'F', top: '35%', left: '18%' },
+      { position: 'F', top: '35%', left: '50%' },
+      { position: 'F', top: '35%', left: '82%' },
+      { position: 'G', top: '65%', left: '50%' }
+    ]
+  };
+
+  // Get court and bench players based on formation
+  const getCourtAndBenchPlayers = () => {
+    if (!squadData || squadData.length === 0) {
+      return { courtPlayers: [], benchPlayers: [] };
+    }
+
+    const guards = squadData.filter(s => s.players?.position === 'G');
+    const forwards = squadData.filter(s => s.players?.position === 'F');
+    const centres = squadData.filter(s => s.players?.position === 'C');
+
+    let courtGuards, benchGuards, courtForwards, benchForwards, courtCentres, benchCentres;
+
+    switch (formation) {
+      case '3G-1F-1C':
+        courtGuards = guards.slice(0, 3);
+        benchGuards = guards.slice(3);
+        courtForwards = forwards.slice(0, 1);
+        benchForwards = forwards.slice(1);
+        courtCentres = centres.slice(0, 1);
+        benchCentres = centres.slice(1);
+        break;
+      case '1G-3F-1C':
+        courtGuards = guards.slice(0, 1);
+        benchGuards = guards.slice(1);
+        courtForwards = forwards.slice(0, 3);
+        benchForwards = forwards.slice(3);
+        courtCentres = centres.slice(0, 1);
+        benchCentres = centres.slice(1);
+        break;
+      default: // 2G-2F-1C
+        courtGuards = guards.slice(0, 2);
+        benchGuards = guards.slice(2);
+        courtForwards = forwards.slice(0, 2);
+        benchForwards = forwards.slice(2);
+        courtCentres = centres.slice(0, 1);
+        benchCentres = centres.slice(1);
+        break;
+    }
+
+    const courtPlayers = [...courtGuards, ...courtForwards, ...courtCentres];
+    const benchPlayers = [...benchGuards, ...benchForwards, ...benchCentres];
+
+    return { courtPlayers, benchPlayers };
+  };
+
+  const { courtPlayers, benchPlayers } = getCourtAndBenchPlayers();
+
+  // Calculate total points with captain double
+  const totalPoints = courtPlayers.reduce((sum, s) => {
+    const pts = s.players?.gw_points || 0;
+    const isCapt = s.is_captain;
+    return sum + (isCapt ? pts * 2 : pts);
+  }, 0);
+
+  // Count players scoring
+  const playersScoring = courtPlayers.filter(s => (s.players?.gw_points || 0) > 0).length;
 
   useEffect(() => {
     fetchSettings();
@@ -523,7 +697,7 @@ const FantasyPage = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 p-4 sm:p-6 space-y-3">
-          {activeTab === 'team' ? (
+          {activeTab === 'team' && (
             <>
               {!hasSquad && settings?.season_state === 'pre_season' && (
                 <div className="card p-6 text-center">
@@ -554,8 +728,25 @@ const FantasyPage = () => {
               <div className="card p-4 sm:p-5 h-auto sm:h-[520px]">
                 {/* Panel Header */}
                 <div className="mb-4 sm:mb-6">
-                  <p className="text-[#FF6B00] font-bold text-xl sm:text-2xl">Total: 54 pts</p>
-                  <p className="text-[#a0a0a0] text-xs mt-1">GW1 • 5 players playing</p>
+                  <p className="text-[#FF6B00] font-bold text-xl sm:text-2xl">Total: {totalPoints} pts</p>
+                  <p className="text-[#a0a0a0] text-xs mt-1">GW{settings?.current_gameweek || 1} · {playersScoring} players scoring</p>
+                </div>
+
+                {/* Formation Toggle Bar */}
+                <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
+                  {['2G-2F-1C', '3G-1F-1C', '1G-3F-1C'].map((form) => (
+                    <button
+                      key={form}
+                      onClick={() => handleFormationChange(form)}
+                      className={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors ${
+                        formation === form
+                          ? 'bg-[#FF6B00] text-white'
+                          : 'bg-[#1a1a1a] text-[#a0a0a0] hover:text-white'
+                      }`}
+                    >
+                      {form.replace('-', ' · ')}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Basketball Court */}
@@ -594,140 +785,86 @@ const FantasyPage = () => {
                       zIndex: 1
                     }}
                   >
-                  {/* C - Top Centre (near basket) */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      transform: 'translate(-50%, -50%)',
-                      top: '15%',
-                      left: '50%'
-                    }}
-                    className="text-center cursor-pointer"
-                  >
-                    <div style={{textAlign: 'center'}}>
-                      <img
-                        src={getJerseyForTeam(startingPlayers[4].team)}
-                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
-                        alt={startingPlayers[4].position}
-                      />
-                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
-                        {startingPlayers[4].name.split(' ')[0]}
-                      </div>
-                      <div style={{color: '#FF5500', fontSize: '12px'}}>
-                        {startingPlayers[4].points} pts
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* PF - Top Left of Paint */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      transform: 'translate(-50%, -50%)',
-                      top: '35%',
-                      left: '25%'
-                    }}
-                    className="text-center cursor-pointer"
-                  >
-                    <div style={{textAlign: 'center'}}>
-                      <img
-                        src={getJerseyForTeam(startingPlayers[3].team)}
-                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
-                        alt={startingPlayers[3].position}
-                      />
-                      {startingPlayers[3].isViceCaptain && (
-                        <div style={{position: 'absolute', top: '-8px', right: '-8px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#FF5500', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <span style={{color: 'white', fontSize: '10px', fontWeight: 'bold'}}>V</span>
+                    {formationPositions[formation]?.map((pos, index) => {
+                      const player = courtPlayers[index];
+                      if (!player || !player.players) return null;
+                      
+                      const isCaptain = captain === player.player_id;
+                      const isViceCaptain = viceCaptain === player.player_id;
+                      
+                      return (
+                        <div
+                          key={player.player_id}
+                          style={{
+                            position: 'absolute',
+                            transform: 'translate(-50%, -50%)',
+                            top: pos.top,
+                            left: pos.left
+                          }}
+                          className="text-center cursor-pointer"
+                          onClick={() => setSelectedPlayer(player)}
+                        >
+                          <div style={{textAlign: 'center', position: 'relative'}}>
+                            {/* Captain/Vice Captain Badge */}
+                            {isCaptain && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: '-8px',
+                                  right: '-8px',
+                                  backgroundColor: '#FF6B00',
+                                  color: 'white',
+                                  width: '20px',
+                                  height: '20px',
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '10px',
+                                  fontWeight: 'bold',
+                                  zIndex: 2
+                                }}
+                              >
+                                C
+                              </div>
+                            )}
+                            {isViceCaptain && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: '-8px',
+                                  right: '-8px',
+                                  backgroundColor: '#666666',
+                                  color: 'white',
+                                  width: '20px',
+                                  height: '20px',
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '10px',
+                                  fontWeight: 'bold',
+                                  zIndex: 2
+                                }}
+                              >
+                                V
+                              </div>
+                            )}
+                            <img
+                              src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
+                              style={{width: '64px', height: '80px', objectFit: 'contain'}}
+                              alt={player.players.position}
+                            />
+                            <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
+                              {player.players.name?.split(' ')[0]}
+                            </div>
+                            <div style={{color: '#FF5500', fontSize: '12px'}}>
+                              {player.players.total_season_points || 0} pts
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
-                        {startingPlayers[3].name.split(' ')[0]}
-                      </div>
-                      <div style={{color: '#FF5500', fontSize: '12px'}}>
-                        {startingPlayers[3].points} pts
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SF - Right Wing */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      transform: 'translate(-50%, -50%)',
-                      top: '35%',
-                      left: '75%'
-                    }}
-                    className="text-center cursor-pointer"
-                  >
-                    <div style={{textAlign: 'center'}}>
-                      <img
-                        src={getJerseyForTeam(startingPlayers[2].team)}
-                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
-                        alt={startingPlayers[2].position}
-                      />
-                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
-                        {startingPlayers[2].name.split(' ')[0]}
-                      </div>
-                      <div style={{color: '#FF5500', fontSize: '12px'}}>
-                        {startingPlayers[2].points} pts
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SG - Left Wing */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      transform: 'translate(-50%, -50%)',
-                      top: '65%',
-                      left: '20%'
-                    }}
-                    className="text-center cursor-pointer"
-                  >
-                    <div style={{textAlign: 'center'}}>
-                      <img
-                        src={getJerseyForTeam(startingPlayers[1].team)}
-                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
-                        alt={startingPlayers[1].position}
-                      />
-                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
-                        {startingPlayers[1].name.split(' ')[0]}
-                      </div>
-                      <div style={{color: '#FF5500', fontSize: '12px'}}>
-                        {startingPlayers[1].points} pts
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* PG - Bottom Centre (ball handler) */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      transform: 'translate(-50%, -50%)',
-                      top: '65%',
-                      left: '50%'
-                    }}
-                    className="text-center cursor-pointer"
-                  >
-                    <div style={{textAlign: 'center'}}>
-                      <img
-                        src={getJerseyForTeam(startingPlayers[0].team)}
-                        style={{width: '64px', height: '80px', objectFit: 'contain'}}
-                        alt={startingPlayers[0].position}
-                      />
-                      {startingPlayers[0].isCaptain && (
-                        <div style={{position: 'absolute', top: '-8px', right: '-8px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#FF5500', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                          <span style={{color: 'white', fontSize: '10px', fontWeight: 'bold'}}>C</span>
-                        </div>
-                      )}
-                      <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
-                        {startingPlayers[0].name.split(' ')[0]}
-                      </div>
-                      <div style={{color: '#FF5500', fontSize: '12px'}}>
-                        {startingPlayers[0].points} pts
-                      </div>
-                    </div>
-                  </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -735,23 +872,74 @@ const FantasyPage = () => {
                 <div className="border-t border-[#242424] mt-3 sm:mt-4 pt-3 sm:pt-4">
                   <h3 className="text-white font-bold text-xs sm:text-sm mb-2 sm:mb-3">Bench</h3>
                   <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
-                    {benchPlayers.map((player, index) => (
-                      <div key={player?.id || index} className="text-center flex-shrink-0 flex-1 sm:flex-none">
-                        {player.name ? (
-                          <div className="cursor-pointer">
+                    {benchPlayers.map((player, index) => {
+                      if (!player || !player.players) return null;
+                      const isCaptain = captain === player.player_id;
+                      const isViceCaptain = viceCaptain === player.player_id;
+                      
+                      return (
+                        <div key={player.player_id} className="text-center flex-shrink-0 flex-1 sm:flex-none cursor-pointer" onClick={() => setSelectedPlayer(player)}>
+                          <div style={{position: 'relative', display: 'inline-block'}}>
+                            {isCaptain && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: '-6px',
+                                  right: '-6px',
+                                  backgroundColor: '#FF6B00',
+                                  color: 'white',
+                                  width: '16px',
+                                  height: '16px',
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '8px',
+                                  fontWeight: 'bold',
+                                  zIndex: 2
+                                }}
+                              >
+                                C
+                              </div>
+                            )}
+                            {isViceCaptain && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: '-6px',
+                                  right: '-6px',
+                                  backgroundColor: '#666666',
+                                  color: 'white',
+                                  width: '16px',
+                                  height: '16px',
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '8px',
+                                  fontWeight: 'bold',
+                                  zIndex: 2
+                                }}
+                              >
+                                V
+                              </div>
+                            )}
                             <img
-                              src={getJerseyForTeam(player.team)}
+                              src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
                               style={{width: '48px', height: '60px', objectFit: 'contain'}}
-                              alt={player.position}
+                              alt={player.players.position}
                             />
-                            <p className="text-white font-bold text-[10px] sm:text-[11px] mt-1">{player.name}</p>
-                            <p className="text-[#FF6B00] font-bold text-[10px] sm:text-[11px]">{player.points} pts</p>
                           </div>
-                        ) : (
-                          <div className="border border-dashed border-[#333] rounded-button p-2 h-[60px] sm:h-[70px] flex flex-col items-center justify-center">
-                            <span className="text-[#555] text-[10px] sm:text-[11px]">Player</span>
-                          </div>
-                        )}
+                          <p className="text-white font-bold text-[10px] sm:text-[11px] mt-1">{player.players.name?.split(' ')[0]}</p>
+                          <p className="text-[#FF6B00] font-bold text-[10px] sm:text-[11px]">{player.players.total_season_points || 0} pts</p>
+                        </div>
+                      );
+                    })}
+                    {[...Array(4 - benchPlayers.length)].map((_, index) => (
+                      <div key={`empty-${index}`} className="text-center flex-shrink-0 flex-1 sm:flex-none">
+                        <div className="border border-dashed border-[#333] rounded-button p-2 h-[60px] sm:h-[70px] flex flex-col items-center justify-center">
+                          <span className="text-[#555] text-[10px] sm:text-[11px]">Player</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -772,196 +960,11 @@ const FantasyPage = () => {
                     <p className="text-white font-bold text-xl sm:text-2xl">54</p>
                   </div>
                 </div>
-                <div className="flex-1 flex items-center justify-center border-r border-[#242424] w-full sm:w-auto py-3 sm:py-0">
+                <div className="flex-1 flex items-center justify-center w-full sm:w-auto py-3 sm:py-0">
                   <div className="text-center">
                     <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">OVERALL RANK</p>
                     <p className="text-white font-bold text-xl sm:text-2xl">—</p>
                   </div>
-                </div>
-                <div className="flex-1 flex items-center justify-center w-full sm:w-auto py-3 sm:py-0">
-                  <div className="text-center">
-                    <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">TRANSFERS</p>
-                    <p className="text-white font-bold text-xl sm:text-2xl">1</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* My Leagues Section */}
-              <div className="space-y-3">
-                {/* Create/Join League Card */}
-                <div className="card p-4 sm:p-5">
-                  <h2 className="text-white font-bold text-lg mb-4">My Leagues</h2>
-                  
-                  {myLeagues.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-[#a0a0a0] text-sm mb-4">You're not in any leagues yet. Create one or join an existing league to get started!</p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button
-                          onClick={() => setLeagueName('')}
-                          className="bg-[#FF6B00] text-white font-bold text-sm px-6 py-2 rounded-button hover:bg-[#e05f00] transition-colors"
-                        >
-                          Create League
-                        </button>
-                        <button
-                          onClick={handleJoinPublicLeague}
-                          disabled={joiningPublic}
-                          className="bg-[#1a1a1a] text-white font-bold text-sm px-6 py-2 rounded-button border border-[#242424] hover:bg-[#2a2a2a] transition-colors disabled:opacity-50"
-                        >
-                          {joiningPublic ? 'Joining...' : 'Join Public League'}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {myLeagues.map((league) => (
-                        <Link
-                          key={league.id}
-                          to={`/leagues/${league.id}`}
-                          className="card p-4 hover:border-[#FF6B00] transition-colors cursor-pointer"
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="text-white font-bold text-sm">{league.name}</h3>
-                              <p className="text-[#a0a0a0] text-xs">{league.league_type === 'private' ? 'Private' : 'Public'} League</p>
-                            </div>
-                            {league.is_commissioner && (
-                              <span className="bg-[#FF6B00] text-white text-[10px] font-bold px-2 py-0.5 rounded-pill">Commissioner</span>
-                            )}
-                          </div>
-                          <div className="border-t border-[#242424] my-3"></div>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-[#a0a0a0] text-xs">Members</span>
-                              <span className="text-white text-xs font-bold">{league.member_count}/{league.max_managers}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-[#a0a0a0] text-xs">Your Rank</span>
-                              <span className="text-[#FF6B00] text-xs font-bold">{league.current_user_rank}</span>
-                            </div>
-                          </div>
-                          {/* Mini Standings */}
-                          <div className="border-t border-[#242424] my-3 pt-3">
-                            <p className="text-[#a0a0a0] text-xs mb-2">Top 3</p>
-                            <div className="space-y-1">
-                              {league.members.slice(0, 3).map((member, idx) => (
-                                <div
-                                  key={member.user_id}
-                                  className={`flex justify-between items-center text-xs py-1 px-2 rounded ${
-                                    member.user_id === user?.id ? 'bg-[#FF6B00]/20 border-l-2 border-[#FF6B00]' : ''
-                                  }`}
-                                >
-                                  <div>
-                                    <span className="text-white font-bold mr-2">{idx + 1}.</span>
-                                    <span className="text-white">{member.users?.team_name || member.users?.username}</span>
-                                  </div>
-                                  <span className="text-[#FF6B00] font-bold">{member.total_points || 0}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                      {/* Create/Join League Button */}
-                      <button
-                        onClick={() => setLeagueName('')}
-                        className="card p-4 hover:border-[#FF6B00] transition-colors cursor-pointer border-2 border-dashed border-[#333]"
-                      >
-                        <div className="text-center">
-                          <p className="text-white font-bold text-sm mb-1">+ Create or Join League</p>
-                          <p className="text-[#a0a0a0] text-xs">Start a new league or join an existing one</p>
-                        </div>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Create League Form */}
-                {leagueName !== '' && (
-                  <div className="card p-4 sm:p-5">
-                    <h3 className="text-white font-bold text-lg mb-4">Create Private League</h3>
-                    <form onSubmit={handleCreatePrivateLeague}>
-                      <div className="mb-4">
-                        <label className="text-[#a0a0a0] text-xs block mb-2">League Name</label>
-                        <input
-                          type="text"
-                          value={leagueName}
-                          onChange={(e) => setLeagueName(e.target.value)}
-                          className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-2 text-white text-sm focus:outline-none focus:border-[#FF6B00]"
-                          placeholder="Enter league name"
-                          required
-                        />
-                      </div>
-                      <div className="flex gap-3">
-                        <button
-                          type="submit"
-                          disabled={creating}
-                          className="flex-1 bg-[#FF6B00] text-white font-bold text-sm px-4 py-2 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50"
-                        >
-                          {creating ? 'Creating...' : 'Create League'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setLeagueName('')}
-                          className="flex-1 bg-[#1a1a1a] text-white font-bold text-sm px-4 py-2 rounded-button border border-[#242424] hover:bg-[#2a2a2a] transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                    {createSuccess && (
-                      <div className="mt-4 p-3 bg-[#22c55e]/10 border border-[#22c55e] rounded-lg">
-                        <p className="text-[#22c55e] text-sm font-bold mb-1">League Created!</p>
-                        <p className="text-[#a0a0a0] text-xs mb-2">Share this invite code with friends:</p>
-                        <div className="flex items-center gap-2">
-                          <code className="bg-[#1a1a1a] text-[#FF6B00] font-bold px-3 py-1 rounded text-sm">{createSuccess}</code>
-                          <button
-                            onClick={() => copyToClipboard(createSuccess)}
-                            className="text-[#FF6B00] text-xs hover:underline"
-                          >
-                            {copied ? 'Copied!' : 'Copy'}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Join Private League Form */}
-                <div className="card p-4 sm:p-5">
-                  <h3 className="text-white font-bold text-lg mb-4">Join Private League</h3>
-                  <form onSubmit={handleJoinPrivateLeague}>
-                    <div className="mb-4">
-                      <label className="text-[#a0a0a0] text-xs block mb-2">Invite Code</label>
-                      <input
-                        type="text"
-                        value={privateInviteCode}
-                        onChange={(e) => setPrivateInviteCode(e.target.value.toUpperCase())}
-                        className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-2 text-white text-sm focus:outline-none focus:border-[#FF6B00] uppercase"
-                        placeholder="Enter 6-character code"
-                        maxLength={6}
-                        required
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={joiningPrivate}
-                      className="w-full bg-[#FF6B00] text-white font-bold text-sm px-4 py-2 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50"
-                    >
-                      {joiningPrivate ? 'Joining...' : 'Join League'}
-                    </button>
-                  </form>
-                  {joinSuccess && (
-                    <div className="mt-4 p-3 bg-[#22c55e]/10 border border-[#22c55e] rounded-lg">
-                      <p className="text-[#22c55e] text-sm font-bold">{joinSuccess}</p>
-                    </div>
-                  )}
-                  {joinError && (
-                    <div className="mt-4 p-3 bg-[#ef4444]/10 border border-[#ef4444] rounded-lg">
-                      <p className="text-[#ef4444] text-sm">{joinError}</p>
-                    </div>
-                  )}
                 </div>
               </div>
             </>

@@ -4,6 +4,9 @@
 -- Add squad_confirmed column to users table
 -- alter table users add column if not exists squad_confirmed boolean default false;
 
+-- Add formation column to users table
+-- alter table users add column if not exists formation text default '2G-2F-1C';
+
 -- Enable RLS on users table
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
