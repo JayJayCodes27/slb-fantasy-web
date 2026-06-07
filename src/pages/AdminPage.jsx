@@ -855,14 +855,15 @@ const FixturesTab = ({ showToast }) => {
     try {
       const [fixturesData, teamsData] = await Promise.all([
         supabase.from('fixture_difficulty').select('*, home_team:slb_teams(*), away_team:slb_teams(*)').order('gameweek'),
-        supabase.from('slb_teams').select('*').order('name')
+        supabase.from('slb_teams').select('id, name').order('name')
       ]);
       if (fixturesData.error) throw fixturesData.error;
       if (teamsData.error) throw teamsData.error;
       setFixtures(fixturesData.data || []);
       setTeams(teamsData.data || []);
+      console.log('Teams loaded:', teamsData.data);
     } catch (error) {
-      // Silent error handling
+      console.error('Error fetching fixtures data:', error);
     } finally {
       setLoading(false);
     }
