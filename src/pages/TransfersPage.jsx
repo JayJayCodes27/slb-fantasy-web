@@ -201,7 +201,7 @@ const TransfersPage = () => {
       const currentBank = userData.bank_balance || 0;
 
       if (playerValue > currentBank) {
-        setShowToast(`You need £${((playerValue - currentBank) / 1000000).toFixed(1)}m more`);
+        setShowToast(`Insufficient funds — you need £${((playerValue - currentBank) / 1000000).toFixed(1)}m more`);
         setTimeout(() => setShowToast(null), 3000);
         setShowBuyConfirm(false);
         return;
@@ -237,11 +237,12 @@ const TransfersPage = () => {
 
       if (insertError) throw insertError;
 
-      // Update bank balance
+      // Update bank balance with floor at 0
+      const newBalance = Math.max(0, currentBank - playerValue);
       const { error: updateError } = await supabase
         .from('users')
         .update({
-          bank_balance: currentBank - playerValue
+          bank_balance: newBalance
         })
         .eq('id', user.id);
 
@@ -725,8 +726,8 @@ const TransfersPage = () => {
                     </div>
                     <p className="text-[#FF5500] font-bold text-sm">{formatValue(player.value)}</p>
                     {!canAfford && (
-                      <span className="text-[#a0a0a0] text-xs">
-                        £{((player.value - bankBalance) / 1000000).toFixed(1)}m needed
+                      <span className="bg-red-900/50 text-red-400 text-xs px-2 py-1 rounded">
+                        Insufficient funds
                       </span>
                     )}
                     {isClubLimited && (
@@ -739,6 +740,14 @@ const TransfersPage = () => {
                           handleBuyClick(player);
                         }}
                         className="bg-[#FF5500] text-white text-xs font-bold px-3 py-1 rounded hover:bg-[#e04400] transition-colors"
+                      >
+                        Add
+                      </button>
+                    )}
+                    {!canAfford && (
+                      <button
+                        disabled
+                        className="bg-[#2a2a2a] text-[#a0a0a0] text-xs font-bold px-3 py-1 rounded cursor-not-allowed"
                       >
                         Add
                       </button>
