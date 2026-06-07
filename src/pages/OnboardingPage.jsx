@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
-const OnboardingPage = () => {
+export default function OnboardingPage() {
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
   const [currentScreen, setCurrentScreen] = useState(1);
   const [seasonState, setSeasonState] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
 
-  if (authLoading) return (
+  if (loading) return (
     <div style={{ 
       minHeight: '100vh', 
       backgroundColor: '#0A0A0A', 
@@ -18,7 +18,7 @@ const OnboardingPage = () => {
       alignItems: 'center', 
       justifyContent: 'center' 
     }}>
-      <div style={{ color: 'white' }}>Loading...</div>
+      <div style={{ color: '#FF5500', fontSize: '18px' }}>Loading...</div>
     </div>
   );
 
@@ -46,7 +46,7 @@ const OnboardingPage = () => {
     } catch (error) {
       console.error('Error checking onboarding status:', error);
     }
-    setLoading(false);
+    setPageLoading(false);
   };
 
   const fetchSeasonState = async () => {
@@ -106,7 +106,7 @@ const OnboardingPage = () => {
     navigate('/fantasy');
   };
 
-  if (loading) {
+  if (pageLoading) {
     return (
       <div style={{ 
         minHeight: '100vh', 
@@ -593,5 +593,3 @@ const Screen4 = ({ onCreatePrivateLeague, onJoinPublicLeague, onSkip }) => (
     </button>
   </div>
 );
-
-export default OnboardingPage;

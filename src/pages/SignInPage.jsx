@@ -24,7 +24,18 @@ const SignInPage = () => {
 
       if (error) throw error;
 
-      navigate('/fantasy');
+      // Check onboarding status
+      const { data: userData } = await supabase
+        .from('users')
+        .select('onboarding_complete')
+        .eq('id', data.user.id)
+        .single();
+
+      if (!userData?.onboarding_complete) {
+        navigate('/onboarding');
+      } else {
+        navigate('/fantasy');
+      }
     } catch (error) {
       setError(error.message || 'Failed to sign in');
     } finally {
