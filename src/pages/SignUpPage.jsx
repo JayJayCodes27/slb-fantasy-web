@@ -43,6 +43,18 @@ const SignUpPage = () => {
       return;
     }
 
+    // Validate team name
+    if (!teamName.trim()) {
+      setError('Please enter a team name');
+      setLoading(false);
+      return;
+    }
+    if (teamName.length > 30) {
+      setError('Team name must be 30 characters or less');
+      setLoading(false);
+      return;
+    }
+
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -123,13 +135,13 @@ const SignUpPage = () => {
           <div>
             <input
               type="text"
-              placeholder="Team Name"
+              placeholder="e.g. The Hoop Gang FC"
               value={teamName}
-              onChange={(e) => setTeamName(e.target.value.slice(0, 30))}
+              onChange={(e) => setTeamName(e.target.value)}
               className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
               required
             />
-            <p className="text-[#555555] text-xs mt-1">This is how you'll appear in league standings</p>
+            <p className="text-[#555555] text-xs mt-1">This is how you appear in leagues</p>
           </div>
 
           {/* Invite Code */}
