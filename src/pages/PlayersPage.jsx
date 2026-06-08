@@ -26,10 +26,6 @@ const PlayersPage = () => {
     return matchSearch && matchPosition && matchTeam;
   });
 
-  console.log('Position filter:', positionFilter);
-  console.log('Team filter:', teamFilter);
-  console.log('Filtered count:', filteredPlayers.length);
-
   const displayPlayers = [...filteredPlayers].sort((a, b) => {
     if (sortBy === 'value-desc') return b.value - a.value;
     if (sortBy === 'value-asc') return a.value - b.value;

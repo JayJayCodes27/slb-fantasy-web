@@ -142,7 +142,7 @@ const LeaderboardPage = () => {
           <tbody>
             {leaderboard.map((member, index) => {
               const isCurrentUser = member.user_id === user.id;
-              const rank = member.current_user_rank;
+              const rank = (page - 1) * 100 + index + 1;
               const getRankBorder = () => {
                 if (rank === 1) return 'border-l-4 border-[#FFD700]';
                 if (rank === 2) return 'border-l-4 border-[#C0C0C0]';

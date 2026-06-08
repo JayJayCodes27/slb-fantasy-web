@@ -129,7 +129,7 @@ const NewsPage = () => {
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm whitespace-nowrap ${
                   activeFilter === filter
                     ? 'bg-[#F4622A] text-white'
-                    : 'bg-[#111111] text-[#A0A0A0] hover:text-white'
+                    : 'bg-[#1A1A1A] text-[#A0A0A0] hover:text-white'
                 }`}
               >
                 {filter}

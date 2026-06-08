@@ -185,10 +185,10 @@ const LandingPage = () => {
             {/* Left Column */}
             <div className="w-full lg:w-[55%] text-center lg:text-left">
               <p className="text-[#C9A84C] font-['Barlow_Condensed'] text-[13px] uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
-              <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[72px] leading-none mb-2">
+              <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2 whitespace-nowrap">
                 YOUR SLB SQUAD.
               </h1>
-              <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[72px] leading-none mb-6">
+              <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6 whitespace-nowrap">
                 OWN THE SEASON.
               </h2>
               <p className="text-[#A0A0A0] text-base leading-relaxed mb-8 font-['Inter']">
