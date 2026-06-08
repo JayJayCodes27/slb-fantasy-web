@@ -77,7 +77,7 @@ export default function DevToolbar() {
     return null;
   }
 
-  if (user.email !== 'jamaljohnson29@gmail.com') {
+  if (user.email !== 'slbfantasy@gmail.com') {
     return null;
   }
 

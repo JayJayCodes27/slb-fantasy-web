@@ -32,7 +32,7 @@ const ScorerPage = () => {
     </div>
   );
 
-  if (!user || user.email !== 'jamaljohnson29@gmail.com') {
+  if (!user || user.email !== 'slbfantasy@gmail.com') {
     navigate('/');
     return null;
   }

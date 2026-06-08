@@ -121,7 +121,7 @@ const Layout = ({ children }) => {
                   </button>
                   {showDropdown && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-[#141414] border border-[#242424] rounded-lg shadow-lg overflow-hidden">
-                      {user?.email === 'jamaljohnson29@gmail.com' && (
+                      {user?.email === 'slbfantasy@gmail.com' && (
                         <>
                           <Link
                             to="/scorer"

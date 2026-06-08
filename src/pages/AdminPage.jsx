@@ -19,7 +19,7 @@ const AdminPage = () => {
   );
 
   // Then check email
-  if (!user || user.email !== 'jamaljohnson29@gmail.com') {
+  if (!user || user.email !== 'slbfantasy@gmail.com') {
     return <Navigate to="/" replace />;
   }
 
