@@ -944,13 +944,44 @@ const FantasyPage = () => {
                     >
                       {formationPositions[formation]?.map((pos, index) => {
                         const player = courtPlayers[index];
-                        if (!player || !player.players) return null;
+                        
+                        const isCaptain = captain === player?.player_id;
+                        const isViceCaptain = viceCaptain === player?.player_id;
+                        const isDragged = draggedId === player?.id;
+                        const isDragOver = dragOverTarget?.id === player?.id;
+                        const isSelectedForSwap = selectedForSwap === player?.id;
 
-                        const isCaptain = captain === player.player_id;
-                        const isViceCaptain = viceCaptain === player.player_id;
-                        const isDragged = draggedId === player.id;
-                        const isDragOver = dragOverTarget?.id === player.id;
-                        const isSelectedForSwap = selectedForSwap === player.id;
+                        // Empty slot placeholder
+                        if (!player || !player.players) {
+                          return (
+                            <div
+                              key={`empty-${pos.row}-${pos.col}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '12px',
+                                padding: '4px'
+                              }}
+                            >
+                              <div 
+                                className="border-2 border-dashed border-[#2E2E2E] rounded-xl flex items-center justify-center"
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  minHeight: '80px'
+                                }}
+                              >
+                                <span 
+                                  className="font-semibold text-[14px]"
+                                  style={{ color: '#C9A84C', fontFamily: 'Inter' }}
+                                >
+                                  {pos.position}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        }
 
                         return (
                           <div
