@@ -51,7 +51,13 @@ const SignUpPage = () => {
     }
 
     try {
-      // Sign up with Supabase Auth
+      // Sign out existing session first
+      const { data: session } = await supabase.auth.getSession();
+      if (session?.session) {
+        await supabase.auth.signOut();
+      }
+
+      // Then proceed with signup
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
