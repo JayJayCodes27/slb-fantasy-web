@@ -177,31 +177,27 @@ const LandingPage = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-12 sm:py-20 px-4 sm:px-12 animate-fade-in">
+      <section className="py-16 sm:py-24 px-4 sm:px-12 animate-fade-in">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
             {/* Left Column */}
             <div className="w-full lg:w-[55%] text-center lg:text-left">
-              <h1 className="text-white font-bold text-3xl sm:text-4xl lg:text-5xl uppercase leading-tight mb-4">
+              <p className="text-[#C9A84C] font-['Barlow_Condensed'] text-[13px] uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
+              <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[72px] leading-none mb-2">
                 YOUR SLB SQUAD.
               </h1>
-              <h2 className="text-[#FF6B00] font-bold text-3xl sm:text-4xl lg:text-5xl uppercase leading-tight mb-6">
+              <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[72px] leading-none mb-6">
                 OWN THE SEASON.
               </h2>
-              <p className="text-[#c0c0c0] text-sm sm:text-base leading-relaxed mb-6">
-                The UK's first fantasy basketball game for Super League Basketball.
-              </p>
-              <p className="text-[#c0c0c0] text-sm sm:text-base leading-relaxed mb-8">
-                Live scoring. Season-long leagues. Free to play.
+              <p className="text-[#A0A0A0] text-base leading-relaxed mb-8 font-['Inter']">
+                The UK's first fantasy basketball game for Super League Basketball. Live scoring. Season-long leagues. Free to play.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <button className="bg-[#FF6B00] text-white font-bold text-sm px-5 py-3 rounded-button h-11 flex items-center justify-center gap-2 hover:bg-[#e05f00] transition-colors">
-                  <span className="text-lg">🍎</span>
-                  Download on iOS
+                <button className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors">
+                  Get Started
                 </button>
-                <button className="bg-[#1e1e1e] text-white font-bold text-sm px-5 py-3 rounded-button h-11 border border-[#333] flex items-center justify-center gap-2 hover:bg-[#2a2a2a] transition-colors">
-                  <span className="text-lg">▶️</span>
-                  Get it on Android
+                <button className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-white hover:bg-white hover:text-black transition-colors">
+                  Learn More
                 </button>
               </div>
             </div>
@@ -247,29 +243,29 @@ const LandingPage = () => {
       </section>
 
       {/* Feature Icons Row */}
-      <section className="px-4 sm:px-12 pb-8">
+      <section className="px-4 sm:px-12 pb-16">
         <div className="max-w-7xl mx-auto">
-          <div className="card p-6 h-auto">
+          <div className="bg-[#111111] border border-[#222222] rounded-xl p-6 h-auto">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 h-full">
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
-                <div className="text-3xl mb-2">👥</div>
-                <h3 className="text-white font-bold text-base mb-1">Create or Join Leagues</h3>
-                <p className="text-[#a0a0a0] text-sm">Compete with friends</p>
+                <div className="text-3xl mb-2 text-[#C9A84C]">👥</div>
+                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Create or Join Leagues</h3>
+                <p className="text-[#A0A0A0] text-sm font-['Inter']">Compete with friends</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
-                <div className="text-3xl mb-2">📅</div>
-                <h3 className="text-white font-bold text-base mb-1">Weekly Gameweeks</h3>
-                <p className="text-[#a0a0a0] text-sm">Real matchups, real points</p>
+                <div className="text-3xl mb-2 text-[#C9A84C]">📅</div>
+                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Weekly Gameweeks</h3>
+                <p className="text-[#A0A0A0] text-sm font-['Inter']">Real matchups, real points</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
-                <div className="text-3xl mb-2">🏆</div>
-                <h3 className="text-white font-bold text-base mb-1">Climb the Rankings</h3>
-                <p className="text-[#a0a0a0] text-sm">Top the leaderboard</p>
+                <div className="text-3xl mb-2 text-[#C9A84C]">🏆</div>
+                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Climb the Rankings</h3>
+                <p className="text-[#A0A0A0] text-sm font-['Inter']">Top the leaderboard</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
-                <div className="text-3xl mb-2">🎁</div>
-                <h3 className="text-white font-bold text-base mb-1">Free to Play</h3>
-                <p className="text-[#a0a0a0] text-sm">No entry fees. Ever.</p>
+                <div className="text-3xl mb-2 text-[#C9A84C]">🎁</div>
+                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Free to Play</h3>
+                <p className="text-[#A0A0A0] text-sm font-['Inter']">No entry fees. Ever.</p>
               </div>
             </div>
           </div>
@@ -277,29 +273,29 @@ const LandingPage = () => {
       </section>
 
       {/* Countdown Banner */}
-      <section className="px-4 sm:px-12 pb-4">
+      <section className="px-4 sm:px-12 pb-16">
         <div className="max-w-7xl mx-auto">
-          <div className="card h-auto sm:h-20 flex flex-col sm:flex-row items-center px-4 sm:px-8 py-4 sm:py-0 gap-4">
-            <span className="text-[#a0a0a0] text-[10px] sm:text-xs uppercase tracking-widest">NEXT DEADLINE</span>
+          <div className="bg-[#111111] border border-[#222222] rounded-xl h-auto sm:h-20 flex flex-col sm:flex-row items-center px-4 sm:px-8 py-4 sm:py-0 gap-4">
+            <span className="text-[#C9A84C] font-['Barlow_Condensed'] text-[11px] uppercase tracking-widest">NEXT DEADLINE</span>
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="text-center">
-                <div className="text-[#FF6B00] font-bold text-2xl sm:text-4xl">{String(countdown.days).padStart(2, '0')}</div>
-                <div className="text-[#555] text-[8px] sm:text-[10px] uppercase">DAYS</div>
+                <div className="text-white font-['Bebas_Neue'] text-4xl sm:text-[64px] leading-none">{String(countdown.days).padStart(2, '0')}</div>
+                <div className="text-[#555555] text-[11px] uppercase font-['Inter']">DAYS</div>
               </div>
-              <div className="text-[#FF6B00] font-bold text-xl sm:text-3xl">:</div>
+              <div className="text-[#F4622A] font-bold text-xl sm:text-3xl">:</div>
               <div className="text-center">
-                <div className="text-[#FF6B00] font-bold text-2xl sm:text-4xl">{String(countdown.hours).padStart(2, '0')}</div>
-                <div className="text-[#555] text-[8px] sm:text-[10px] uppercase">HRS</div>
+                <div className="text-white font-['Bebas_Neue'] text-4xl sm:text-[64px] leading-none">{String(countdown.hours).padStart(2, '0')}</div>
+                <div className="text-[#555555] text-[11px] uppercase font-['Inter']">HRS</div>
               </div>
-              <div className="text-[#FF6B00] font-bold text-xl sm:text-3xl">:</div>
+              <div className="text-[#F4622A] font-bold text-xl sm:text-3xl">:</div>
               <div className="text-center">
-                <div className="text-[#FF6B00] font-bold text-2xl sm:text-4xl">{String(countdown.minutes).padStart(2, '0')}</div>
-                <div className="text-[#555] text-[8px] sm:text-[10px] uppercase">MINS</div>
+                <div className="text-white font-['Bebas_Neue'] text-4xl sm:text-[64px] leading-none">{String(countdown.minutes).padStart(2, '0')}</div>
+                <div className="text-[#555555] text-[11px] uppercase font-['Inter']">MINS</div>
               </div>
-              <div className="text-[#FF6B00] font-bold text-xl sm:text-3xl">:</div>
+              <div className="text-[#F4622A] font-bold text-xl sm:text-3xl">:</div>
               <div className="text-center">
-                <div className="text-[#FF6B00] font-bold text-2xl sm:text-4xl">{String(countdown.seconds).padStart(2, '0')}</div>
-                <div className="text-[#555] text-[8px] sm:text-[10px] uppercase">SECS</div>
+                <div className="text-white font-['Bebas_Neue'] text-4xl sm:text-[64px] leading-none">{String(countdown.seconds).padStart(2, '0')}</div>
+                <div className="text-[#555555] text-[11px] uppercase font-['Inter']">SECS</div>
               </div>
             </div>
           </div>
@@ -322,18 +318,18 @@ const LandingPage = () => {
       </div>
 
       {/* Top Form Players */}
-      <section className="py-8 px-4 sm:px-12">
+      <section className="py-16 px-4 sm:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold text-sm sm:text-base uppercase tracking-wide">TOP FORM PLAYERS THIS WEEK</h2>
-            <span className="text-[#FF6B00] text-xs cursor-pointer">View all →</span>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-white font-['Barlow_Condensed'] font-bold text-[28px] uppercase">TOP FORM PLAYERS THIS WEEK</h2>
+            <Link to="/players" className="text-[#F4622A] font-['Inter'] font-medium text-sm">View all →</Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
             {topPlayers.length > 0 ? (
               topPlayers.map((player, index) => (
-                <div key={player.id} className="card p-4 h-[200px] flex-shrink-0 snap-start" style={{ width: '200px' }}>
+                <div key={player.id} className="bg-[#111111] border border-[#222222] rounded-xl p-4 h-[200px] flex-shrink-0 snap-start hover:border-[#F4622A] hover:scale-[1.02] transition-all cursor-pointer" style={{ width: '200px' }}>
                   <div className="flex justify-between items-start mb-4">
-                    <span className="text-white font-bold text-xl">{index + 1}</span>
+                    <span className="text-[#C9A84C] font-['Bebas_Neue'] font-bold text-2xl">{index + 1}</span>
                   </div>
                   <div className="flex justify-center mb-4">
                     <svg viewBox="0 0 60 50" className="w-[90px] h-[90px]">
@@ -342,33 +338,36 @@ const LandingPage = () => {
                     </svg>
                   </div>
                   <div className="text-center">
-                    <p className="text-white font-bold text-sm mb-1">{player.name}</p>
-                    <p className="text-[#FF6B00] font-bold text-xs uppercase">{player.total_season_points} PTS</p>
+                    <p className="text-white font-['Inter'] font-semibold text-sm mb-1">{player.name}</p>
+                    <p className="text-[#F4622A] font-['Barlow_Condensed'] font-bold text-sm uppercase">{player.total_season_points} PTS</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-[#a0a0a0]">Loading top players...</p>
+              <p className="text-[#A0A0A0]">Loading top players...</p>
             )}
           </div>
         </div>
       </section>
 
       {/* Scout Picks */}
-      <section className="py-12 sm:py-20 px-4 sm:px-8 bg-[#1A1A1A]">
+      <section className="py-16 px-4 sm:px-12">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-oswald text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-16">SCOUT PICKS THIS WEEK</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-white font-['Barlow_Condensed'] font-bold text-[28px] uppercase">SCOUT PICKS THIS WEEK</h2>
+            <Link to="/players" className="text-[#F4622A] font-['Inter'] font-medium text-sm">View all →</Link>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {scoutPicks.length > 0 ? (
               scoutPicks.map((pick) => (
-                <div key={pick.id} className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
-                  <span className="bg-orange text-white px-3 py-1 rounded text-xs font-semibold mb-4 inline-block">SCOUT PICK</span>
+                <div key={pick.id} className="bg-[#111111] border border-[#222222] rounded-xl p-4 sm:p-6 hover:border-[#F4622A] hover:scale-[1.02] transition-all cursor-pointer">
+                  <span className="bg-[#F4622A] text-white px-3 py-1 rounded text-xs font-semibold mb-4 inline-block font-['Inter']">SCOUT PICK</span>
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="font-oswald text-lg sm:text-xl font-bold">{pick.players?.name || 'Unknown'}</h3>
+                      <h3 className="font-['Barlow_Condensed'] text-lg sm:text-xl font-bold text-white">{pick.players?.name || 'Unknown'}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span
-                          className="px-2 py-1 rounded text-xs font-semibold"
+                          className="px-2 py-1 rounded text-xs font-semibold font-['Inter']"
                           style={{ backgroundColor: getPositionColor(pick.players?.position) + '20', color: getPositionColor(pick.players?.position) }}
                         >
                           {pick.players?.position || 'N/A'}
@@ -378,23 +377,23 @@ const LandingPage = () => {
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: pick.slb_teams?.primary_colour || '#6B7280' }}
                           />
-                          <span className="text-gray-400 text-sm">{pick.slb_teams?.name || 'Unknown'}</span>
+                          <span className="text-[#A0A0A0] text-sm font-['Inter']">{pick.slb_teams?.name || 'Unknown'}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  {pick.reason && <p className="text-gray-400 italic mb-4 text-sm">"{pick.reason}"</p>}
+                  {pick.reason && <p className="text-[#A0A0A0] italic mb-4 text-sm font-['Inter']">"{pick.reason}"</p>}
                   <div className="flex justify-between items-center">
-                    <span className="text-orange font-oswald text-lg sm:text-xl font-bold">{pick.players?.total_season_points || 0}</span>
-                    <span className="text-gray-400 text-sm">{formatValue(pick.players?.value || 0)}</span>
+                    <span className="text-[#F4622A] font-['Barlow_Condensed'] text-lg sm:text-xl font-bold">{pick.players?.total_season_points || 0}</span>
+                    <span className="text-[#A0A0A0] text-sm font-['Inter']">{formatValue(pick.players?.value || 0)}</span>
                   </div>
                 </div>
               ))
             ) : (
               [...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
-                  <span className="bg-orange/50 text-white px-3 py-1 rounded text-xs font-semibold mb-4 inline-block">SCOUT PICK</span>
-                  <p className="text-gray-400 italic text-sm">Picks coming soon</p>
+                <div key={i} className="bg-[#111111] border border-[#222222] rounded-xl p-4 sm:p-6">
+                  <span className="bg-[#F4622A]/50 text-white px-3 py-1 rounded text-xs font-semibold mb-4 inline-block font-['Inter']">SCOUT PICK</span>
+                  <p className="text-[#A0A0A0] italic text-sm font-['Inter']">Picks coming soon</p>
                 </div>
               ))
             )}

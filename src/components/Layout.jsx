@@ -67,34 +67,34 @@ const Layout = ({ children }) => {
 
         {/* Main Navigation - Fixed */}
         {!isAuthPage && (
-          <nav className="flex items-center justify-between px-4 sm:px-8 h-12 sm:h-14 bg-[#0a0a0a] border-b border-[#242424]">
+          <nav className="flex items-center justify-between px-4 sm:px-8 h-12 sm:h-14 bg-[#0A0A0A] border-b border-[#222222]">
           {/* Left Cluster - Logo */}
           <div className="flex items-center gap-4 sm:gap-8">
             <Link to="/" className="flex flex-col leading-none">
               <div className="flex items-center gap-1">
-                <span className="text-white font-bold text-xl sm:text-2xl">SLB</span>
-                <span className="text-[#FF6B00] text-sm sm:text-base">🏀</span>
+                <span className="text-white font-bold text-xl sm:text-2xl font-['Bebas_Neue'] tracking-wide">SLB</span>
+                <span className="text-[#F4622A] text-sm sm:text-base">🏀</span>
               </div>
-              <span className="text-[#FF6B00] text-[8px] sm:text-[9px] font-bold uppercase tracking-wider">FANTASY</span>
+              <span className="text-[#F4622A] text-[8px] sm:text-[9px] font-bold uppercase tracking-widest">FANTASY</span>
             </Link>
 
             {/* Nav Links - Desktop */}
             <div className="hidden md:flex items-center gap-4 sm:gap-6">
               {user ? (
                 <>
-                  <Link to="/" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Home</Link>
-                  <Link to="/players" className={`text-sm font-medium ${location.pathname === '/players' ? 'text-white font-bold border-b-2 border-[#FF6B00] pb-0.5' : 'text-white hover:text-[#FF6B00] transition-colors'}`}>Players</Link>
-                  <Link to="/fantasy" className={`text-sm font-medium ${location.pathname === '/fantasy' ? 'text-white font-bold border-b-2 border-[#FF6B00] pb-0.5' : 'text-white hover:text-[#FF6B00] transition-colors'}`}>Fantasy</Link>
-                  <Link to="/leaderboard" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Leaderboard</Link>
-                  <Link to="/fixtures" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Fixtures</Link>
-                  <Link to="/news" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">News</Link>
+                  <Link to="/" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Home</Link>
+                  <Link to="/players" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/players' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Players</Link>
+                  <Link to="/fantasy" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/fantasy' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Fantasy</Link>
+                  <Link to="/leaderboard" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Leaderboard</Link>
+                  <Link to="/fixtures" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Fixtures</Link>
+                  <Link to="/news" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">News</Link>
                 </>
               ) : (
                 <>
-                  <Link to="/" className={`text-white text-sm font-medium ${location.pathname === '/' ? 'border-b-2 border-[#FF6B00] pb-0.5' : 'hover:text-[#FF6B00] transition-colors'}`}>Home</Link>
-                  <Link to="/players" className={`text-white text-sm font-medium ${location.pathname === '/players' ? 'text-white font-bold border-b-2 border-[#FF6B00] pb-0.5' : 'text-white hover:text-[#FF6B00] transition-colors'}`}>Players</Link>
-                  <Link to="/fixtures" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">Fixtures</Link>
-                  <Link to="/news" className="text-white text-sm font-medium hover:text-[#FF6B00] transition-colors">News</Link>
+                  <Link to="/" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Home</Link>
+                  <Link to="/players" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/players' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Players</Link>
+                  <Link to="/fixtures" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Fixtures</Link>
+                  <Link to="/news" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">News</Link>
                 </>
               )}
             </div>

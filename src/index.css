@@ -2,9 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg-primary: #0A0A0A;
+  --bg-surface: #111111;
+  --bg-elevated: #1A1A1A;
+  --accent-orange: #F4622A;
+  --accent-gold: #C9A84C;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --text-muted: #555555;
+  --border: #222222;
+  --border-light: #2E2E2E;
+}
+
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Barlow Condensed', sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 700;
