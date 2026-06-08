@@ -1,46 +1,65 @@
 // LandingPage.jsx — Public landing page with features, countdown, and waitlist signup
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import JerseyCard from '../components/JerseyCard';
 import Jersey from '../components/Jersey.jsx';
 import { getTeamColours } from '../constants/teamColours.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const LandingPage = () => {
-  const [countdown, setCountdown] = useState({ days: 7, hours: 0, minutes: 0, seconds: 0 });
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [topPlayers, setTopPlayers] = useState([]);
-  const [scoutPicks, setScoutPicks] = useState([]);
   const [newsItems, setNewsItems] = useState([]);
   const [email, setEmail] = useState('');
   const [waitlistMessage, setWaitlistMessage] = useState('');
   const [waitlistError, setWaitlistError] = useState('');
 
+  // Fetch deadline from active gameweek, fall back to 7 days from now
   useEffect(() => {
-    // Set deadline to 7 days from now
-    const deadline = new Date();
-    deadline.setDate(deadline.getDate() + 7);
-    deadline.setHours(18, 0, 0, 0); // 6 PM
+    const startCountdown = (deadlineDate) => {
+      const timer = setInterval(() => {
+        const now = new Date();
+        const diff = deadlineDate - now;
+        if (diff > 0) {
+          setCountdown({
+            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+            seconds: Math.floor((diff % (1000 * 60)) / 1000),
+          });
+        } else {
+          setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        }
+      }, 1000);
+      return timer;
+    };
 
-    const timer = setInterval(() => {
-      const now = new Date();
-      const diff = deadline - now;
-
-      if (diff > 0) {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        setCountdown({ days, hours, minutes, seconds });
+    let timer;
+    const fetchDeadline = async () => {
+      try {
+        const { data } = await supabase
+          .from('gameweeks')
+          .select('deadline')
+          .eq('is_active', true)
+          .limit(1)
+          .single();
+        const deadline = data?.deadline ? new Date(data.deadline) : (() => {
+          const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(18, 0, 0, 0); return d;
+        })();
+        timer = startCountdown(deadline);
+      } catch {
+        const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(18, 0, 0, 0);
+        timer = startCountdown(d);
       }
-    }, 1000);
-
-    return () => clearInterval(timer);
+    };
+    fetchDeadline();
+    return () => { if (timer) clearInterval(timer); };
   }, []);
 
   useEffect(() => {
     fetchTopPlayers();
-    fetchScoutPicks();
     fetchNews();
   }, []);
 
@@ -65,33 +84,7 @@ const LandingPage = () => {
     }
   };
 
-  const fetchScoutPicks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('weekly_picks')
-        .select(`
-          *,
-          players (
-            name,
-            position,
-            value,
-            slb_teams (
-              name,
-              short_name,
-              primary_colour
-            )
-          )
-        `)
-        .limit(3);
-
-      if (error) throw error;
-      if (data) setScoutPicks(data);
-    } catch (error) {
-      // Silent error handling
-    }
-  };
-
-  const fetchNews = async () => {
+const fetchNews = async () => {
     try {
       const [playerNewsData, transferNewsData] = await Promise.all([
         supabase
@@ -154,28 +147,6 @@ const LandingPage = () => {
     return `£${(value / 1000000).toFixed(1)}m`;
   };
 
-  const getPositionColor = (position) => {
-    const colors = {
-      PG: '#3B82F6',
-      SG: '#10B981',
-      SF: '#F59E0B',
-      PF: '#EF4444',
-      C: '#8B5CF6'
-    };
-    return colors[position] || '#6B7280';
-  };
-
-  const getPriceTrendIcon = (trend) => {
-    switch (trend) {
-      case 'rising':
-        return <span className="text-green-400">▲</span>;
-      case 'falling':
-        return <span className="text-red-400">▼</span>;
-      default:
-        return <span className="text-gray-400">—</span>;
-    }
-  };
-
   return (
     <>
       {/* Hero Section */}
@@ -195,12 +166,20 @@ const LandingPage = () => {
                 The UK's first fantasy basketball game for Super League Basketball. Live scoring. Season-long leagues. Free to play.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <button className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors">
-                  Get Started
-                </button>
-                <button className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-white hover:bg-white hover:text-black transition-colors">
+                {!user && (
+                  <Link
+                    to="/signup"
+                    className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center"
+                  >
+                    Get Started
+                  </Link>
+                )}
+                <Link
+                  to="/about"
+                  className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-white hover:bg-white hover:text-black transition-colors text-center"
+                >
                   Learn More
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -251,22 +230,22 @@ const LandingPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 h-full">
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
                 <div className="text-3xl mb-2 text-[#C9A84C]">👥</div>
-                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Create or Join Leagues</h3>
+                <h3 className="text-white font-inter font-bold text-[16px] uppercase mb-1">Create or Join Leagues</h3>
                 <p className="text-[#A0A0A0] text-sm font-['Inter']">Compete with friends</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
                 <div className="text-3xl mb-2 text-[#C9A84C]">📅</div>
-                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Weekly Gameweeks</h3>
+                <h3 className="text-white font-inter font-bold text-[16px] uppercase mb-1">Weekly Gameweeks</h3>
                 <p className="text-[#A0A0A0] text-sm font-['Inter']">Real matchups, real points</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
                 <div className="text-3xl mb-2 text-[#C9A84C]">🏆</div>
-                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Climb the Rankings</h3>
+                <h3 className="text-white font-inter font-bold text-[16px] uppercase mb-1">Climb the Rankings</h3>
                 <p className="text-[#A0A0A0] text-sm font-['Inter']">Top the leaderboard</p>
               </div>
               <div className="flex flex-col items-center justify-center text-center min-h-[120px]">
                 <div className="text-3xl mb-2 text-[#C9A84C]">🎁</div>
-                <h3 className="text-white font-['Barlow_Condensed'] font-bold text-[18px] uppercase mb-1">Free to Play</h3>
+                <h3 className="text-white font-inter font-bold text-[16px] uppercase mb-1">Free to Play</h3>
                 <p className="text-[#A0A0A0] text-sm font-['Inter']">No entry fees. Ever.</p>
               </div>
             </div>
@@ -323,7 +302,7 @@ const LandingPage = () => {
       <section className="py-16 px-4 sm:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-white font-['Barlow_Condensed'] font-bold text-[28px] uppercase">TOP FORM PLAYERS THIS WEEK</h2>
+            <h2 className="text-white font-inter font-bold text-[22px] sm:text-[26px] uppercase tracking-wide">TOP POINTS SCORERS</h2>
             <Link to="/players" className="text-[#F4622A] font-['Inter'] font-medium text-sm">View all →</Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
@@ -337,7 +316,7 @@ const LandingPage = () => {
                     <Jersey
                       primaryColour={getTeamColours(player.slb_teams?.name).primary}
                       secondaryColour={getTeamColours(player.slb_teams?.name).secondary}
-                      number={player.jersey_number || player.id % 99}
+                      number={player.squad_number ?? null}
                       size="lg"
                     />
                   </div>
@@ -354,174 +333,23 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Scout Picks */}
+      {/* How It Works */}
       <section className="py-16 px-4 sm:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-white font-['Barlow_Condensed'] font-bold text-[28px] uppercase">SCOUT PICKS THIS WEEK</h2>
-            <Link to="/players" className="text-[#F4622A] font-['Inter'] font-medium text-sm">View all →</Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {scoutPicks.length > 0 ? (
-              scoutPicks.map((pick) => (
-                <div key={pick.id} className="bg-[#111111] border border-[#222222] rounded-xl p-4 sm:p-6 hover:border-[#F4622A] hover:scale-[1.02] transition-all cursor-pointer">
-                  <span className="bg-[#F4622A] text-white px-3 py-1 rounded text-xs font-semibold mb-4 inline-block font-['Inter']">SCOUT PICK</span>
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-['Barlow_Condensed'] text-lg sm:text-xl font-bold text-white">{pick.players?.name || 'Unknown'}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className="px-2 py-1 rounded text-xs font-semibold font-['Inter']"
-                          style={{ backgroundColor: getPositionColor(pick.players?.position) + '20', color: getPositionColor(pick.players?.position) }}
-                        >
-                          {pick.players?.position || 'N/A'}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: pick.slb_teams?.primary_colour || '#6B7280' }}
-                          />
-                          <span className="text-[#A0A0A0] text-sm font-['Inter']">{pick.slb_teams?.name || 'Unknown'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {pick.reason && <p className="text-[#A0A0A0] italic mb-4 text-sm font-['Inter']">"{pick.reason}"</p>}
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#F4622A] font-['Barlow_Condensed'] text-lg sm:text-xl font-bold">{pick.players?.total_season_points || 0}</span>
-                    <span className="text-[#A0A0A0] text-sm font-['Inter']">{formatValue(pick.players?.value || 0)}</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              [...Array(3)].map((_, i) => (
-                <div key={i} className="bg-[#111111] border border-[#222222] rounded-xl p-4 sm:p-6">
-                  <span className="bg-[#F4622A]/50 text-white px-3 py-1 rounded text-xs font-semibold mb-4 inline-block font-['Inter']">SCOUT PICK</span>
-                  <p className="text-[#A0A0A0] italic text-sm font-['Inter']">Picks coming soon</p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-12 sm:py-20 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-oswald text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-16">HOW IT WORKS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 text-2xl sm:text-3xl font-oswald font-bold">1</div>
-              <h3 className="font-oswald text-xl sm:text-2xl font-bold mb-4">Draft Your Team</h3>
-              <p className="text-gray-400 text-sm sm:text-base">Select your players from across the SLB and build your dream squad within the budget.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 text-2xl sm:text-3xl font-oswald font-bold">2</div>
-              <h3 className="font-oswald text-xl sm:text-2xl font-bold mb-4">Score Live Points</h3>
-              <p className="text-gray-400 text-sm sm:text-base">Watch your players score points in real-time as they play in actual SLB games.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-orange rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 text-2xl sm:text-3xl font-oswald font-bold">3</div>
-              <h3 className="font-oswald text-xl sm:text-2xl font-bold mb-4">Top Your League</h3>
-              <p className="text-gray-400 text-sm sm:text-base">Compete against friends and other fans to climb the leaderboard and win prizes.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Top Picks */}
-      <section className="py-12 sm:py-20 px-4 sm:px-8 bg-[#1A1A1A]">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-oswald text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-16">TOP PICKS THIS WEEK</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-orange/50 transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-oswald text-xl sm:text-2xl font-bold">Aaryn Rai</h3>
-                  <p className="text-gray-400 text-sm">London Lions</p>
-                </div>
-                <span className="bg-orange text-white px-3 py-1 rounded text-xs sm:text-sm font-semibold">PG</span>
+          <h2 className="text-white font-inter font-bold text-[22px] sm:text-[26px] uppercase tracking-wide mb-8">HOW IT WORKS</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { num: '01', title: 'Sign Up', desc: 'Create your free account in seconds and join the UK's first SLB fantasy game.' },
+              { num: '02', title: 'Pick Squad', desc: 'Choose 9 players — 3 Guards, 3 Forwards, 3 Centres — within your £100m budget.' },
+              { num: '03', title: 'Score Points', desc: 'Your players earn points from real SLB stats every gameweek. Captain doubles up.' },
+              { num: '04', title: 'Win', desc: 'Climb the public leaderboard or top your private league to be crowned champion.' },
+            ].map(({ num, title, desc }) => (
+              <div key={num} className="bg-[#111111] border border-[#222222] rounded-xl p-6">
+                <div className="text-[#C9A84C] font-bold text-3xl font-['Bebas_Neue'] mb-3">{num}</div>
+                <h3 className="text-white font-inter font-bold text-base uppercase mb-2">{title}</h3>
+                <p className="text-[#A0A0A0] text-sm leading-relaxed">{desc}</p>
               </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-400 text-sm">Value: £12.5m</span>
-                <span className="text-green-400 font-bold text-sm">Form: 9.2/10</span>
-              </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div className="bg-orange h-2 rounded-full" style={{ width: '92%' }}></div>
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-orange/50 transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-oswald text-xl sm:text-2xl font-bold">Jordan Hunt</h3>
-                  <p className="text-gray-400 text-sm">Newcastle Eagles</p>
-                </div>
-                <span className="bg-orange text-white px-3 py-1 rounded text-xs sm:text-sm font-semibold">SF</span>
-              </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-400 text-sm">Value: £10.8m</span>
-                <span className="text-green-400 font-bold text-sm">Form: 8.7/10</span>
-              </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div className="bg-orange h-2 rounded-full" style={{ width: '87%' }}></div>
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-orange/50 transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-oswald text-xl sm:text-2xl font-bold">Tariq Sboui</h3>
-                  <p className="text-gray-400 text-sm">Leicester Riders</p>
-                </div>
-                <span className="bg-orange text-white px-3 py-1 rounded text-xs sm:text-sm font-semibold">C</span>
-              </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-400 text-sm">Value: £9.2m</span>
-                <span className="text-green-400 font-bold text-sm">Form: 8.4/10</span>
-              </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div className="bg-orange h-2 rounded-full" style={{ width: '84%' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Injuries & Availability */}
-      <section className="py-12 sm:py-20 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="font-oswald text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-16">INJURIES & AVAILABILITY</h2>
-          <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 sm:py-4 px-4 sm:px-6 font-oswald text-sm sm:text-lg">Player</th>
-                  <th className="text-left py-3 sm:py-4 px-4 sm:px-6 font-oswald text-sm sm:text-lg hidden sm:table-cell">Team</th>
-                  <th className="text-left py-3 sm:py-4 px-4 sm:px-6 font-oswald text-sm sm:text-lg">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-white/5">
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-sm sm:text-base">Aaryn Rai</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-gray-400 hidden sm:table-cell text-sm sm:text-base">London Lions</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6"><span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">Fit</span></td>
-                </tr>
-                <tr className="border-b border-white/5">
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-sm sm:text-base">Jordan Hunt</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-gray-400 hidden sm:table-cell text-sm sm:text-base">Newcastle Eagles</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6"><span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">Doubtful</span></td>
-                </tr>
-                <tr className="border-b border-white/5">
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-sm sm:text-base">Marcus Evans</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-gray-400 hidden sm:table-cell text-sm sm:text-base">Leicester Riders</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6"><span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">Out</span></td>
-                </tr>
-                <tr>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-sm sm:text-base">Tariq Sboui</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6 text-gray-400 hidden sm:table-cell text-sm sm:text-base">Leicester Riders</td>
-                  <td className="py-3 sm:py-4 px-4 sm:px-6"><span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">Fit</span></td>
-                </tr>
-              </tbody>
-            </table>
+            ))}
           </div>
         </div>
       </section>
@@ -723,9 +551,10 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8">
             <div className="font-oswald text-xl sm:text-2xl font-bold text-orange">SLB FANTASY</div>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+              <Link to="/about" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">About</Link>
               <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Privacy Policy</Link>
               <Link to="/terms" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Terms</Link>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Contact</a>
+              <a href="mailto:hello@slbfantasy.co.uk" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Contact</a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">@slbfantasy</a>
             </div>
             <p className="text-gray-500 text-sm sm:text-base">slbfantasy.co.uk</p>

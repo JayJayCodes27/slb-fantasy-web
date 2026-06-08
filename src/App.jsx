@@ -19,6 +19,8 @@ import OnboardingPage from './pages/OnboardingPage.jsx';
 import GameweekResultsPage from './pages/GameweekResultsPage.jsx';
 import LeaderboardPage from './pages/LeaderboardPage.jsx';
 import ScorerPage from './pages/ScorerPage.jsx';
+import SettingsPage from './pages/SettingsPage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
         <Route path="/squad-selection" element={<Layout><SquadSelectionPage /></Layout>} />
         <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />
         <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+        <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
+        <Route path="/about" element={<Layout><AboutPage /></Layout>} />
       </Routes>
       <DevToolbar />
     </AuthProvider>

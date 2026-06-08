@@ -1,5 +1,5 @@
 // Layout.jsx — Main layout component with fixed header navigation and ticker
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -9,6 +9,19 @@ const Layout = ({ children }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsRef = useRef(null);
+
+  // Close notifications panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    if (showNotifications) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotifications]);
 
   const isLandingPage = location.pathname === '/';
   const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
@@ -82,20 +95,16 @@ const Layout = ({ children }) => {
             <div className="hidden md:flex items-center gap-4 sm:gap-6">
               {user ? (
                 <>
-                  <Link to="/" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Home</Link>
-                  <Link to="/players" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/players' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Players</Link>
-                  <Link to="/fantasy" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/fantasy' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Fantasy</Link>
-                  <Link to="/transfers" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/transfers' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Transfers</Link>
-                  <Link to="/leaderboard" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Leaderboard</Link>
-                  <Link to="/fixtures" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Fixtures</Link>
-                  <Link to="/news" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">News</Link>
+                  <Link to="/" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Home</Link>
+                  <Link to="/fantasy" className={`text-[13px] font-medium uppercase tracking-widest relative group ${['/fantasy','/transfers','/leaderboard','/players'].includes(location.pathname) ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Fantasy</Link>
+                  <Link to="/news" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/news' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>News</Link>
+                  <Link to="/fixtures" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/fixtures' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Fixtures</Link>
                 </>
               ) : (
                 <>
                   <Link to="/" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Home</Link>
-                  <Link to="/players" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/players' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Players</Link>
-                  <Link to="/fixtures" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Fixtures</Link>
-                  <Link to="/news" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">News</Link>
+                  <Link to="/news" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/news' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>News</Link>
+                  <Link to="/fixtures" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/fixtures' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Fixtures</Link>
                 </>
               )}
             </div>
@@ -113,12 +122,29 @@ const Layout = ({ children }) => {
 
             {user ? (
               <>
-                <button className="hidden sm:block text-white text-lg hover:text-[#FF6B00] transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                  </svg>
-                </button>
+                {/* Notifications Bell */}
+                <div className="relative hidden sm:block" ref={notificationsRef}>
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="text-white hover:text-[#FF6B00] transition-colors p-1"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                  </button>
+                  {showNotifications && (
+                    <div className="absolute right-0 top-full mt-2 w-72 bg-[#111111] border border-[#222222] rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-[#222222]">
+                        <p className="text-white font-bold text-sm uppercase tracking-widest">Notifications</p>
+                      </div>
+                      <div className="px-4 py-6 text-center">
+                        <p className="text-[#555555] text-sm">No notifications yet</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Avatar / Dropdown */}
                 <div className="relative">
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
@@ -150,11 +176,11 @@ const Layout = ({ children }) => {
                         </>
                       )}
                       <Link
-                        to="/fantasy"
+                        to="/settings"
                         onClick={() => setShowDropdown(false)}
                         className="block px-4 py-3 text-white text-sm hover:bg-[#1a1a1a] transition-colors"
                       >
-                        Fantasy
+                        Settings
                       </Link>
                       <button
                         onClick={() => {
@@ -186,12 +212,10 @@ const Layout = ({ children }) => {
             {user ? (
               <>
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Home</Link>
-                <Link to="/players" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Players</Link>
                 <Link to="/fantasy" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Fantasy</Link>
-                <Link to="/transfers" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Transfers</Link>
-                <Link to="/leaderboard" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Leaderboard</Link>
+                <Link to="/news" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">News</Link>
                 <Link to="/fixtures" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Fixtures</Link>
-                <Link to="/news" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3">News</Link>
+                <Link to="/settings" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3">Settings</Link>
               </>
             ) : (
               <>

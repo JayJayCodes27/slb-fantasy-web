@@ -1,6 +1,6 @@
 // FantasyPage.jsx — Main fantasy hub: My Team court view and My Leagues tab
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
 import halfCourt from '../assets/half-court.svg';
@@ -9,6 +9,7 @@ import { getTeamColours } from '../constants/teamColours.js';
 
 const FantasyPage = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('team');
   const [view, setView] = useState('court');
   const [myLeagues, setMyLeagues] = useState([]);
@@ -755,18 +756,35 @@ const FantasyPage = () => {
               <span className="text-[#A0A0A0] text-xs mr-2">Transfers</span>
               <span className="text-white font-bold text-sm">1</span>
             </div>
-            <Link
-              to="/transfers"
-              className="bg-[#F4622A] text-white font-semibold text-sm px-5 py-2 rounded-lg hover:bg-[#d4521a] transition-colors flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 10v14l-7-7 7-7"/>
-                <path d="M17 10v14l7-7-7-7"/>
-                <path d="M14 4l-4 4 4 4"/>
-                <path d="M10 8l4-4-4-4"/>
-              </svg>
-              Make Transfers
-            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Fantasy Sub-Nav Tab Bar */}
+      <div className="border-b border-[#222222] bg-[#0A0A0A] sticky top-[96px] z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="flex items-center gap-0 overflow-x-auto">
+            {[
+              { label: 'My Team', href: '/fantasy' },
+              { label: 'Transfers', href: '/transfers' },
+              { label: 'Leaderboard', href: '/leaderboard' },
+              { label: 'Players', href: '/players' },
+            ].map(({ label, href }) => {
+              const isActive = location.pathname === href;
+              return (
+                <Link
+                  key={href}
+                  to={href}
+                  className={`px-4 sm:px-6 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                    isActive
+                      ? 'border-[#F4622A] text-white'
+                      : 'border-transparent text-[#666666] hover:text-[#A0A0A0]'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
