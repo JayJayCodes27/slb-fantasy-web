@@ -113,6 +113,7 @@ const PlayersTab = ({ showToast }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [positionFilter, setPositionFilter] = useState('All');
   const [teamFilter, setTeamFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('value-desc');
   const [showModal, setShowModal] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [formData, setFormData] = useState({
@@ -206,6 +207,23 @@ const PlayersTab = ({ showToast }) => {
     return matchesSearch && matchesPosition && matchesTeam;
   });
 
+  const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+    switch(sortBy) {
+      case 'value-desc':
+        return b.value - a.value;
+      case 'value-asc':
+        return a.value - b.value;
+      case 'name-asc':
+        return a.name.localeCompare(b.name);
+      case 'position':
+        return a.position.localeCompare(b.position);
+      case 'team':
+        return (a.slb_teams?.name || '').localeCompare(b.slb_teams?.name || '');
+      default:
+        return 0;
+    }
+  });
+
   if (loading) return <div className="text-center py-8">Loading...</div>;
 
   return (
@@ -239,6 +257,17 @@ const PlayersTab = ({ showToast }) => {
               <option key={team.id} value={team.id}>{team.name}</option>
             ))}
           </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-[#141414] border border-[#2A2A2A] rounded-lg px-4 py-2 text-sm"
+          >
+            <option value="value-desc">Value: High to Low</option>
+            <option value="value-asc">Value: Low to High</option>
+            <option value="name-asc">Name: A to Z</option>
+            <option value="position">Position: G / F / C</option>
+            <option value="team">Team: A to Z</option>
+          </select>
         </div>
         <button
           onClick={() => {
@@ -266,7 +295,7 @@ const PlayersTab = ({ showToast }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredPlayers.map((player, index) => (
+            {sortedPlayers.map((player, index) => (
               <tr key={player.id} className={index % 2 === 0 ? 'bg-[#141414]' : 'bg-[#1a1a1a]'}>
                 <td className="px-4 py-3 text-sm">{player.name}</td>
                 <td className="px-4 py-3 text-sm">
