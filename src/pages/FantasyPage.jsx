@@ -109,13 +109,11 @@ const FantasyPage = () => {
 
       setSquadData(squadData || []);
 
-      // Calculate remaining budget using purchase_price where available, falling back to current value
+      // Remaining budget = £100m minus what was actually spent (purchase_price, fallback to current value)
       const calculatedSquadValue = squadData?.reduce((sum, s) => {
         const cost = s.purchase_price != null ? s.purchase_price : (s.players?.value || 0);
-        console.log('[budget]', s.players?.name, 'purchase_price:', s.purchase_price, 'value:', s.players?.value, 'cost used:', cost);
         return sum + cost;
       }, 0) || 0;
-      console.log('[budget] totalSquadValue:', calculatedSquadValue, 'bank:', 100000000 - calculatedSquadValue);
       setSquadValue(calculatedSquadValue);
       setBank(100000000 - calculatedSquadValue);
 
@@ -845,7 +843,7 @@ const FantasyPage = () => {
           <div className="flex flex-wrap gap-3 items-center">
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
               <span className="text-[#A0A0A0] text-xs mr-2">Budget</span>
-              <span className="text-white font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
+              <span className="text-white font-bold text-sm">£{(Math.max(0, bank) / 1000000).toFixed(1)}m</span>
             </div>
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
               <span className="text-[#A0A0A0] text-xs mr-2">Transfers</span>
