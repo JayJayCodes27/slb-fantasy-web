@@ -109,8 +109,11 @@ const FantasyPage = () => {
 
       setSquadData(squadData || []);
 
-      // Calculate squad value
-      const calculatedSquadValue = squadData?.reduce((sum, s) => sum + (s.players?.value || 0), 0) || 0;
+      // Calculate remaining budget using purchase_price where available, falling back to current value
+      const calculatedSquadValue = squadData?.reduce((sum, s) => {
+        const cost = s.purchase_price != null ? s.purchase_price : (s.players?.value || 0);
+        return sum + cost;
+      }, 0) || 0;
       setSquadValue(calculatedSquadValue);
       setBank(100000000 - calculatedSquadValue);
 
@@ -590,23 +593,31 @@ const FantasyPage = () => {
     ]
   };
 
-  // Get court and bench players based on formation - 9 players on court (3G, 3F, 3C)
+  // Normalise position strings to the three court categories G / F / C
+  const normPos = (pos) => {
+    if (!pos) return null;
+    if (pos === 'G' || pos === 'PG' || pos === 'SG') return 'G';
+    if (pos === 'F' || pos === 'SF' || pos === 'PF') return 'F';
+    if (pos === 'C') return 'C';
+    return null;
+  };
+
+  // Get court and bench players — always 3G, 3F, 3C on court; remainder on bench
   const getCourtAndBenchPlayers = () => {
     if (!squadData || squadData.length === 0) {
       return { courtPlayers: [], benchPlayers: [] };
     }
 
-    const guards = squadData.filter(s => s.players?.position === 'G');
-    const forwards = squadData.filter(s => s.players?.position === 'F');
-    const centres = squadData.filter(s => s.players?.position === 'C');
+    const guards   = squadData.filter(s => normPos(s.players?.position) === 'G');
+    const forwards = squadData.filter(s => normPos(s.players?.position) === 'F');
+    const centres  = squadData.filter(s => normPos(s.players?.position) === 'C');
 
-    // Always put 3 of each position on court
-    const courtGuards = guards.slice(0, 3);
-    const benchGuards = guards.slice(3);
+    const courtGuards   = guards.slice(0, 3);
+    const benchGuards   = guards.slice(3);
     const courtForwards = forwards.slice(0, 3);
     const benchForwards = forwards.slice(3);
-    const courtCentres = centres.slice(0, 3);
-    const benchCentres = centres.slice(3);
+    const courtCentres  = centres.slice(0, 3);
+    const benchCentres  = centres.slice(3);
 
     const courtPlayers = [...courtGuards, ...courtForwards, ...courtCentres];
     const benchPlayers = [...benchGuards, ...benchForwards, ...benchCentres];
@@ -616,11 +627,10 @@ const FantasyPage = () => {
 
   const { courtPlayers, benchPlayers } = getCourtAndBenchPlayers();
 
-  // Calculate formation label from squadData
-  const starters = squadData.filter(s => s.is_starter);
-  const gCount = starters.filter(s => s.players?.position === 'G').length;
-  const fCount = starters.filter(s => s.players?.position === 'F').length;
-  const cCount = starters.filter(s => s.players?.position === 'C').length;
+  // Calculate formation label from court players (uses normalised positions)
+  const gCount = courtPlayers.filter(s => normPos(s.players?.position) === 'G').length;
+  const fCount = courtPlayers.filter(s => normPos(s.players?.position) === 'F').length;
+  const cCount = courtPlayers.filter(s => normPos(s.players?.position) === 'C').length;
   const formationLabel = `${gCount}G · ${fCount}F · ${cCount}C`;
 
   // Calculate total points with captain double
@@ -836,10 +846,6 @@ const FantasyPage = () => {
               <span className="text-white font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
             </div>
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
-              <span className="text-[#A0A0A0] text-xs mr-2">Players</span>
-              <span className="text-white font-bold text-sm">{squadData.length}/9</span>
-            </div>
-            <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
               <span className="text-[#A0A0A0] text-xs mr-2">Transfers</span>
               <span className="text-white font-bold text-sm">1</span>
             </div>
@@ -900,7 +906,7 @@ const FantasyPage = () => {
                         height: '100%',
                         objectFit: 'cover',
                         objectPosition: 'center',
-                        opacity: 0.8,
+                        opacity: 1,
                         zIndex: 0,
                         pointerEvents: 'none'
                       }}
@@ -1206,7 +1212,7 @@ const FantasyPage = () => {
                       {[...Array(4 - benchPlayers.length)].map((_, index) => (
                         <div key={`empty-${index}`} className="text-center flex-shrink-0 flex-1 sm:flex-none">
                           <div className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3 h-[100px] flex flex-col items-center justify-center">
-                            <span className="text-[#C9A84C] font-bold text-[14px]">G/F/C</span>
+                            <span className="text-[#444444] font-bold text-[12px] uppercase tracking-wider">Bench</span>
                           </div>
                         </div>
                       ))}

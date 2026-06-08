@@ -67,18 +67,20 @@ const Jersey = ({ primaryColour, secondaryColour, number, size = 'md' }) => {
       />
       
       {/* Number */}
-      <text
-        x="32"
-        y="42"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill={textColor}
-        fontSize={fontSize}
-        fontWeight="bold"
-        fontFamily="Inter, sans-serif"
-      >
-        {number}
-      </text>
+      {number != null && !isNaN(number) && (
+        <text
+          x="32"
+          y="42"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill={textColor}
+          fontSize={fontSize}
+          fontWeight="bold"
+          fontFamily="Inter, sans-serif"
+        >
+          {number}
+        </text>
+      )}
     </svg>
   );
 };
