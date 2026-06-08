@@ -354,39 +354,63 @@ const FantasyPage = () => {
     setTimeout(() => setSwapError(null), 600);
   };
 
-  // Validate and execute a swap between two squad members.
-  // Enforces: same position only; court must keep ≥1G, ≥1F, ≥1C after swap.
+  // Validate and execute a swap. Position-agnostic — any swap is allowed as long
+  // as the resulting court composition passes all rules.
   const swapPlayers = async (playerA, playerB) => {
-    const posA = normPos(playerA.players?.position);
-    const posB = normPos(playerB.players?.position);
-
-    // Rule 1: positions must match
-    if (posA !== posB) {
-      flashInvalidSwap(playerA.id, playerB.id);
-      const label = { G: 'Guard', F: 'Forward', C: 'Centre' };
-      showSwapToast(`Can't swap — ${label[posA] || 'player'} can only swap with another ${label[posA] || 'player'}`);
-      return;
-    }
-
-    // Rule 2: if moving a court player to bench, ensure court keeps ≥1 of that position
+    const posLabel = { G: 'Guard', F: 'Forward', C: 'Centre' };
     const { courtPlayers: currentCourt } = getCourtAndBenchPlayers();
+
     const aOnCourt = currentCourt.some(p => p.id === playerA.id);
     const bOnCourt = currentCourt.some(p => p.id === playerB.id);
-    const movingTowardsBench = aOnCourt !== bOnCourt; // one court, one bench
+    const crossingBoundary = aOnCourt !== bOnCourt; // one on court, one on bench
 
-    if (movingTowardsBench) {
+    if (crossingBoundary) {
+      // Simulate the resulting court after swap
       const courtPlayer = aOnCourt ? playerA : playerB;
-      const courtOfPos = currentCourt.filter(p => normPos(p.players?.position) === posA);
-      if (courtOfPos.length <= 1) {
-        const label = { G: 'Guard', F: 'Forward', C: 'Centre' };
+      const benchPlayer = aOnCourt ? playerB : playerA;
+      const simCourt = currentCourt
+        .filter(p => p.id !== courtPlayer.id)
+        .concat(benchPlayer);
+
+      const count = (pos) => simCourt.filter(p => normPos(p.players?.position) === pos).length;
+
+      // Min 1 of each position
+      for (const pos of ['G', 'F', 'C']) {
+        if (count(pos) < 1) {
+          flashInvalidSwap(playerA.id, playerB.id);
+          showSwapToast(`Court must have at least 1 ${posLabel[pos]}`);
+          return;
+        }
+      }
+      // Max 2 Centres
+      if (count('C') > 2) {
         flashInvalidSwap(playerA.id, playerB.id);
-        showSwapToast(`Court must always have at least 1 ${label[posA] || 'player'}`);
+        showSwapToast('Maximum 2 Centres allowed on court');
         return;
       }
     }
 
     const aStarter = playerA.is_starter;
     const bStarter = playerB.is_starter;
+
+    // If a captain/VC is being moved to bench, strip their badge
+    let captainUpdate = captain;
+    let vcUpdate = viceCaptain;
+    if (crossingBoundary) {
+      const movingToBench = aOnCourt ? playerA : playerB;
+      if (movingToBench.player_id === captain) {
+        captainUpdate = null;
+        setCaptain(null);
+        showSwapToast('Captain moved to bench — please assign a new captain');
+        try { await supabase.from('user_squads').update({ is_captain: false }).eq('user_id', user.id); } catch {}
+      }
+      if (movingToBench.player_id === viceCaptain) {
+        vcUpdate = null;
+        setViceCaptain(null);
+        showSwapToast('Vice Captain moved to bench — please assign a new vice captain');
+        try { await supabase.from('user_squads').update({ is_vice_captain: false }).eq('user_id', user.id); } catch {}
+      }
+    }
 
     setSquadData(prev => {
       const next = [...prev];
@@ -871,6 +895,9 @@ const FantasyPage = () => {
                               <div style={{ color: '#F4622A', fontSize: '11px', fontWeight: 'bold' }}>
                                 {player.players.total_season_points || 0} pts
                               </div>
+                              <div style={{ color: '#A0A0A0', fontSize: '10px' }}>
+                                £{((player.players?.value || 0) / 1000000).toFixed(1)}m
+                              </div>
                               <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 {normPos(player.players?.position) || player.players?.position}
                               </div>
@@ -881,8 +908,8 @@ const FantasyPage = () => {
                     </div>
                   </div>
 
-                  {/* Captain/Vice Captain Popup */}
-                  {selectedPlayer && !isMobile && (
+                  {/* Captain/Vice Captain Popup — court players only */}
+                  {selectedPlayer && !isMobile && courtPlayers.some(p => p.id === selectedPlayer.id) && (
                     <div
                       className="absolute z-50 bg-[#1A1A1A] border border-[#F4622A] rounded-xl p-4 shadow-xl min-w-[180px]"
                       style={{
@@ -954,11 +981,8 @@ const FantasyPage = () => {
                             onDrop={(e) => handleDrop(e, player)}
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (window.innerWidth < 768) {
-                                handleTap(player);
-                              } else {
-                                handlePlayerClick(player, e);
-                              }
+                              if (window.innerWidth < 768) handleTap(player);
+                              else handleTap(player); // bench players: tap-to-swap only, no captain menu
                             }}
                             style={{
                               opacity: isDragged ? 0.5 : 1,
@@ -991,6 +1015,7 @@ const FantasyPage = () => {
                               />
                               <p className="text-white font-semibold text-[11px] mt-2">{player.players.name?.split(' ')[0]}</p>
                               <p className="text-[#F4622A] font-bold text-[11px]">{player.players.total_season_points || 0} pts</p>
+                              <p style={{ color: '#A0A0A0', fontSize: '10px' }}>£{((player.players?.value || 0) / 1000000).toFixed(1)}m</p>
                               <p style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 {normPos(player.players?.position) || player.players?.position}
                               </p>
