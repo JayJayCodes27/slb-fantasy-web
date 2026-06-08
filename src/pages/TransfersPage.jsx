@@ -109,7 +109,7 @@ const TransfersPage = () => {
         .select('*, home_team:slb_teams!home_team_id(name,short_name), away_team:slb_teams!away_team_id(name,short_name)')
         .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
         .gte('gameweek_number', currentGameweek)
-        .order('gameweek', { ascending: true })
+        .order('gameweek_number', { ascending: true })
         .limit(3);
 
       if (error) throw error;
@@ -158,6 +158,9 @@ const TransfersPage = () => {
       const newFreeTransfers = Math.max(0, currentFreeTransfers - 1);
       const newBankBalance = (userData.bank_balance || 0) + sellPrice;
 
+      console.log('Current free transfers:', currentFreeTransfers);
+      console.log('Updating free transfers to:', newFreeTransfers);
+
       // Set points deduction flag if no free transfers
       if (currentFreeTransfers === 0) {
         setPointsDeduction(true);
@@ -173,9 +176,12 @@ const TransfersPage = () => {
 
       if (updateError) throw updateError;
 
+      // Update local state
+      setFreeTransfers(newFreeTransfers);
+
       // Add empty slot instead of redirecting
       setEmptySlots([...emptySlots, { position: selectedPlayer.players?.position, slotIndex: emptySlots.length }]);
-      
+
       // Show success toast
       setShowToast(`Sold ${selectedPlayer.players?.name} for £${(sellPrice / 1000000).toFixed(1)}m`);
       setTimeout(() => setShowToast(null), 3000);
