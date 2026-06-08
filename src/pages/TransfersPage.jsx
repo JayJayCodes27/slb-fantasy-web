@@ -17,6 +17,7 @@ const TransfersPage = () => {
   const [loading, setLoading] = useState(true);
   const [squadData, setSquadData] = useState([]);
   const [userData, setUserData] = useState(null);
+  const [freeTransfers, setFreeTransfers] = useState(1);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [viewMode, setViewMode] = useState('own'); // 'own' or 'replacement'
   const [soldPlayer, setSoldPlayer] = useState(null);
@@ -59,6 +60,7 @@ const TransfersPage = () => {
       }
 
       setUserData(userData);
+      setFreeTransfers(userData.free_transfers_available || 1);
 
       // Fetch squad data
       const { data: squadData, error: squadError } = await supabase
@@ -362,7 +364,6 @@ const TransfersPage = () => {
   }
 
   const { guards, forwards, centres } = groupPlayersByPosition();
-  const freeTransfers = userData?.free_transfers_available || 1;
   const bankBalance = userData?.bank_balance || 0;
   const usedTransfers = 1 - freeTransfers;
   const totalBudget = 100000000;
