@@ -107,7 +107,7 @@ const ScorerPage = () => {
           home_team:slb_teams!fixture_difficulty_home_team_id_fkey(name, primary_colour),
           away_team:slb_teams!fixture_difficulty_away_team_id_fkey(name, primary_colour)
         `)
-        .order('fixture_date', { ascending: true });
+        .order('gameweek_number', { ascending: true });
 
       setFixtures(fixturesData || []);
     } catch (error) {

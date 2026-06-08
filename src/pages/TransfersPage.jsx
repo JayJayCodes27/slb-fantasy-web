@@ -107,7 +107,7 @@ const TransfersPage = () => {
         .from('fixture_difficulty')
         .select('*, home_team:slb_teams!home_team_id(name,short_name), away_team:slb_teams!away_team_id(name,short_name)')
         .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
-        .gte('gameweek', currentGameweek)
+        .gte('gameweek_number', currentGameweek)
         .order('gameweek', { ascending: true })
         .limit(3);
 

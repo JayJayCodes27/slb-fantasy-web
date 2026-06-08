@@ -864,13 +864,13 @@ const FixturesTab = ({ showToast }) => {
       const { data, error } = await supabase
         .from('fixture_difficulty')
         .select(`
-          id, gameweek, match_date,
+          id, gameweek_number, match_date,
           home_difficulty, away_difficulty,
           home_team_id, away_team_id,
           home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
           away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
         `)
-        .order('gameweek', { ascending: true });
+        .order('gameweek_number', { ascending: true });
       console.log('Fixtures:', data, error);
       if (data) setFixtures(data);
       setLoading(false);
@@ -881,7 +881,7 @@ const FixturesTab = ({ showToast }) => {
   const handleSave = async () => {
     try {
       const fixtureData = {
-        gameweek: formData.gameweek,
+        gameweek_number: formData.gameweek,
         home_team_id: formData.home_team_id,
         away_team_id: formData.away_team_id,
         match_date: formData.match_date,
@@ -903,7 +903,7 @@ const FixturesTab = ({ showToast }) => {
       setShowModal(false);
       setEditingFixture(null);
       setFormData({ gameweek: 1, home_team_id: '', away_team_id: '', match_date: '', home_difficulty: 3, away_difficulty: 3 });
-      fetchData();
+      fetchFixtures();
     } catch (error) {
       showToast('Failed to save', 'error');
     }
@@ -924,7 +924,7 @@ const FixturesTab = ({ showToast }) => {
   const handleEdit = (fixture) => {
     setEditingFixture(fixture);
     setFormData({
-      gameweek: fixture.gameweek,
+      gameweek: fixture.gameweek_number,
       home_team_id: fixture.home_team_id,
       away_team_id: fixture.away_team_id,
       match_date: fixture.match_date,
@@ -978,7 +978,7 @@ const FixturesTab = ({ showToast }) => {
           <tbody>
             {fixtures.map((fixture, index) => (
               <tr key={fixture.id} className={index % 2 === 0 ? 'bg-[#141414]' : 'bg-[#1a1a1a]'}>
-                <td className="px-4 py-3 text-sm">GW{fixture.gameweek}</td>
+                <td className="px-4 py-3 text-sm">GW{fixture.gameweek_number}</td>
                 <td className="px-4 py-3 text-sm">
                   {fixture.home_team?.name} vs {fixture.away_team?.name}
                 </td>
