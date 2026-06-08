@@ -65,11 +65,7 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/';
   };
 
-  useEffect(() => {
-    console.log('AuthContext user changed:', user?.email);
-  }, [user]);
-
-  return (
+return (
     <AuthContext.Provider value={{ user, session, loading, signOut }}>
       {children}
     </AuthContext.Provider>

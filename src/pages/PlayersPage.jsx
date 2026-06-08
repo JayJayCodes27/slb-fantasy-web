@@ -1,10 +1,12 @@
 // PlayersPage.jsx — Player listing with search, filters, and team selection
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import Jersey from '../components/Jersey.jsx';
 import { getTeamColours } from '../constants/teamColours.js';
 
 const PlayersPage = () => {
+  const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -58,8 +60,6 @@ const PlayersPage = () => {
       if (teamsData) setTeams(teamsData);
       if (data) {
         setPlayers(data);
-        console.log('Players loaded:', data.length);
-        console.log('First player:', data[0]);
       }
     } catch (error) {
       // Silent error handling
@@ -183,7 +183,7 @@ const PlayersPage = () => {
                     <Jersey
                       primaryColour={getTeamColours(player.slb_teams?.name).primary}
                       secondaryColour={getTeamColours(player.slb_teams?.name).secondary}
-                      number={player.jersey_number || player.id % 99}
+                      number={player.squad_number ?? null}
                       size="sm"
                     />
                   </div>
@@ -224,7 +224,10 @@ const PlayersPage = () => {
                   </div>
 
                   {/* Add to Squad Button - Appears on Hover */}
-                  <button className="absolute bottom-4 right-4 bg-[#F4622A] text-white text-xs font-semibold px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/transfers?incoming=${player.id}`); }}
+                    className="absolute bottom-4 right-4 bg-[#F4622A] text-white text-xs font-semibold px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
                     Add
                   </button>
                 </div>

@@ -6,13 +6,14 @@
 // alter table user_squads add column if not exists was_starter boolean default true;
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
 
 const TransfersPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [loading, setLoading] = useState(true);
   const [squadData, setSquadData] = useState([]);
@@ -45,6 +46,26 @@ const TransfersPage = () => {
     }
     fetchData();
   }, [user]);
+
+  // Pre-select player from ?incoming=<player_id> query param (from Players page "Add" button)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const incomingId = params.get('incoming');
+    if (!incomingId || loading) return;
+    const fetchIncoming = async () => {
+      const { data } = await supabase
+        .from('players')
+        .select('*, slb_teams(*)')
+        .eq('id', incomingId)
+        .single();
+      if (data) {
+        setViewMode('replacement');
+        setSoldPlayer({ players: { position: data.position } });
+        fetchAvailablePlayers(data.position);
+      }
+    };
+    fetchIncoming();
+  }, [location.search, loading]);
 
   const fetchData = async () => {
     try {
@@ -470,7 +491,7 @@ const TransfersPage = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Header */}
-      <div className="px-4 sm:px-6 py-8 sm:py-12">
+      <div className="px-4 sm:px-6 pt-24 sm:pt-32 pb-8 sm:pb-12">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">TRANSFERS</h1>
         </div>

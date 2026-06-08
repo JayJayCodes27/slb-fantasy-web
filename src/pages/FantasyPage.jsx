@@ -88,10 +88,10 @@ const FantasyPage = () => {
         return;
       }
 
-      // Fetch squad_confirmed and formation from users table
+      // Fetch squad_confirmed, formation, and bank_balance from users table
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('squad_confirmed, formation')
+        .select('squad_confirmed, formation, bank_balance')
         .eq('id', user.id)
         .single();
 
@@ -100,6 +100,8 @@ const FantasyPage = () => {
       if (userData?.formation) {
         setFormation(userData.formation);
       }
+      // Use bank_balance from DB — same source TransfersPage writes to
+      setBank(userData?.bank_balance ?? 100000000);
 
       // Fetch user squad with player values and captain/vice captain
       const { data: squadData, error: squadError } = await supabase
@@ -111,13 +113,11 @@ const FantasyPage = () => {
 
       setSquadData(squadData || []);
 
-      // Remaining budget = £100m minus what was actually spent (purchase_price, fallback to current value)
       const calculatedSquadValue = squadData?.reduce((sum, s) => {
         const cost = s.purchase_price != null ? s.purchase_price : (s.players?.value || 0);
         return sum + cost;
       }, 0) || 0;
       setSquadValue(calculatedSquadValue);
-      setBank(100000000 - calculatedSquadValue);
 
       // Load captain and vice captain
       const captainData = squadData?.find(s => s.is_captain);
@@ -517,14 +517,31 @@ const FantasyPage = () => {
 
   const { courtPlayers, benchPlayers } = getCourtAndBenchPlayers();
 
+  // Auto-sub map: courtPlayer.id → bench replacement when starter scored 0 pts
+  // and a bench player of the same position did score
+  const autoSubMap = (() => {
+    const map = {};
+    const usedBenchIds = new Set();
+    for (const cp of courtPlayers) {
+      if ((cp.players?.gw_points || 0) > 0) continue;
+      const cpPos = normPos(cp.players?.position);
+      const sub = benchPlayers.find(
+        bp => !usedBenchIds.has(bp.id) && normPos(bp.players?.position) === cpPos && (bp.players?.gw_points || 0) > 0
+      );
+      if (sub) { map[cp.id] = sub; usedBenchIds.add(sub.id); }
+    }
+    return map;
+  })();
+
   const gCount = courtPlayers.filter(s => normPos(s.players?.position) === 'G').length;
   const fCount = courtPlayers.filter(s => normPos(s.players?.position) === 'F').length;
   const cCount = courtPlayers.filter(s => normPos(s.players?.position) === 'C').length;
   const formationLabel = `${gCount}G · ${fCount}F · ${cCount}C`;
 
-  // Calculate total points with captain double
+  // Calculate total points with captain double and auto-sub
   const totalPoints = courtPlayers.reduce((sum, s) => {
-    const pts = s.players?.gw_points || 0;
+    const sub = autoSubMap[s.id];
+    const pts = sub ? (sub.players?.gw_points || 0) : (s.players?.gw_points || 0);
     const isCapt = s.is_captain;
     return sum + (isCapt ? pts * 2 : pts);
   }, 0);
@@ -715,7 +732,7 @@ const FantasyPage = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Page Header */}
-      <div className="px-4 sm:px-8 py-8 sm:py-12">
+      <div className="px-4 sm:px-8 pt-24 sm:pt-32 pb-8 sm:pb-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
             <div>
@@ -844,6 +861,8 @@ const FantasyPage = () => {
                           );
                         }
 
+                        const autoSub = autoSubMap[player.id];
+
                         return (
                           <div
                             key={player.player_id}
@@ -871,7 +890,7 @@ const FantasyPage = () => {
                               className="bg-[#111111] border rounded-xl p-2 hover:border-[#F4622A] transition-all text-center"
                               style={{
                                 position: 'relative',
-                                borderColor: isInvalidSwap ? '#EF4444' : isDragOver || isSelectedForSwap ? '#F4622A' : '#222222',
+                                borderColor: isInvalidSwap ? '#EF4444' : isDragOver || isSelectedForSwap ? '#F4622A' : autoSub ? '#C9A84C' : '#222222',
                                 boxShadow: isInvalidSwap ? '0 0 0 2px #EF4444' : isSelectedForSwap ? '0 0 0 2px #F4622A' : 'none',
                                 minWidth: '64px',
                                 transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -883,23 +902,26 @@ const FantasyPage = () => {
                               {isViceCaptain && (
                                 <div style={{ position: 'absolute', top: '-8px', right: '-8px', backgroundColor: '#666666', color: 'white', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', zIndex: 2 }}>V</div>
                               )}
+                              {autoSub && (
+                                <div style={{ position: 'absolute', top: '-8px', left: '-8px', backgroundColor: '#C9A84C', color: 'white', fontSize: '9px', fontWeight: 'bold', padding: '2px 4px', borderRadius: '4px', zIndex: 2, whiteSpace: 'nowrap' }}>AUTO</div>
+                              )}
                               <Jersey
-                                primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
-                                secondaryColour={getTeamColours(player.players?.slb_teams?.name).secondary}
-                                number={player.players?.squad_number ?? null}
+                                primaryColour={getTeamColours(autoSub ? autoSub.players?.slb_teams?.name : player.players?.slb_teams?.name).primary}
+                                secondaryColour={getTeamColours(autoSub ? autoSub.players?.slb_teams?.name : player.players?.slb_teams?.name).secondary}
+                                number={(autoSub ? autoSub.players?.squad_number : player.players?.squad_number) ?? null}
                                 size="sm"
                               />
-                              <div style={{ color: 'white', fontSize: '11px', fontWeight: '600', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '64px' }}>
-                                {player.players.name?.split(' ')[0]}
+                              <div style={{ color: autoSub ? '#C9A84C' : 'white', fontSize: '11px', fontWeight: '600', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '64px' }}>
+                                {(autoSub ? autoSub.players?.name : player.players?.name)?.split(' ')[0]}
                               </div>
                               <div style={{ color: '#F4622A', fontSize: '11px', fontWeight: 'bold' }}>
-                                {player.players.total_season_points || 0} pts
+                                {(autoSub ? autoSub.players?.gw_points : player.players?.total_season_points) || 0} pts
                               </div>
                               <div style={{ color: '#A0A0A0', fontSize: '10px' }}>
-                                £{((player.players?.value || 0) / 1000000).toFixed(1)}m
+                                £{(((autoSub ? autoSub.players?.value : player.players?.value) || 0) / 1000000).toFixed(1)}m
                               </div>
                               <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                {normPos(player.players?.position) || player.players?.position}
+                                {normPos((autoSub ? autoSub.players?.position : player.players?.position)) || player.players?.position}
                               </div>
                             </div>
                           </div>
