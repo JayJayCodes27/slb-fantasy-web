@@ -112,8 +112,10 @@ const FantasyPage = () => {
       // Calculate remaining budget using purchase_price where available, falling back to current value
       const calculatedSquadValue = squadData?.reduce((sum, s) => {
         const cost = s.purchase_price != null ? s.purchase_price : (s.players?.value || 0);
+        console.log('[budget]', s.players?.name, 'purchase_price:', s.purchase_price, 'value:', s.players?.value, 'cost used:', cost);
         return sum + cost;
       }, 0) || 0;
+      console.log('[budget] totalSquadValue:', calculatedSquadValue, 'bank:', 100000000 - calculatedSquadValue);
       setSquadValue(calculatedSquadValue);
       setBank(100000000 - calculatedSquadValue);
 
@@ -1047,7 +1049,7 @@ const FantasyPage = () => {
                               <Jersey
                                 primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
                                 secondaryColour={getTeamColours(player.players?.slb_teams?.name).secondary}
-                                number={player.players?.jersey_number || player.players?.id % 99}
+                                number={player.players?.squad_number ?? null}
                                 size="md"
                               />
                               <div style={{ color: 'white', fontSize: '12px', fontWeight: '600', marginTop: '4px' }}>
@@ -1200,7 +1202,7 @@ const FantasyPage = () => {
                               <Jersey
                                 primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
                                 secondaryColour={getTeamColours(player.players?.slb_teams?.name).secondary}
-                                number={player.players?.jersey_number || player.players?.id % 99}
+                                number={player.players?.squad_number ?? null}
                                 size="sm"
                               />
                               <p className="text-white font-semibold text-[11px] mt-2">{player.players.name?.split(' ')[0]}</p>
