@@ -342,188 +342,47 @@ const FantasyPage = () => {
     setDragOverTarget(null);
   };
 
+  // Swap two players: swaps their array positions and persists is_starter changes to DB
+  const swapPlayers = async (playerA, playerB) => {
+    const aStarter = playerA.is_starter;
+    const bStarter = playerB.is_starter;
+
+    // Swap their slots in the array and update is_starter flags in one pass
+    setSquadData(prev => {
+      const next = [...prev];
+      const idxA = next.findIndex(s => s.id === playerA.id);
+      const idxB = next.findIndex(s => s.id === playerB.id);
+      next[idxA] = { ...playerB, is_starter: aStarter };
+      next[idxB] = { ...playerA, is_starter: bStarter };
+      return next;
+    });
+
+    // Only write to DB when starter status actually changes (court ↔ bench)
+    if (aStarter !== bStarter) {
+      try {
+        await supabase.from('user_squads').update({ is_starter: bStarter }).eq('id', playerA.id);
+        await supabase.from('user_squads').update({ is_starter: aStarter }).eq('id', playerB.id);
+      } catch (error) {
+        console.error('Error saving formation:', error);
+      }
+    }
+  };
+
   const handleDrop = async (e, targetItem) => {
     e.preventDefault();
     setDragOverTarget(null);
-
-    if (!draggedId || draggedId === targetItem.id) {
-      setDraggedId(null);
-      return;
-    }
-
+    if (!draggedId || draggedId === targetItem.id) { setDraggedId(null); return; }
     const draggedItem = squadData.find(s => s.id === draggedId);
-    if (!draggedItem) {
-      setDraggedId(null);
-      return;
-    }
-
-    // Check if both players are on the court and have the same position type
-    const draggedPosition = draggedItem.players?.position;
-    const targetPosition = targetItem.players?.position;
-    const bothOnCourt = draggedItem.is_starter && targetItem.is_starter;
-
-    if (bothOnCourt && draggedPosition === targetPosition) {
-      // Swap positions in the squadData array
-      // Find the indices of the two players in the courtPlayers array
-      const { courtPlayers } = getCourtAndBenchPlayers();
-      const draggedIndex = courtPlayers.findIndex(p => p.id === draggedId);
-      const targetIndex = courtPlayers.findIndex(p => p.id === targetItem.id);
-
-      if (draggedIndex !== -1 && targetIndex !== -1) {
-        // Swap the players in the squadData array based on their court positions
-        const draggedPlayer = squadData.find(s => s.id === draggedId);
-        const targetPlayer = squadData.find(s => s.id === targetItem.id);
-
-        // Swap the players in the squadData array
-        const newSquadData = [...squadData];
-        const draggedIdx = newSquadData.findIndex(s => s.id === draggedId);
-        const targetIdx = newSquadData.findIndex(s => s.id === targetItem.id);
-
-        // Swap the players
-        [newSquadData[draggedIdx], newSquadData[targetIdx]] = [newSquadData[targetIdx], newSquadData[draggedIdx]];
-
-        setSquadData(newSquadData);
-
-        // Save to Supabase - we need to update the slot_order or similar
-        // For now, just update local state since the database might not support position swapping
-        setDraggedId(null);
-        return;
-      }
-    }
-
-    // Original logic: swap is_starter between the two players
-    const draggedStarter = draggedItem.is_starter;
-    const targetStarter = targetItem.is_starter;
-
-    // Update local state immediately
-    setSquadData(prev => prev.map(s => {
-      if (s.id === draggedId)
-        return { ...s, is_starter: targetStarter };
-      if (s.id === targetItem.id)
-        return { ...s, is_starter: draggedStarter };
-      return s;
-    }));
-
-    // Save both to Supabase
-    try {
-      await supabase
-        .from('user_squads')
-        .update({ is_starter: targetStarter })
-        .eq('id', draggedId);
-
-      await supabase
-        .from('user_squads')
-        .update({ is_starter: draggedStarter })
-        .eq('id', targetItem.id);
-    } catch (error) {
-      console.error('Error saving formation:', error);
-    }
-
+    if (draggedItem) await swapPlayers(draggedItem, targetItem);
     setDraggedId(null);
-  };
-
-  const saveFormationToSupabase = async (squad) => {
-    try {
-      for (const s of squad) {
-        await supabase
-          .from('user_squads')
-          .update({ is_starter: s.is_starter })
-          .eq('id', s.id);
-      }
-    } catch (error) {
-      console.error('Error saving formation:', error);
-    }
-  };
-
-  const detectAndUpdateFormation = async (squad) => {
-    const starters = squad.filter(s => s.is_starter);
-    const guards = starters.filter(s => s.players?.position === 'G').length;
-    const forwards = starters.filter(s => s.players?.position === 'F').length;
-    const centres = starters.filter(s => s.players?.position === 'C').length;
-
-    let newFormation = '2G-2F-1C';
-    if (guards === 3 && forwards === 1 && centres === 1) {
-      newFormation = '3G-1F-1C';
-    } else if (guards === 1 && forwards === 3 && centres === 1) {
-      newFormation = '1G-3F-1C';
-    }
-
-    setFormation(newFormation);
-
-    // Save to users table
-    try {
-      await supabase
-        .from('users')
-        .update({ formation: newFormation })
-        .eq('id', user.id);
-    } catch (error) {
-      console.error('Error saving formation:', error);
-    }
   };
 
   // Mobile tap-to-swap
   const handleTap = async (squadItem) => {
-    // If nothing selected, select this player
-    if (!selectedForSwap) {
-      setSelectedForSwap(squadItem.id);
-      return;
-    }
-
-    // If tapping the same player, deselect
-    if (selectedForSwap === squadItem.id) {
-      setSelectedForSwap(null);
-      return;
-    }
-
-    // Swap the two players
+    if (!selectedForSwap) { setSelectedForSwap(squadItem.id); return; }
+    if (selectedForSwap === squadItem.id) { setSelectedForSwap(null); return; }
     const firstItem = squadData.find(s => s.id === selectedForSwap);
-    if (!firstItem) return;
-
-    // Check if both players are on the court and have the same position type
-    const firstPosition = firstItem.players?.position;
-    const secondPosition = squadItem.players?.position;
-    const bothOnCourt = firstItem.is_starter && squadItem.is_starter;
-
-    if (bothOnCourt && firstPosition === secondPosition) {
-      // Swap positions in the squadData array
-      const newSquadData = [...squadData];
-      const firstIdx = newSquadData.findIndex(s => s.id === selectedForSwap);
-      const secondIdx = newSquadData.findIndex(s => s.id === squadItem.id);
-
-      // Swap the players
-      [newSquadData[firstIdx], newSquadData[secondIdx]] = [newSquadData[secondIdx], newSquadData[firstIdx]];
-
-      setSquadData(newSquadData);
-      setSelectedForSwap(null);
-      return;
-    }
-
-    // Original logic: swap is_starter
-    const firstStarter = firstItem.is_starter;
-    const secondStarter = squadItem.is_starter;
-
-    setSquadData(prev => prev.map(s => {
-      if (s.id === selectedForSwap)
-        return { ...s, is_starter: secondStarter };
-      if (s.id === squadItem.id)
-        return { ...s, is_starter: firstStarter };
-      return s;
-    }));
-
-    try {
-      await supabase
-        .from('user_squads')
-        .update({ is_starter: secondStarter })
-        .eq('id', selectedForSwap);
-
-      await supabase
-        .from('user_squads')
-        .update({ is_starter: firstStarter })
-        .eq('id', squadItem.id);
-    } catch (error) {
-      console.error('Error saving formation:', error);
-    }
-
+    if (firstItem) await swapPlayers(firstItem, squadItem);
     setSelectedForSwap(null);
   };
 
@@ -546,54 +405,17 @@ const FantasyPage = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Formation positions configuration - 3 rows of 3 players each (G top, F middle, C bottom)
-  // Using CSS Grid approach: 3x3 grid with equal cells
-  const formationPositions = {
-    '2G-2F-1C': [
-      // Row 1 - Guards (3 slots)
-      { position: 'G', row: 1, col: 1 },
-      { position: 'G', row: 1, col: 2 },
-      { position: 'G', row: 1, col: 3 },
-      // Row 2 - Forwards (3 slots)
-      { position: 'F', row: 2, col: 1 },
-      { position: 'F', row: 2, col: 2 },
-      { position: 'F', row: 2, col: 3 },
-      // Row 3 - Centres (3 slots)
-      { position: 'C', row: 3, col: 1 },
-      { position: 'C', row: 3, col: 2 },
-      { position: 'C', row: 3, col: 3 }
-    ],
-    '3G-1F-1C': [
-      // Row 1 - Guards (3 slots)
-      { position: 'G', row: 1, col: 1 },
-      { position: 'G', row: 1, col: 2 },
-      { position: 'G', row: 1, col: 3 },
-      // Row 2 - Forwards (3 slots)
-      { position: 'F', row: 2, col: 1 },
-      { position: 'F', row: 2, col: 2 },
-      { position: 'F', row: 2, col: 3 },
-      // Row 3 - Centres (3 slots)
-      { position: 'C', row: 3, col: 1 },
-      { position: 'C', row: 3, col: 2 },
-      { position: 'C', row: 3, col: 3 }
-    ],
-    '1G-3F-1C': [
-      // Row 1 - Guards (3 slots)
-      { position: 'G', row: 1, col: 1 },
-      { position: 'G', row: 1, col: 2 },
-      { position: 'G', row: 1, col: 3 },
-      // Row 2 - Forwards (3 slots)
-      { position: 'F', row: 2, col: 1 },
-      { position: 'F', row: 2, col: 2 },
-      { position: 'F', row: 2, col: 3 },
-      // Row 3 - Centres (3 slots)
-      { position: 'C', row: 3, col: 1 },
-      { position: 'C', row: 3, col: 2 },
-      { position: 'C', row: 3, col: 3 }
-    ]
-  };
+  // Absolute positions for 5 starting players on the half-court (as % of container)
+  // 2 guards top, 2 forwards middle, 1 centre post
+  const courtSlotPositions = [
+    { top: '14%', left: '22%' },  // Guard 1
+    { top: '14%', left: '78%' },  // Guard 2
+    { top: '52%', left: '18%' },  // Forward 1
+    { top: '52%', left: '82%' },  // Forward 2
+    { top: '78%', left: '50%' },  // Centre
+  ];
 
-  // Normalise position strings to the three court categories G / F / C
+  // Normalise position strings to G / F / C
   const normPos = (pos) => {
     if (!pos) return null;
     if (pos === 'G' || pos === 'PG' || pos === 'SG') return 'G';
@@ -602,32 +424,31 @@ const FantasyPage = () => {
     return null;
   };
 
-  // Get court and bench players — always 3G, 3F, 3C on court; remainder on bench
+  // Split squad into 5 starters (court) and 4 bench players using is_starter flag.
+  // Fallback when flag not set: first 5 by position order (G → F → C).
   const getCourtAndBenchPlayers = () => {
     if (!squadData || squadData.length === 0) {
       return { courtPlayers: [], benchPlayers: [] };
     }
 
-    const guards   = squadData.filter(s => normPos(s.players?.position) === 'G');
-    const forwards = squadData.filter(s => normPos(s.players?.position) === 'F');
-    const centres  = squadData.filter(s => normPos(s.players?.position) === 'C');
+    const hasFlags = squadData.some(s => s.is_starter === true || s.is_starter === false);
+    if (hasFlags) {
+      return {
+        courtPlayers: squadData.filter(s => s.is_starter).slice(0, 5),
+        benchPlayers: squadData.filter(s => !s.is_starter).slice(0, 4),
+      };
+    }
 
-    const courtGuards   = guards.slice(0, 3);
-    const benchGuards   = guards.slice(3);
-    const courtForwards = forwards.slice(0, 3);
-    const benchForwards = forwards.slice(3);
-    const courtCentres  = centres.slice(0, 3);
-    const benchCentres  = centres.slice(3);
-
-    const courtPlayers = [...courtGuards, ...courtForwards, ...courtCentres];
-    const benchPlayers = [...benchGuards, ...benchForwards, ...benchCentres];
-
-    return { courtPlayers, benchPlayers };
+    // Fallback: order G first, then F, then C; first 5 to court
+    const posOrder = { G: 0, F: 1, C: 2 };
+    const sorted = [...squadData].sort((a, b) =>
+      (posOrder[normPos(a.players?.position)] ?? 9) - (posOrder[normPos(b.players?.position)] ?? 9)
+    );
+    return { courtPlayers: sorted.slice(0, 5), benchPlayers: sorted.slice(5, 9) };
   };
 
   const { courtPlayers, benchPlayers } = getCourtAndBenchPlayers();
 
-  // Calculate formation label from court players (uses normalised positions)
   const gCount = courtPlayers.filter(s => normPos(s.players?.position) === 'G').length;
   const fCount = courtPlayers.filter(s => normPos(s.players?.position) === 'F').length;
   const cCount = courtPlayers.filter(s => normPos(s.players?.position) === 'C').length;
@@ -913,58 +734,35 @@ const FantasyPage = () => {
                       alt=""
                     />
 
-                    {/* Players layer on top - CSS Grid */}
+                    {/* 5 starting players — absolutely positioned on the court */}
                     <div
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        zIndex: 1,
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gridTemplateRows: 'repeat(3, 1fr)',
-                        padding: '4%'
-                      }}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}
                       onClick={() => setSelectedPlayer(null)}
                     >
-                      {formationPositions[formation]?.map((pos, index) => {
+                      {courtSlotPositions.map((slotPos, index) => {
                         const player = courtPlayers[index];
-                        
                         const isCaptain = captain === player?.player_id;
                         const isViceCaptain = viceCaptain === player?.player_id;
                         const isDragged = draggedId === player?.id;
                         const isDragOver = dragOverTarget?.id === player?.id;
                         const isSelectedForSwap = selectedForSwap === player?.id;
 
-                        // Empty slot placeholder
+                        // Empty slot
                         if (!player || !player.players) {
                           return (
                             <div
-                              key={`empty-${pos.row}-${pos.col}`}
+                              key={`empty-court-${index}`}
                               style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '12px',
-                                padding: '4px'
+                                position: 'absolute',
+                                top: slotPos.top,
+                                left: slotPos.left,
+                                transform: 'translate(-50%, -50%)',
+                                width: '70px',
+                                textAlign: 'center',
                               }}
                             >
-                              <div 
-                                className="border-2 border-dashed border-[#2E2E2E] rounded-xl flex items-center justify-center"
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  minHeight: '80px'
-                                }}
-                              >
-                                <span 
-                                  className="font-semibold text-[14px]"
-                                  style={{ color: '#C9A84C', fontFamily: 'Inter' }}
-                                >
-                                  {pos.position}
-                                </span>
+                              <div className="border-2 border-dashed border-[#2E2E2E] rounded-xl flex items-center justify-center" style={{ width: '70px', height: '90px' }}>
+                                <span className="text-[#555555] text-[11px] font-semibold uppercase tracking-wider">Empty</span>
                               </div>
                             </div>
                           );
@@ -978,86 +776,47 @@ const FantasyPage = () => {
                             onDragOver={(e) => handleDragOver(e, player)}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, player)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              opacity: isDragged ? 0.5 : 1,
-                              border: isDragOver || isSelectedForSwap ? '2px dashed #F4622A' : 'none',
-                              borderRadius: '12px',
-                              padding: '4px',
-                              animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
-                            }}
-                            className="cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (window.innerWidth < 768) {
-                                handleTap(player);
-                              } else {
-                                handlePlayerClick(player, e);
-                              }
+                              if (window.innerWidth < 768) handleTap(player);
+                              else handlePlayerClick(player, e);
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: slotPos.top,
+                              left: slotPos.left,
+                              transform: 'translate(-50%, -50%)',
+                              opacity: isDragged ? 0.4 : 1,
+                              cursor: 'pointer',
+                              zIndex: isSelectedForSwap ? 3 : 2,
                             }}
                           >
-                            <div className="bg-[#111111] border border-[#222222] rounded-xl p-3 hover:border-[#F4622A] transition-all" style={{ position: 'relative' }}>
-                              {/* Captain/Vice Captain Badge */}
+                            <div
+                              className="bg-[#111111] border rounded-xl p-2 hover:border-[#F4622A] transition-all text-center"
+                              style={{
+                                position: 'relative',
+                                borderColor: isDragOver || isSelectedForSwap ? '#F4622A' : '#222222',
+                                boxShadow: isSelectedForSwap ? '0 0 0 2px #F4622A' : 'none',
+                                minWidth: '64px',
+                              }}
+                            >
                               {isCaptain && (
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: '-8px',
-                                    right: '-8px',
-                                    backgroundColor: '#C9A84C',
-                                    color: 'white',
-                                    width: '24px',
-                                    height: '24px',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
-                                    zIndex: 2
-                                  }}
-                                >
-                                  C
-                                </div>
+                                <div style={{ position: 'absolute', top: '-8px', right: '-8px', backgroundColor: '#C9A84C', color: 'white', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', zIndex: 2 }}>C</div>
                               )}
                               {isViceCaptain && (
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: '-8px',
-                                    right: '-8px',
-                                    backgroundColor: '#666666',
-                                    color: 'white',
-                                    width: '24px',
-                                    height: '24px',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
-                                    zIndex: 2
-                                  }}
-                                >
-                                  V
-                                </div>
+                                <div style={{ position: 'absolute', top: '-8px', right: '-8px', backgroundColor: '#666666', color: 'white', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', zIndex: 2 }}>V</div>
                               )}
                               <Jersey
                                 primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
                                 secondaryColour={getTeamColours(player.players?.slb_teams?.name).secondary}
                                 number={player.players?.squad_number ?? null}
-                                size="md"
+                                size="sm"
                               />
-                              <div style={{ color: 'white', fontSize: '12px', fontWeight: '600', marginTop: '4px' }}>
+                              <div style={{ color: 'white', fontSize: '11px', fontWeight: '600', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '64px' }}>
                                 {player.players.name?.split(' ')[0]}
                               </div>
-                              <div style={{ color: '#F4622A', fontSize: '14px', fontWeight: 'bold' }}>
+                              <div style={{ color: '#F4622A', fontSize: '11px', fontWeight: 'bold' }}>
                                 {player.players.total_season_points || 0} pts
-                              </div>
-                              <div style={{ color: '#C9A84C', fontSize: '11px' }}>
-                                £{((player.players?.value || 0) / 1000000).toFixed(1)}m
                               </div>
                             </div>
                           </div>
