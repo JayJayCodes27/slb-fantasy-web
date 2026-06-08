@@ -1,6 +1,8 @@
 // PlayersPage.jsx — Player listing with search, filters, and team selection
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import Jersey from '../components/Jersey.jsx';
+import { getTeamColours } from '../constants/teamColours.js';
 
 const PlayersPage = () => {
   const [players, setPlayers] = useState([]);
@@ -182,14 +184,12 @@ const PlayersPage = () => {
                 >
                   {/* Jersey Component */}
                   <div className="flex justify-center mb-3">
-                    <div
-                      className="w-12 h-14 rounded flex items-center justify-center"
-                      style={{ backgroundColor: player.slb_teams?.primary_colour + '30' }}
-                    >
-                      <span className="text-xs font-bold" style={{ color: player.slb_teams?.primary_colour }}>
-                        {player.slb_teams?.short_name}
-                      </span>
-                    </div>
+                    <Jersey
+                      primaryColour={getTeamColours(player.slb_teams?.name).primary}
+                      secondaryColour={getTeamColours(player.slb_teams?.name).secondary}
+                      number={player.jersey_number || player.id % 99}
+                      size="sm"
+                    />
                   </div>
 
                   {/* Player Name */}

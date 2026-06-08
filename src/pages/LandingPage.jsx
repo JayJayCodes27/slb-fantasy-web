@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import JerseyCard from '../components/JerseyCard';
+import Jersey from '../components/Jersey.jsx';
+import { getTeamColours } from '../constants/teamColours.js';
 
 const LandingPage = () => {
   const [countdown, setCountdown] = useState({ days: 7, hours: 0, minutes: 0, seconds: 0 });
@@ -332,10 +334,12 @@ const LandingPage = () => {
                     <span className="text-[#C9A84C] font-['Bebas_Neue'] font-bold text-2xl">{index + 1}</span>
                   </div>
                   <div className="flex justify-center mb-4">
-                    <svg viewBox="0 0 60 50" className="w-[90px] h-[90px]">
-                      <path d="M15 0 L45 0 L50 15 L50 35 L45 50 L15 50 L10 35 L10 15 Z" fill={player.slb_teams?.primary_colour || '#6B7280'} />
-                      <text x="30" y="30" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold">{player.position}</text>
-                    </svg>
+                    <Jersey
+                      primaryColour={getTeamColours(player.slb_teams?.name).primary}
+                      secondaryColour={getTeamColours(player.slb_teams?.name).secondary}
+                      number={player.jersey_number || player.id % 99}
+                      size="lg"
+                    />
                   </div>
                   <div className="text-center">
                     <p className="text-white font-['Inter'] font-semibold text-sm mb-1">{player.name}</p>

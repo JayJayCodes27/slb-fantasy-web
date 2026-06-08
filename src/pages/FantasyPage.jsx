@@ -4,12 +4,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../lib/supabase';
 import halfCourt from '../assets/half-court.svg';
-import jerseyBlue from '../assets/jersey-blue-blank.svg';
-import jerseyDark from '../assets/jersey-dark-blank.svg';
-import jerseyOrange from '../assets/jersey-orange-blank.svg';
-import jerseyGreen from '../assets/jersey-green-blank.svg';
-import jerseyPurple from '../assets/jersey-purple-blank.svg';
-import jerseyRed from '../assets/jersey-red-blank.svg';
+import Jersey from '../components/Jersey.jsx';
+import { getTeamColours } from '../constants/teamColours.js';
 
 const FantasyPage = () => {
   const { user } = useAuth();
@@ -69,21 +65,6 @@ const FantasyPage = () => {
   ];
 
   const allPlayers = [...startingPlayers, ...mockBenchPlayers.filter(p => p.name)];
-
-  const getJerseyForTeam = (shortName) => {
-    const map = {
-      'LDN': jerseyRed,
-      'NEW': jerseyBlue,
-      'LEI': jerseyBlue,
-      'MAN': jerseyBlue,
-      'CHE': jerseyOrange,
-      'BRI': jerseyRed,
-      'SHE': jerseyDark,
-      'SUR': jerseyGreen,
-      'CAL': jerseyPurple,
-    };
-    return map[shortName] || jerseyDark;
-  };
 
   const fetchSettings = async () => {
     try {
@@ -1057,10 +1038,11 @@ const FantasyPage = () => {
                                   V
                                 </div>
                               )}
-                              <img
-                                src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
-                                style={{ width: '64px', height: '80px', objectFit: 'contain' }}
-                                alt={player.players.position}
+                              <Jersey
+                                primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
+                                secondaryColour={getTeamColours(player.players?.slb_teams?.name).secondary}
+                                number={player.players?.jersey_number || player.players?.id % 99}
+                                size="md"
                               />
                               <div style={{ color: 'white', fontSize: '12px', fontWeight: '600', marginTop: '4px' }}>
                                 {player.players.name?.split(' ')[0]}
@@ -1209,10 +1191,11 @@ const FantasyPage = () => {
                                   V
                                 </div>
                               )}
-                              <img
-                                src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
-                                style={{ width: '48px', height: '60px', objectFit: 'contain' }}
-                                alt={player.players.position}
+                              <Jersey
+                                primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
+                                secondaryColour={getTeamColours(player.players?.slb_teams?.name).secondary}
+                                number={player.players?.jersey_number || player.players?.id % 99}
+                                size="sm"
                               />
                               <p className="text-white font-semibold text-[11px] mt-2">{player.players.name?.split(' ')[0]}</p>
                               <p className="text-[#F4622A] font-bold text-[11px]">{player.players.total_season_points || 0} pts</p>
