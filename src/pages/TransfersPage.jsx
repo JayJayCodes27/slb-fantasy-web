@@ -30,6 +30,7 @@ const TransfersPage = () => {
   const [showToast, setShowToast] = useState(null);
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
   const [buyingPlayer, setBuyingPlayer] = useState(null);
+  const [pointsDeduction, setPointsDeduction] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -153,8 +154,14 @@ const TransfersPage = () => {
       const sellPrice = calculateSellPrice(selectedPlayer.players, purchasePrice);
 
       // Update user transfers and bank
-      const newFreeTransfers = Math.max(0, (userData.free_transfers_available || 1) - 1);
+      const currentFreeTransfers = userData.free_transfers_available || 1;
+      const newFreeTransfers = Math.max(0, currentFreeTransfers - 1);
       const newBankBalance = (userData.bank_balance || 0) + sellPrice;
+
+      // Set points deduction flag if no free transfers
+      if (currentFreeTransfers === 0) {
+        setPointsDeduction(true);
+      }
 
       const { error: updateError } = await supabase
         .from('users')
@@ -386,10 +393,10 @@ const TransfersPage = () => {
         </div>
 
         {/* Row 2: Warning if no free transfers */}
-        {freeTransfers === 0 && (
+        {(freeTransfers === 0 || pointsDeduction) && (
           <div className="bg-orange-900/30 border-t border-b border-orange-900/50 px-4 py-3">
             <p className="text-orange-400 text-sm text-center">
-              ⚠️ You have no free transfers. Each transfer costs -4 points this gameweek.
+              ⚠️ This transfer costs -4 points
             </p>
           </div>
         )}
