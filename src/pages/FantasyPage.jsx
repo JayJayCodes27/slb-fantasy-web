@@ -563,48 +563,49 @@ const FantasyPage = () => {
   }, []);
 
   // Formation positions configuration - 3 rows of 3 players each (G top, F middle, C bottom)
+  // Using CSS Grid approach: 3x3 grid with equal cells
   const formationPositions = {
     '2G-2F-1C': [
-      // Top row - Guards (3 slots)
-      { position: 'G', top: '15%', left: '20%', transform: 'none' },
-      { position: 'G', top: '15%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'G', top: '15%', left: '80%', transform: 'translateX(-100%)' },
-      // Middle row - Forwards (3 slots)
-      { position: 'F', top: '45%', left: '20%', transform: 'none' },
-      { position: 'F', top: '45%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'F', top: '45%', left: '80%', transform: 'translateX(-100%)' },
-      // Bottom row - Centres (3 slots)
-      { position: 'C', top: '72%', left: '20%', transform: 'none' },
-      { position: 'C', top: '72%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'C', top: '72%', left: '80%', transform: 'translateX(-100%)' }
+      // Row 1 - Guards (3 slots)
+      { position: 'G', row: 1, col: 1 },
+      { position: 'G', row: 1, col: 2 },
+      { position: 'G', row: 1, col: 3 },
+      // Row 2 - Forwards (3 slots)
+      { position: 'F', row: 2, col: 1 },
+      { position: 'F', row: 2, col: 2 },
+      { position: 'F', row: 2, col: 3 },
+      // Row 3 - Centres (3 slots)
+      { position: 'C', row: 3, col: 1 },
+      { position: 'C', row: 3, col: 2 },
+      { position: 'C', row: 3, col: 3 }
     ],
     '3G-1F-1C': [
-      // Top row - Guards (3 slots)
-      { position: 'G', top: '15%', left: '20%', transform: 'none' },
-      { position: 'G', top: '15%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'G', top: '15%', left: '80%', transform: 'translateX(-100%)' },
-      // Middle row - Forwards (3 slots)
-      { position: 'F', top: '45%', left: '20%', transform: 'none' },
-      { position: 'F', top: '45%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'F', top: '45%', left: '80%', transform: 'translateX(-100%)' },
-      // Bottom row - Centres (3 slots)
-      { position: 'C', top: '72%', left: '20%', transform: 'none' },
-      { position: 'C', top: '72%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'C', top: '72%', left: '80%', transform: 'translateX(-100%)' }
+      // Row 1 - Guards (3 slots)
+      { position: 'G', row: 1, col: 1 },
+      { position: 'G', row: 1, col: 2 },
+      { position: 'G', row: 1, col: 3 },
+      // Row 2 - Forwards (3 slots)
+      { position: 'F', row: 2, col: 1 },
+      { position: 'F', row: 2, col: 2 },
+      { position: 'F', row: 2, col: 3 },
+      // Row 3 - Centres (3 slots)
+      { position: 'C', row: 3, col: 1 },
+      { position: 'C', row: 3, col: 2 },
+      { position: 'C', row: 3, col: 3 }
     ],
     '1G-3F-1C': [
-      // Top row - Guards (3 slots)
-      { position: 'G', top: '15%', left: '20%', transform: 'none' },
-      { position: 'G', top: '15%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'G', top: '15%', left: '80%', transform: 'translateX(-100%)' },
-      // Middle row - Forwards (3 slots)
-      { position: 'F', top: '45%', left: '20%', transform: 'none' },
-      { position: 'F', top: '45%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'F', top: '45%', left: '80%', transform: 'translateX(-100%)' },
-      // Bottom row - Centres (3 slots)
-      { position: 'C', top: '72%', left: '20%', transform: 'none' },
-      { position: 'C', top: '72%', left: '50%', transform: 'translateX(-50%)' },
-      { position: 'C', top: '72%', left: '80%', transform: 'translateX(-100%)' }
+      // Row 1 - Guards (3 slots)
+      { position: 'G', row: 1, col: 1 },
+      { position: 'G', row: 1, col: 2 },
+      { position: 'G', row: 1, col: 3 },
+      // Row 2 - Forwards (3 slots)
+      { position: 'F', row: 2, col: 1 },
+      { position: 'F', row: 2, col: 2 },
+      { position: 'F', row: 2, col: 3 },
+      // Row 3 - Centres (3 slots)
+      { position: 'C', row: 3, col: 1 },
+      { position: 'C', row: 3, col: 2 },
+      { position: 'C', row: 3, col: 3 }
     ]
   };
 
@@ -925,7 +926,7 @@ const FantasyPage = () => {
                       alt=""
                     />
 
-                    {/* Players layer on top */}
+                    {/* Players layer on top - CSS Grid */}
                     <div
                       style={{
                         position: 'absolute',
@@ -933,7 +934,11 @@ const FantasyPage = () => {
                         left: 0,
                         width: '100%',
                         height: '100%',
-                        zIndex: 1
+                        zIndex: 1,
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gridTemplateRows: 'repeat(3, 1fr)',
+                        padding: '4%'
                       }}
                       onClick={() => setSelectedPlayer(null)}
                     >
@@ -956,17 +961,16 @@ const FantasyPage = () => {
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, player)}
                             style={{
-                              position: 'absolute',
-                              transform: pos.transform === 'none' ? 'translate(-50%, -50%)' : pos.transform,
-                              top: pos.top,
-                              left: pos.left,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                               opacity: isDragged ? 0.5 : 1,
                               border: isDragOver || isSelectedForSwap ? '2px dashed #F4622A' : 'none',
                               borderRadius: '12px',
-                              padding: '8px',
+                              padding: '4px',
                               animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
                             }}
-                            className="text-center cursor-pointer"
+                            className="cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (window.innerWidth < 768) {
