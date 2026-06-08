@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 const PlayersPage = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
   const [positionFilter, setPositionFilter] = useState('All');
   const [teamFilter, setTeamFilter] = useState('All');
   const [sortBy, setSortBy] = useState('value-desc');
@@ -17,24 +17,18 @@ const PlayersPage = () => {
   }, []);
 
   // Derive filtered list directly — no useEffect needed
-  const filtered = players.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchPos = positionFilter === 'All' || p.position === positionFilter;
+  const filteredPlayers = players.filter(p => {
+    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
+    const matchPosition = positionFilter === 'All' || p.position === positionFilter;
     const matchTeam = teamFilter === 'All' || p.slb_teams?.name === teamFilter;
-    return matchSearch && matchPos && matchTeam;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'value-desc':
-        return b.value - a.value;
-      case 'value-asc':
-        return a.value - b.value;
-      case 'points-desc':
-        return b.total_season_points - a.total_season_points;
-      case 'alphabetical':
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
-    }
+    return matchSearch && matchPosition && matchTeam;
+  });
+
+  const displayPlayers = [...filteredPlayers].sort((a, b) => {
+    if (sortBy === 'value-desc') return b.value - a.value;
+    if (sortBy === 'value-asc') return a.value - b.value;
+    if (sortBy === 'name') return a.name.localeCompare(b.name);
+    return 0;
   });
 
   const fetchPlayers = async () => {
@@ -101,8 +95,8 @@ const PlayersPage = () => {
                 <input
                   type="text"
                   placeholder="Search players..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] text-sm sm:text-base"
                 />
               </div>
@@ -149,8 +143,7 @@ const PlayersPage = () => {
                 >
                   <option value="value-desc">Value (high to low)</option>
                   <option value="value-asc">Value (low to high)</option>
-                  <option value="points-desc">Points (high to low)</option>
-                  <option value="alphabetical">Alphabetical</option>
+                  <option value="name">Name (A to Z)</option>
                 </select>
               </div>
             </div>
@@ -167,7 +160,7 @@ const PlayersPage = () => {
                 <div key={i} className="card h-16 animate-pulse" />
               ))}
             </div>
-          ) : filtered.length === 0 ? (
+          ) : displayPlayers.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-xl sm:text-2xl text-[#a0a0a0]">No players found</p>
             </div>
@@ -175,7 +168,7 @@ const PlayersPage = () => {
             <>
               {/* Mobile: Player Cards */}
               <div className="grid grid-cols-1 sm:hidden gap-4">
-                {filtered.map((player) => (
+                {displayPlayers.map((player) => (
                   <div
                     key={player.id}
                     onClick={() => setSelectedPlayer(player)}
@@ -224,7 +217,7 @@ const PlayersPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((player) => (
+                    {displayPlayers.map((player) => (
                       <tr
                         key={player.id}
                         onClick={() => setSelectedPlayer(player)}
