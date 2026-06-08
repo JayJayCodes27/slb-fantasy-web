@@ -433,10 +433,15 @@ const FantasyPage = () => {
 
     const hasFlags = squadData.some(s => s.is_starter === true || s.is_starter === false);
     if (hasFlags) {
-      return {
-        courtPlayers: squadData.filter(s => s.is_starter).slice(0, 5),
-        benchPlayers: squadData.filter(s => !s.is_starter).slice(0, 4),
-      };
+      const starters = squadData.filter(s => s.is_starter);
+      const nonStarters = squadData.filter(s => !s.is_starter);
+      // If everyone is marked starter (e.g. seeded with all is_starter=true),
+      // cap court at 5 and treat the overflow as bench players
+      const courtPlayers = starters.slice(0, 5);
+      const benchPlayers = nonStarters.length >= 4
+        ? nonStarters.slice(0, 4)
+        : [...nonStarters, ...starters.slice(5)].slice(0, 4);
+      return { courtPlayers, benchPlayers };
     }
 
     // Fallback: order G first, then F, then C; first 5 to court
