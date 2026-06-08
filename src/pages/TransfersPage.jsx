@@ -18,6 +18,7 @@ const TransfersPage = () => {
   const [squadData, setSquadData] = useState([]);
   const [userData, setUserData] = useState(null);
   const [freeTransfers, setFreeTransfers] = useState(1);
+  const [bankBalance, setBankBalance] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [viewMode, setViewMode] = useState('own'); // 'own' or 'replacement'
   const [soldPlayer, setSoldPlayer] = useState(null);
@@ -61,6 +62,7 @@ const TransfersPage = () => {
 
       setUserData(userData);
       setFreeTransfers(userData.free_transfers_available || 1);
+      setBankBalance(userData.bank_balance || 0);
 
       // Fetch squad data
       const { data: squadData, error: squadError } = await supabase
@@ -178,8 +180,17 @@ const TransfersPage = () => {
 
       if (updateError) throw updateError;
 
-      // Update local state
-      setFreeTransfers(newFreeTransfers);
+      // Refetch user data to refresh display
+      const { data: refreshed } = await supabase
+        .from('users')
+        .select('free_transfers_available, bank_balance')
+        .eq('id', user.id)
+        .single();
+
+      if (refreshed) {
+        setFreeTransfers(refreshed.free_transfers_available);
+        setBankBalance(refreshed.bank_balance);
+      }
 
       // Add empty slot instead of redirecting
       setEmptySlots([...emptySlots, { position: selectedPlayer.players?.position, slotIndex: emptySlots.length }]);
@@ -364,7 +375,6 @@ const TransfersPage = () => {
   }
 
   const { guards, forwards, centres } = groupPlayersByPosition();
-  const bankBalance = userData?.bank_balance || 0;
   const usedTransfers = 1 - freeTransfers;
   const totalBudget = 100000000;
 
