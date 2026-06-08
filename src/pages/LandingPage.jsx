@@ -721,6 +721,7 @@ const LandingPage = () => {
             <div className="font-oswald text-xl sm:text-2xl font-bold text-orange">SLB FANTASY</div>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
               <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Privacy Policy</Link>
+              <Link to="/terms" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Terms</Link>
               <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Contact</a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">@slbfantasy</a>
             </div>

@@ -14,6 +14,7 @@ import AdminPage from './pages/AdminPage.jsx';
 import SquadSelectionPage from './pages/SquadSelectionPage.jsx';
 import TransfersPage from './pages/TransfersPage.jsx';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage.jsx';
+import TermsPage from './pages/TermsPage.jsx';
 import OnboardingPage from './pages/OnboardingPage.jsx';
 import GameweekResultsPage from './pages/GameweekResultsPage.jsx';
 import LeaderboardPage from './pages/LeaderboardPage.jsx';
@@ -40,6 +41,7 @@ function App() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/squad-selection" element={<Layout><SquadSelectionPage /></Layout>} />
         <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />
+        <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
       </Routes>
       <DevToolbar />
     </AuthProvider>
