@@ -96,7 +96,7 @@ const LeaderboardPage = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter'] p-5 max-w-6xl mx-auto">
       {/* Page Header */}
-      <div className="pt-24 sm:pt-32 pb-8 sm:pb-12">
+      <div className="pt-6 pb-8 sm:pb-12">
         <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">LEADERBOARD</h1>
       </div>
 

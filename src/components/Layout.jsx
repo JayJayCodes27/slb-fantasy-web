@@ -231,11 +231,45 @@ const Layout = ({ children }) => {
         </div>
       )}
 
+      {/* Fantasy Sub-Nav — shown on the 4 fantasy routes */}
+      {user && ['/fantasy', '/transfers', '/leaderboard', '/players'].includes(location.pathname) && (
+        <div className="border-b border-[#222222] bg-[#0A0A0A]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8">
+            <div className="flex items-center overflow-x-auto">
+              {[
+                { label: 'My Team', href: '/fantasy' },
+                { label: 'Transfers', href: '/transfers' },
+                { label: 'Leaderboard', href: '/leaderboard' },
+                { label: 'Players', href: '/players' },
+              ].map(({ label, href }) => {
+                const isActive = location.pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    to={href}
+                    className={`px-4 sm:px-6 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                      isActive ? 'border-[#F4622A] text-white' : 'border-transparent text-[#666666] hover:text-[#A0A0A0]'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Close Fixed Header Wrapper */}
       </div>
 
-      {/* Main Content */}
-      <div className={isAuthPage ? '' : 'pt-24'}>
+      {/* Main Content — extra top padding on fantasy sub-nav routes */}
+      <div className={
+        isAuthPage ? '' :
+        (user && ['/fantasy', '/transfers', '/leaderboard', '/players'].includes(location.pathname))
+          ? 'pt-36'
+          : 'pt-24'
+      }>
         {children}
       </div>
 

@@ -733,7 +733,7 @@ const FantasyPage = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Page Header */}
-      <div className="px-4 sm:px-8 pt-24 sm:pt-32 pb-8 sm:pb-12">
+      <div className="px-4 sm:px-8 pt-6 pb-8 sm:pb-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
             <div>
@@ -760,34 +760,6 @@ const FantasyPage = () => {
         </div>
       </div>
 
-      {/* Fantasy Sub-Nav Tab Bar */}
-      <div className="border-b border-[#222222] bg-[#0A0A0A] sticky top-[96px] z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="flex items-center gap-0 overflow-x-auto">
-            {[
-              { label: 'My Team', href: '/fantasy' },
-              { label: 'Transfers', href: '/transfers' },
-              { label: 'Leaderboard', href: '/leaderboard' },
-              { label: 'Players', href: '/players' },
-            ].map(({ label, href }) => {
-              const isActive = location.pathname === href;
-              return (
-                <Link
-                  key={href}
-                  to={href}
-                  className={`px-4 sm:px-6 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
-                    isActive
-                      ? 'border-[#F4622A] text-white'
-                      : 'border-transparent text-[#666666] hover:text-[#A0A0A0]'
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
 
       <div className="px-4 sm:px-8 pb-8 sm:pb-12">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">

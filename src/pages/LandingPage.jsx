@@ -15,6 +15,15 @@ const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [waitlistMessage, setWaitlistMessage] = useState('');
   const [waitlistError, setWaitlistError] = useState('');
+  const [heroSlide, setHeroSlide] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
+
+  // Auto-advance hero carousel
+  useEffect(() => {
+    if (heroPaused) return;
+    const t = setInterval(() => setHeroSlide(s => (s + 1) % 3), 5000);
+    return () => clearInterval(t);
+  }, [heroPaused]);
 
   // Fetch deadline from active gameweek, fall back to 7 days from now
   useEffect(() => {
@@ -149,76 +158,98 @@ const fetchNews = async () => {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-12 animate-fade-in">
+      {/* Hero Carousel */}
+      <section
+        className="py-12 sm:py-20 px-4 sm:px-12 relative overflow-hidden"
+        onMouseEnter={() => setHeroPaused(true)}
+        onMouseLeave={() => setHeroPaused(false)}
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-            {/* Left Column */}
-            <div className="w-full lg:w-[55%] text-center lg:text-left">
-              <p className="text-[#C9A84C] font-['Barlow_Condensed'] text-[13px] uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
-              <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2 whitespace-nowrap">
-                YOUR SLB SQUAD.
-              </h1>
-              <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6 whitespace-nowrap">
-                OWN THE SEASON.
-              </h2>
-              <p className="text-[#A0A0A0] text-base leading-relaxed mb-8 font-['Inter']">
-                The UK's first fantasy basketball game for Super League Basketball. Live scoring. Season-long leagues. Free to play.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                {!user && (
-                  <Link
-                    to="/signup"
-                    className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center"
-                  >
-                    Get Started
-                  </Link>
-                )}
-                <Link
-                  to="/about"
-                  className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-white hover:bg-white hover:text-black transition-colors text-center"
-                >
-                  Learn More
-                </Link>
-              </div>
-            </div>
+          {/* Slides */}
+          <div className="relative min-h-[320px] sm:min-h-[380px]">
 
-            {/* Right Column - Jersey Graphic */}
-            <div className="hidden lg:flex w-[45%] items-center justify-center">
-              <div className="relative" style={{ width: '280px', height: '350px' }}>
-                {/* Radiating light burst effect */}
-                <div className="absolute inset-0 bg-gradient-radial from-[#FF6B00]/30 via-[#FF6B00]/10 to-transparent rounded-full blur-3xl"></div>
-                
-                {/* Jersey illustration */}
-                <div className="relative transform rotate-[-10deg]">
-                  <svg viewBox="0 0 280 350" className="w-full h-full" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 107, 0, 0.3))' }}>
-                    {/* Jersey body - proper basketball jersey shape */}
-                    <path d="M30 20 L250 20 L270 50 L270 180 L250 220 L140 240 L30 220 L10 180 L10 50 Z" fill="#0a0a0a" />
-                    
-                    {/* Orange shoulders */}
-                    <path d="M30 20 L250 20 L270 50 L250 70 L30 70 L10 50 Z" fill="#FF6B00" />
-                    
-                    {/* Orange side trim */}
-                    <path d="M10 50 L30 70 L30 220 L10 180 Z" fill="#FF6B00" />
-                    <path d="M250 20 L270 50 L270 180 L250 220 L250 70 Z" fill="#FF6B00" />
-                    
-                    {/* Orange collar/neckline */}
-                    <path d="M100 20 L140 40 L180 20" fill="none" stroke="#FF6B00" strokeWidth="4" />
-                    
-                    {/* SLB text at chest level */}
-                    <text x="140" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold" fontFamily="sans-serif">SLB</text>
-                    
-                    {/* Number 23 large in centre */}
-                    <text x="140" y="180" textAnchor="middle" fill="white" fontSize="100" fontWeight="bold" fontFamily="sans-serif">23</text>
-                    
-                    {/* Subtle texture lines */}
-                    <line x1="140" y1="50" x2="140" y2="240" stroke="#1a1a1a" strokeWidth="1" />
-                    <line x1="80" y1="60" x2="80" y2="230" stroke="#1a1a1a" strokeWidth="1" />
-                    <line x1="200" y1="60" x2="200" y2="230" stroke="#1a1a1a" strokeWidth="1" />
-                  </svg>
+            {/* Slide 1 */}
+            <div className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === 0 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
+                <div className="w-full lg:w-[55%] text-center lg:text-left">
+                  <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
+                  <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">YOUR SLB SQUAD.</h1>
+                  <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">OWN THE SEASON.</h2>
+                  <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">The UK's first fantasy basketball game for Super League Basketball. Live scoring. Season-long leagues. Free to play.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                    {!user && <Link to="/signup" className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center">Get Started</Link>}
+                    <Link to="/about" className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-white hover:bg-white hover:text-black transition-colors text-center">Learn More</Link>
+                  </div>
+                </div>
+                <div className="hidden lg:flex w-[45%] items-center justify-center">
+                  <div className="relative" style={{ width: '280px', height: '350px' }}>
+                    <div className="absolute inset-0 bg-gradient-radial from-[#FF6B00]/30 via-[#FF6B00]/10 to-transparent rounded-full blur-3xl"></div>
+                    <div className="relative transform rotate-[-10deg]">
+                      <svg viewBox="0 0 280 350" className="w-full h-full" style={{ filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.3))' }}>
+                        <path d="M30 20 L250 20 L270 50 L270 180 L250 220 L140 240 L30 220 L10 180 L10 50 Z" fill="#0a0a0a" />
+                        <path d="M30 20 L250 20 L270 50 L250 70 L30 70 L10 50 Z" fill="#FF6B00" />
+                        <path d="M10 50 L30 70 L30 220 L10 180 Z" fill="#FF6B00" />
+                        <path d="M250 20 L270 50 L270 180 L250 220 L250 70 Z" fill="#FF6B00" />
+                        <path d="M100 20 L140 40 L180 20" fill="none" stroke="#FF6B00" strokeWidth="4" />
+                        <text x="140" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold" fontFamily="sans-serif">SLB</text>
+                        <text x="140" y="180" textAnchor="middle" fill="white" fontSize="100" fontWeight="bold" fontFamily="sans-serif">23</text>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Slide 2 */}
+            <div className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === 1 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
+                <div className="w-full lg:w-[55%] text-center lg:text-left">
+                  <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
+                  <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">BUILD YOUR</h1>
+                  <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">DREAM TEAM.</h2>
+                  <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">9 players. £100m budget. Every decision counts.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                    <Link to="/about" className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center">How It Works</Link>
+                  </div>
+                </div>
+                <div className="hidden lg:flex w-[45%] items-center justify-center">
+                  <div className="w-[280px] h-[350px] bg-[#111111] rounded-2xl border border-[#222222] flex items-center justify-center">
+                    <span className="text-[#F4622A] font-['Bebas_Neue'] text-6xl">SLB</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Slide 3 */}
+            <div className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === 2 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
+                <div className="w-full lg:w-[55%] text-center lg:text-left">
+                  <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
+                  <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">COMPETE. SCORE.</h1>
+                  <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">WIN.</h2>
+                  <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">Live scoring. Season-long leagues. Free to play.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                    <a href="mailto:hello@slbfantasy.co.uk" className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center">Join the Waitlist</a>
+                  </div>
+                </div>
+                <div className="hidden lg:flex w-[45%] items-center justify-center">
+                  <div className="w-[280px] h-[350px] bg-[#111111] rounded-2xl border border-[#222222] flex items-center justify-center">
+                    <span className="text-[#F4622A] font-['Bebas_Neue'] text-6xl">SLB</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dot indicators */}
+          <div className="flex items-center justify-center gap-2 mt-8">
+            {[0, 1, 2].map(i => (
+              <button
+                key={i}
+                onClick={() => setHeroSlide(i)}
+                className={`rounded-full transition-all ${heroSlide === i ? 'w-6 h-2 bg-[#F4622A]' : 'w-2 h-2 bg-[#333333] hover:bg-[#555555]'}`}
+              />
+            ))}
           </div>
         </div>
       </section>

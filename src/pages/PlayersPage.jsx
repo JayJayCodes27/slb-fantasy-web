@@ -84,7 +84,7 @@ const PlayersPage = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Page Header */}
-      <div className="pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-8">
+      <div className="pt-6 pb-8 sm:pb-12 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">PLAYERS</h1>
           <p className="text-[#A0A0A0] text-base sm:text-lg">Browse and scout players</p>
