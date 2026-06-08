@@ -339,7 +339,7 @@ const fetchNews = async () => {
           <h2 className="text-white font-inter font-bold text-[22px] sm:text-[26px] uppercase tracking-wide mb-8">HOW IT WORKS</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { num: '01', title: 'Sign Up', desc: 'Create your free account in seconds and join the UK's first SLB fantasy game.' },
+              { num: '01', title: 'Sign Up', desc: "Create your free account in seconds and join the UK's first SLB fantasy game." },
               { num: '02', title: 'Pick Squad', desc: 'Choose 9 players — 3 Guards, 3 Forwards, 3 Centres — within your £100m budget.' },
               { num: '03', title: 'Score Points', desc: 'Your players earn points from real SLB stats every gameweek. Captain doubles up.' },
               { num: '04', title: 'Win', desc: 'Climb the public leaderboard or top your private league to be crowned champion.' },
