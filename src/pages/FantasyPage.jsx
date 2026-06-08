@@ -27,6 +27,8 @@ const FantasyPage = () => {
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const [isMobile, setIsMobile] = useState(false);
   const [selectedForSwap, setSelectedForSwap] = useState(null);
+  const [swapError, setSwapError] = useState(null);       // { ids: [id, id] } for red-flash
+  const [swapToast, setSwapToast] = useState(null);       // string message
 
   // Create Private League form state
   const [leagueName, setLeagueName] = useState('');
@@ -342,12 +344,50 @@ const FantasyPage = () => {
     setDragOverTarget(null);
   };
 
-  // Swap two players: swaps their array positions and persists is_starter changes to DB
+  const showSwapToast = (msg) => {
+    setSwapToast(msg);
+    setTimeout(() => setSwapToast(null), 2500);
+  };
+
+  const flashInvalidSwap = (idA, idB) => {
+    setSwapError({ ids: [idA, idB] });
+    setTimeout(() => setSwapError(null), 600);
+  };
+
+  // Validate and execute a swap between two squad members.
+  // Enforces: same position only; court must keep ≥1G, ≥1F, ≥1C after swap.
   const swapPlayers = async (playerA, playerB) => {
+    const posA = normPos(playerA.players?.position);
+    const posB = normPos(playerB.players?.position);
+
+    // Rule 1: positions must match
+    if (posA !== posB) {
+      flashInvalidSwap(playerA.id, playerB.id);
+      const label = { G: 'Guard', F: 'Forward', C: 'Centre' };
+      showSwapToast(`Can't swap — ${label[posA] || 'player'} can only swap with another ${label[posA] || 'player'}`);
+      return;
+    }
+
+    // Rule 2: if moving a court player to bench, ensure court keeps ≥1 of that position
+    const { courtPlayers: currentCourt } = getCourtAndBenchPlayers();
+    const aOnCourt = currentCourt.some(p => p.id === playerA.id);
+    const bOnCourt = currentCourt.some(p => p.id === playerB.id);
+    const movingTowardsBench = aOnCourt !== bOnCourt; // one court, one bench
+
+    if (movingTowardsBench) {
+      const courtPlayer = aOnCourt ? playerA : playerB;
+      const courtOfPos = currentCourt.filter(p => normPos(p.players?.position) === posA);
+      if (courtOfPos.length <= 1) {
+        const label = { G: 'Guard', F: 'Forward', C: 'Centre' };
+        flashInvalidSwap(playerA.id, playerB.id);
+        showSwapToast(`Court must always have at least 1 ${label[posA] || 'player'}`);
+        return;
+      }
+    }
+
     const aStarter = playerA.is_starter;
     const bStarter = playerB.is_starter;
 
-    // Swap their slots in the array and update is_starter flags in one pass
     setSquadData(prev => {
       const next = [...prev];
       const idxA = next.findIndex(s => s.id === playerA.id);
@@ -357,7 +397,6 @@ const FantasyPage = () => {
       return next;
     });
 
-    // Only write to DB when starter status actually changes (court ↔ bench)
     if (aStarter !== bStarter) {
       try {
         await supabase.from('user_squads').update({ is_starter: bStarter }).eq('id', playerA.id);
@@ -710,6 +749,13 @@ const FantasyPage = () => {
 
             {hasSquad && (
               <>
+                {/* Swap error toast */}
+                {swapToast && (
+                  <div className="mb-3 bg-[#1A1A1A] border border-[#EF4444] text-[#EF4444] text-sm font-semibold rounded-xl px-4 py-3 text-center">
+                    {swapToast}
+                  </div>
+                )}
+
                 {/* Basketball Court */}
                 <div className="bg-[#1A1A1A] border border-[#2E2E2E] rounded-xl p-4 sm:p-6" style={{ boxShadow: 'inset 0 0 40px rgba(244, 98, 42, 0.05)' }}>
                   {/* Court Container */}
@@ -751,6 +797,7 @@ const FantasyPage = () => {
                         const isDragged = draggedId === player?.id;
                         const isDragOver = dragOverTarget?.id === player?.id;
                         const isSelectedForSwap = selectedForSwap === player?.id;
+                        const isInvalidSwap = swapError?.ids.includes(player?.id);
 
                         // Empty slot
                         if (!player || !player.players) {
@@ -800,9 +847,10 @@ const FantasyPage = () => {
                               className="bg-[#111111] border rounded-xl p-2 hover:border-[#F4622A] transition-all text-center"
                               style={{
                                 position: 'relative',
-                                borderColor: isDragOver || isSelectedForSwap ? '#F4622A' : '#222222',
-                                boxShadow: isSelectedForSwap ? '0 0 0 2px #F4622A' : 'none',
+                                borderColor: isInvalidSwap ? '#EF4444' : isDragOver || isSelectedForSwap ? '#F4622A' : '#222222',
+                                boxShadow: isInvalidSwap ? '0 0 0 2px #EF4444' : isSelectedForSwap ? '0 0 0 2px #F4622A' : 'none',
                                 minWidth: '64px',
+                                transition: 'border-color 0.15s, box-shadow 0.15s',
                               }}
                             >
                               {isCaptain && (
@@ -822,6 +870,9 @@ const FantasyPage = () => {
                               </div>
                               <div style={{ color: '#F4622A', fontSize: '11px', fontWeight: 'bold' }}>
                                 {player.players.total_season_points || 0} pts
+                              </div>
+                              <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                {normPos(player.players?.position) || player.players?.position}
                               </div>
                             </div>
                           </div>
@@ -890,6 +941,7 @@ const FantasyPage = () => {
                         const isDragged = draggedId === player.id;
                         const isDragOver = dragOverTarget?.id === player.id;
                         const isSelectedForSwap = selectedForSwap === player.id;
+                        const isInvalidSwap = swapError?.ids.includes(player.id);
 
                         return (
                           <div
@@ -916,50 +968,20 @@ const FantasyPage = () => {
                               animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
                             }}
                           >
-                            <div className="bg-[#111111] border border-[#222222] rounded-xl p-3 hover:border-[#F4622A] transition-all" style={{ position: 'relative' }}>
+                            <div
+                              className="bg-[#111111] border rounded-xl p-3 hover:border-[#F4622A] transition-all text-center"
+                              style={{
+                                position: 'relative',
+                                borderColor: isInvalidSwap ? '#EF4444' : isDragOver || isSelectedForSwap ? '#F4622A' : '#222222',
+                                boxShadow: isInvalidSwap ? '0 0 0 2px #EF4444' : isSelectedForSwap ? '0 0 0 2px #F4622A' : 'none',
+                                transition: 'border-color 0.15s, box-shadow 0.15s',
+                              }}
+                            >
                               {isCaptain && (
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: '-6px',
-                                    right: '-6px',
-                                    backgroundColor: '#C9A84C',
-                                    color: 'white',
-                                    width: '20px',
-                                    height: '20px',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '10px',
-                                    fontWeight: 'bold',
-                                    zIndex: 2
-                                  }}
-                                >
-                                  C
-                                </div>
+                                <div style={{ position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#C9A84C', color: 'white', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>C</div>
                               )}
                               {isViceCaptain && (
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    top: '-6px',
-                                    right: '-6px',
-                                    backgroundColor: '#666666',
-                                    color: 'white',
-                                    width: '20px',
-                                    height: '20px',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '10px',
-                                    fontWeight: 'bold',
-                                    zIndex: 2
-                                  }}
-                                >
-                                  V
-                                </div>
+                                <div style={{ position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#666666', color: 'white', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold', zIndex: 2 }}>V</div>
                               )}
                               <Jersey
                                 primaryColour={getTeamColours(player.players?.slb_teams?.name).primary}
@@ -969,6 +991,9 @@ const FantasyPage = () => {
                               />
                               <p className="text-white font-semibold text-[11px] mt-2">{player.players.name?.split(' ')[0]}</p>
                               <p className="text-[#F4622A] font-bold text-[11px]">{player.players.total_season_points || 0} pts</p>
+                              <p style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                {normPos(player.players?.position) || player.players?.position}
+                              </p>
                             </div>
                           </div>
                         );
