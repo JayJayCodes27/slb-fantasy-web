@@ -85,6 +85,7 @@ const Layout = ({ children }) => {
                   <Link to="/" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Home</Link>
                   <Link to="/players" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/players' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Players</Link>
                   <Link to="/fantasy" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/fantasy' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Fantasy</Link>
+                  <Link to="/transfers" className={`text-[13px] font-medium uppercase tracking-widest relative group ${location.pathname === '/transfers' ? 'text-[#F4622A]' : 'text-white hover:text-[#F4622A] transition-colors'}`}>Transfers</Link>
                   <Link to="/leaderboard" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Leaderboard</Link>
                   <Link to="/fixtures" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">Fixtures</Link>
                   <Link to="/news" className="text-white text-[13px] font-medium uppercase tracking-widest hover:text-[#F4622A] transition-colors relative group">News</Link>
@@ -187,6 +188,7 @@ const Layout = ({ children }) => {
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Home</Link>
                 <Link to="/players" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Players</Link>
                 <Link to="/fantasy" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Fantasy</Link>
+                <Link to="/transfers" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Transfers</Link>
                 <Link to="/leaderboard" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Leaderboard</Link>
                 <Link to="/fixtures" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3 border-b border-[#242424]">Fixtures</Link>
                 <Link to="/news" onClick={() => setMobileMenuOpen(false)} className="text-white text-sm font-medium py-3">News</Link>

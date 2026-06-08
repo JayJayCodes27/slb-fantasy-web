@@ -562,32 +562,53 @@ const FantasyPage = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Formation positions configuration
+  // Formation positions configuration - 3 rows of 3 players each (G top, F middle, C bottom)
   const formationPositions = {
     '2G-2F-1C': [
-      { position: 'C', top: '15%', left: '50%' },
-      { position: 'F', top: '38%', left: '22%' },
-      { position: 'F', top: '38%', left: '78%' },
-      { position: 'G', top: '65%', left: '25%' },
-      { position: 'G', top: '65%', left: '65%' }
+      // Top row - Guards (3 slots)
+      { position: 'G', top: '20%', left: '20%' },
+      { position: 'G', top: '20%', left: '50%' },
+      { position: 'G', top: '20%', left: '80%' },
+      // Middle row - Forwards (3 slots)
+      { position: 'F', top: '50%', left: '20%' },
+      { position: 'F', top: '50%', left: '50%' },
+      { position: 'F', top: '50%', left: '80%' },
+      // Bottom row - Centres (3 slots)
+      { position: 'C', top: '80%', left: '20%' },
+      { position: 'C', top: '80%', left: '50%' },
+      { position: 'C', top: '80%', left: '80%' }
     ],
     '3G-1F-1C': [
-      { position: 'C', top: '15%', left: '50%' },
-      { position: 'G', top: '35%', left: '15%' },
-      { position: 'G', top: '35%', left: '85%' },
-      { position: 'G', top: '65%', left: '50%' },
-      { position: 'F', top: '50%', left: '50%' }
+      // Top row - Guards (3 slots)
+      { position: 'G', top: '20%', left: '20%' },
+      { position: 'G', top: '20%', left: '50%' },
+      { position: 'G', top: '20%', left: '80%' },
+      // Middle row - Forwards (3 slots)
+      { position: 'F', top: '50%', left: '20%' },
+      { position: 'F', top: '50%', left: '50%' },
+      { position: 'F', top: '50%', left: '80%' },
+      // Bottom row - Centres (3 slots)
+      { position: 'C', top: '80%', left: '20%' },
+      { position: 'C', top: '80%', left: '50%' },
+      { position: 'C', top: '80%', left: '80%' }
     ],
     '1G-3F-1C': [
-      { position: 'C', top: '15%', left: '50%' },
-      { position: 'F', top: '35%', left: '18%' },
-      { position: 'F', top: '35%', left: '50%' },
-      { position: 'F', top: '35%', left: '82%' },
-      { position: 'G', top: '65%', left: '50%' }
+      // Top row - Guards (3 slots)
+      { position: 'G', top: '20%', left: '20%' },
+      { position: 'G', top: '20%', left: '50%' },
+      { position: 'G', top: '20%', left: '80%' },
+      // Middle row - Forwards (3 slots)
+      { position: 'F', top: '50%', left: '20%' },
+      { position: 'F', top: '50%', left: '50%' },
+      { position: 'F', top: '50%', left: '80%' },
+      // Bottom row - Centres (3 slots)
+      { position: 'C', top: '80%', left: '20%' },
+      { position: 'C', top: '80%', left: '50%' },
+      { position: 'C', top: '80%', left: '80%' }
     ]
   };
 
-  // Get court and bench players based on formation
+  // Get court and bench players based on formation - 9 players on court (3G, 3F, 3C)
   const getCourtAndBenchPlayers = () => {
     if (!squadData || squadData.length === 0) {
       return { courtPlayers: [], benchPlayers: [] };
@@ -597,34 +618,13 @@ const FantasyPage = () => {
     const forwards = squadData.filter(s => s.players?.position === 'F');
     const centres = squadData.filter(s => s.players?.position === 'C');
 
-    let courtGuards, benchGuards, courtForwards, benchForwards, courtCentres, benchCentres;
-
-    switch (formation) {
-      case '3G-1F-1C':
-        courtGuards = guards.slice(0, 3);
-        benchGuards = guards.slice(3);
-        courtForwards = forwards.slice(0, 1);
-        benchForwards = forwards.slice(1);
-        courtCentres = centres.slice(0, 1);
-        benchCentres = centres.slice(1);
-        break;
-      case '1G-3F-1C':
-        courtGuards = guards.slice(0, 1);
-        benchGuards = guards.slice(1);
-        courtForwards = forwards.slice(0, 3);
-        benchForwards = forwards.slice(3);
-        courtCentres = centres.slice(0, 1);
-        benchCentres = centres.slice(1);
-        break;
-      default: // 2G-2F-1C
-        courtGuards = guards.slice(0, 2);
-        benchGuards = guards.slice(2);
-        courtForwards = forwards.slice(0, 2);
-        benchForwards = forwards.slice(2);
-        courtCentres = centres.slice(0, 1);
-        benchCentres = centres.slice(1);
-        break;
-    }
+    // Always put 3 of each position on court
+    const courtGuards = guards.slice(0, 3);
+    const benchGuards = guards.slice(3);
+    const courtForwards = forwards.slice(0, 3);
+    const benchForwards = forwards.slice(3);
+    const courtCentres = centres.slice(0, 3);
+    const benchCentres = centres.slice(3);
 
     const courtPlayers = [...courtGuards, ...courtForwards, ...courtCentres];
     const benchPlayers = [...benchGuards, ...benchForwards, ...benchCentres];
@@ -838,29 +838,41 @@ const FantasyPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-white font-['Bebas_Neue'] text-4xl sm:text-[36px] leading-none mb-2">{user?.team_name || 'MY TEAM'}</h1>
-              <p className="text-[#C9A84C] font-['Barlow_Condensed'] text-[14px] uppercase tracking-widest">GAMEWEEK {settings?.current_gameweek || 1}</p>
+              <h1 className="text-white font-bold text-4xl sm:text-[36px] leading-none mb-2">{user?.team_name || 'MY TEAM'}</h1>
+              <p className="text-[#C9A84C] font-semibold text-[14px] uppercase tracking-widest">GAMEWEEK {settings?.current_gameweek || 1}</p>
             </div>
             <div className="flex items-baseline gap-3">
-              <span className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-[48px] leading-none">{totalPoints}</span>
-              <span className="text-[#C9A84C] font-['Barlow_Condensed'] text-sm uppercase tracking-wider">PTS</span>
+              <span className="text-[#F4622A] font-bold text-5xl sm:text-[48px] leading-none">{totalPoints}</span>
+              <span className="text-[#C9A84C] font-semibold text-sm uppercase tracking-wider">PTS</span>
             </div>
           </div>
           
           {/* Quick Stats Pills */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 items-center">
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
-              <span className="text-[#A0A0A0] text-xs font-['Inter'] mr-2">Budget</span>
-              <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
+              <span className="text-[#A0A0A0] text-xs mr-2">Budget</span>
+              <span className="text-white font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
             </div>
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
-              <span className="text-[#A0A0A0] text-xs font-['Inter'] mr-2">Players</span>
-              <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">{squadData.length}/9</span>
+              <span className="text-[#A0A0A0] text-xs mr-2">Players</span>
+              <span className="text-white font-bold text-sm">{squadData.length}/9</span>
             </div>
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
-              <span className="text-[#A0A0A0] text-xs font-['Inter'] mr-2">Transfers</span>
-              <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">1</span>
+              <span className="text-[#A0A0A0] text-xs mr-2">Transfers</span>
+              <span className="text-white font-bold text-sm">1</span>
             </div>
+            <Link
+              to="/transfers"
+              className="bg-[#F4622A] text-white font-semibold text-sm px-5 py-2 rounded-lg hover:bg-[#d4521a] transition-colors flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 10v14l-7-7 7-7"/>
+                <path d="M17 10v14l7-7-7-7"/>
+                <path d="M14 4l-4 4 4 4"/>
+                <path d="M10 8l4-4-4-4"/>
+              </svg>
+              Make Transfers
+            </Link>
           </div>
         </div>
       </div>
@@ -871,11 +883,11 @@ const FantasyPage = () => {
           <div className="w-full lg:w-[65%]">
             {!hasSquad && settings?.season_state === 'pre_season' && (
               <div className="bg-[#111111] border border-[#222222] rounded-xl p-6 text-center">
-                <h2 className="text-white font-['Barlow_Condensed'] font-bold text-xl mb-2 uppercase">Build Your Squad</h2>
-                <p className="text-[#A0A0A0] text-sm mb-4 font-['Inter']">Select 9 players within £100m budget to get started</p>
+                <h2 className="text-white font-bold text-xl mb-2 uppercase">Build Your Squad</h2>
+                <p className="text-[#A0A0A0] text-sm mb-4">Select 9 players within £100m budget to get started</p>
                 <Link
                   to="/squad-selection"
-                  className="inline-block bg-[#F4622A] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#d4521a] transition-colors font-['Inter']"
+                  className="inline-block bg-[#F4622A] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#d4521a] transition-colors"
                 >
                   Build Your Squad →
                 </Link>
@@ -1015,13 +1027,13 @@ const FantasyPage = () => {
                                 style={{ width: '64px', height: '80px', objectFit: 'contain' }}
                                 alt={player.players.position}
                               />
-                              <div style={{ color: 'white', fontSize: '12px', fontWeight: '600', marginTop: '4px', fontFamily: 'Inter' }}>
+                              <div style={{ color: 'white', fontSize: '12px', fontWeight: '600', marginTop: '4px' }}>
                                 {player.players.name?.split(' ')[0]}
                               </div>
-                              <div style={{ color: '#F4622A', fontSize: '14px', fontWeight: 'bold', fontFamily: 'Barlow Condensed' }}>
+                              <div style={{ color: '#F4622A', fontSize: '14px', fontWeight: 'bold' }}>
                                 {player.players.total_season_points || 0} pts
                               </div>
-                              <div style={{ color: '#C9A84C', fontSize: '11px', fontFamily: 'Inter' }}>
+                              <div style={{ color: '#C9A84C', fontSize: '11px' }}>
                                 £{((player.players?.value || 0) / 1000000).toFixed(1)}m
                               </div>
                             </div>
@@ -1041,18 +1053,18 @@ const FantasyPage = () => {
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <p className="text-white font-bold text-sm mb-3 font-['Inter']">{selectedPlayer.players?.name}</p>
+                      <p className="text-white font-bold text-sm mb-3">{selectedPlayer.players?.name}</p>
 
                       <button
                         onClick={() => handleSetCaptain(selectedPlayer)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#F4622A] font-bold font-['Inter']"
+                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#F4622A] font-bold"
                       >
                         🅒 Set as Captain
                       </button>
 
                       <button
                         onClick={() => handleSetViceCaptain(selectedPlayer)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#A0A0A0] font-['Inter']"
+                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#A0A0A0]"
                       >
                         Ⓥ Set as Vice Captain
                       </button>
@@ -1060,7 +1072,7 @@ const FantasyPage = () => {
                       {captain === selectedPlayer.player_id && (
                         <button
                           onClick={() => handleRemoveCaptain(selectedPlayer)}
-                          className="w-full text-left px-3 py-2 text-sm rounded-lg text-red-400 hover:bg-[#2A2A2A] font-['Inter']"
+                          className="w-full text-left px-3 py-2 text-sm rounded-lg text-red-400 hover:bg-[#2A2A2A]"
                         >
                           Remove Captain
                         </button>
@@ -1068,7 +1080,7 @@ const FantasyPage = () => {
 
                       <button
                         onClick={() => setSelectedPlayer(null)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg text-[#555555] hover:bg-[#2A2A2A] mt-1 font-['Inter']"
+                        className="w-full text-left px-3 py-2 text-sm rounded-lg text-[#555555] hover:bg-[#2A2A2A] mt-1"
                       >
                         Cancel
                       </button>
@@ -1077,9 +1089,9 @@ const FantasyPage = () => {
 
                   {/* Bench Section */}
                   <div className="border-t border-[#2E2E2E] mt-6 pt-6">
-                    <h3 className="text-white font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">Bench</h3>
+                    <h3 className="text-white font-bold text-sm uppercase mb-4">Bench</h3>
                     {isMobile && (
-                      <p className="text-[#A0A0A0] text-xs mb-4 font-['Inter']">
+                      <p className="text-[#A0A0A0] text-xs mb-4">
                         {selectedForSwap ? "Tap another player to swap" : "Tap a player to move them"}
                       </p>
                     )}
@@ -1167,8 +1179,8 @@ const FantasyPage = () => {
                                 style={{ width: '48px', height: '60px', objectFit: 'contain' }}
                                 alt={player.players.position}
                               />
-                              <p className="text-white font-semibold text-[11px] mt-2 font-['Inter']">{player.players.name?.split(' ')[0]}</p>
-                              <p className="text-[#F4622A] font-bold text-[11px] font-['Barlow_Condensed']">{player.players.total_season_points || 0} pts</p>
+                              <p className="text-white font-semibold text-[11px] mt-2">{player.players.name?.split(' ')[0]}</p>
+                              <p className="text-[#F4622A] font-bold text-[11px]">{player.players.total_season_points || 0} pts</p>
                             </div>
                           </div>
                         );
@@ -1176,7 +1188,7 @@ const FantasyPage = () => {
                       {[...Array(4 - benchPlayers.length)].map((_, index) => (
                         <div key={`empty-${index}`} className="text-center flex-shrink-0 flex-1 sm:flex-none">
                           <div className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3 h-[100px] flex flex-col items-center justify-center">
-                            <span className="text-[#C9A84C] font-['Bebas_Neue'] text-[14px]">G/F/C</span>
+                            <span className="text-[#C9A84C] font-bold text-[14px]">G/F/C</span>
                           </div>
                         </div>
                       ))}
@@ -1191,17 +1203,17 @@ const FantasyPage = () => {
           <div className="w-full lg:w-[35%] space-y-6">
             {/* Chips Section */}
             <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">
-              <h2 className="text-[#C9A84C] font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">CHIPS</h2>
+              <h2 className="text-[#C9A84C] font-bold text-sm uppercase mb-4">CHIPS</h2>
               <div className="space-y-3">
                 {chips.map((chip) => (
                   <div key={chip.name} className="bg-[#1A1A1A] border border-[#222222] rounded-xl p-4 hover:border-[#F4622A] transition-colors cursor-pointer">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">{chip.name}</span>
+                      <span className="text-white font-bold text-sm">{chip.name}</span>
                       <span className={`text-white text-[10px] font-bold px-2 py-1 rounded-full ${chip.remaining > 0 ? 'bg-[#F4622A]' : 'bg-[#555555]'}`}>
                         {chip.remaining > 0 ? `×${chip.remaining}` : 'USED'}
                       </span>
                     </div>
-                    <p className="text-[#A0A0A0] text-xs font-['Inter']">{chip.description}</p>
+                    <p className="text-[#A0A0A0] text-xs">{chip.description}</p>
                   </div>
                 ))}
               </div>
@@ -1209,7 +1221,7 @@ const FantasyPage = () => {
 
             {/* Squad List */}
             <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">
-              <h2 className="text-[#C9A84C] font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">SQUAD</h2>
+              <h2 className="text-[#C9A84C] font-bold text-sm uppercase mb-4">SQUAD</h2>
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {squadData.map((squadItem) => {
                   if (!squadItem.players) return null;
@@ -1222,20 +1234,20 @@ const FantasyPage = () => {
                         style={{ backgroundColor: squadItem.players.slb_teams?.primary_colour || '#6B7280' }}
                       />
                       <div className="flex-1">
-                        <p className="text-white font-semibold text-sm font-['Inter']">{squadItem.players.name}</p>
+                        <p className="text-white font-semibold text-sm">{squadItem.players.name}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span
-                            className="text-[10px] font-bold px-2 py-0.5 rounded-full font-['Inter']"
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                             style={{ backgroundColor: positionColor + '20', color: positionColor }}
                           >
                             {squadItem.players.position}
                           </span>
                           {isCaptain && (
-                            <span className="text-[#C9A84C] text-[10px] font-bold font-['Barlow_Condensed']">C</span>
+                            <span className="text-[#C9A84C] text-[10px] font-bold">C</span>
                           )}
                         </div>
                       </div>
-                      <span className="text-[#F4622A] font-['Barlow_Condensed'] font-bold text-sm">{squadItem.players.total_season_points || 0}</span>
+                      <span className="text-[#F4622A] font-bold text-sm">{squadItem.players.total_season_points || 0}</span>
                     </div>
                   );
                 })}
@@ -1244,19 +1256,19 @@ const FantasyPage = () => {
 
             {/* Gameweek Stats */}
             <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">
-              <h2 className="text-[#C9A84C] font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">GAMEWEEK STATS</h2>
+              <h2 className="text-[#C9A84C] font-bold text-sm uppercase mb-4">GAMEWEEK STATS</h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-[#A0A0A0] text-sm font-['Inter']">Points</span>
-                  <span className="text-white font-['Barlow_Condensed'] font-bold text-lg">{totalPoints}</span>
+                  <span className="text-[#A0A0A0] text-sm">Points</span>
+                  <span className="text-white font-bold text-lg">{totalPoints}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[#A0A0A0] text-sm font-['Inter']">Players scoring</span>
-                  <span className="text-white font-['Barlow_Condensed'] font-bold text-lg">{playersScoring}/5</span>
+                  <span className="text-[#A0A0A0] text-sm">Players scoring</span>
+                  <span className="text-white font-bold text-lg">{playersScoring}/5</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[#A0A0A0] text-sm font-['Inter']">Formation</span>
-                  <span className="text-white font-['Barlow_Condensed'] font-bold text-lg">{formationLabel}</span>
+                  <span className="text-[#A0A0A0] text-sm">Formation</span>
+                  <span className="text-white font-bold text-lg">{formationLabel}</span>
                 </div>
               </div>
             </div>
