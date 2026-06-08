@@ -192,6 +192,14 @@ const TransfersPage = () => {
         setBankBalance(refreshed.bank_balance);
       }
 
+      // Refresh squad display
+      const { data: updatedSquad } = await supabase
+        .from('user_squads')
+        .select('*, players(*, slb_teams(*))')
+        .eq('user_id', user.id);
+
+      if (updatedSquad) setSquadData(updatedSquad);
+
       // Add empty slot instead of redirecting
       setEmptySlots([...emptySlots, { position: selectedPlayer.players?.position, slotIndex: emptySlots.length }]);
 
@@ -199,10 +207,9 @@ const TransfersPage = () => {
       setShowToast(`Sold ${selectedPlayer.players?.name} for £${(sellPrice / 1000000).toFixed(1)}m`);
       setTimeout(() => setShowToast(null), 3000);
 
-      // Close panel and refresh
+      // Close panel
       setSelectedPlayer(null);
       setShowConfirmDialog(false);
-      fetchData();
 
     } catch (error) {
       console.error('Error selling player:', error);
