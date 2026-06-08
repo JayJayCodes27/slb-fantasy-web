@@ -373,15 +373,49 @@ const FantasyPage = () => {
       return;
     }
 
-    // Swap is_starter between the two players
+    // Check if both players are on the court and have the same position type
+    const draggedPosition = draggedItem.players?.position;
+    const targetPosition = targetItem.players?.position;
+    const bothOnCourt = draggedItem.is_starter && targetItem.is_starter;
+
+    if (bothOnCourt && draggedPosition === targetPosition) {
+      // Swap positions in the squadData array
+      // Find the indices of the two players in the courtPlayers array
+      const { courtPlayers } = getCourtAndBenchPlayers();
+      const draggedIndex = courtPlayers.findIndex(p => p.id === draggedId);
+      const targetIndex = courtPlayers.findIndex(p => p.id === targetItem.id);
+
+      if (draggedIndex !== -1 && targetIndex !== -1) {
+        // Swap the players in the squadData array based on their court positions
+        const draggedPlayer = squadData.find(s => s.id === draggedId);
+        const targetPlayer = squadData.find(s => s.id === targetItem.id);
+
+        // Swap the players in the squadData array
+        const newSquadData = [...squadData];
+        const draggedIdx = newSquadData.findIndex(s => s.id === draggedId);
+        const targetIdx = newSquadData.findIndex(s => s.id === targetItem.id);
+
+        // Swap the players
+        [newSquadData[draggedIdx], newSquadData[targetIdx]] = [newSquadData[targetIdx], newSquadData[draggedIdx]];
+
+        setSquadData(newSquadData);
+
+        // Save to Supabase - we need to update the slot_order or similar
+        // For now, just update local state since the database might not support position swapping
+        setDraggedId(null);
+        return;
+      }
+    }
+
+    // Original logic: swap is_starter between the two players
     const draggedStarter = draggedItem.is_starter;
     const targetStarter = targetItem.is_starter;
 
     // Update local state immediately
     setSquadData(prev => prev.map(s => {
-      if (s.id === draggedId) 
+      if (s.id === draggedId)
         return { ...s, is_starter: targetStarter };
-      if (s.id === targetItem.id) 
+      if (s.id === targetItem.id)
         return { ...s, is_starter: draggedStarter };
       return s;
     }));
@@ -461,6 +495,26 @@ const FantasyPage = () => {
     const firstItem = squadData.find(s => s.id === selectedForSwap);
     if (!firstItem) return;
 
+    // Check if both players are on the court and have the same position type
+    const firstPosition = firstItem.players?.position;
+    const secondPosition = squadItem.players?.position;
+    const bothOnCourt = firstItem.is_starter && squadItem.is_starter;
+
+    if (bothOnCourt && firstPosition === secondPosition) {
+      // Swap positions in the squadData array
+      const newSquadData = [...squadData];
+      const firstIdx = newSquadData.findIndex(s => s.id === selectedForSwap);
+      const secondIdx = newSquadData.findIndex(s => s.id === squadItem.id);
+
+      // Swap the players
+      [newSquadData[firstIdx], newSquadData[secondIdx]] = [newSquadData[secondIdx], newSquadData[firstIdx]];
+
+      setSquadData(newSquadData);
+      setSelectedForSwap(null);
+      return;
+    }
+
+    // Original logic: swap is_starter
     const firstStarter = firstItem.is_starter;
     const secondStarter = squadItem.is_starter;
 
@@ -778,498 +832,435 @@ const FantasyPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
-      {/* Page Sub-header */}
-      <div className="px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#242424]">
-        <div className="flex items-center gap-3">
-          <h1 className="text-white font-bold text-lg sm:text-xl uppercase tracking-wide">FANTASY</h1>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#22c55e]"></div>
-            <span className="text-[#22c55e] text-xs">Live</span>
-            <span className="text-[#a0a0a0] text-xs">•</span>
-            <span className="text-[#a0a0a0] text-xs">Gameweek 1</span>
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
+      {/* Page Header */}
+      <div className="px-4 sm:px-8 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-white font-['Bebas_Neue'] text-4xl sm:text-[36px] leading-none mb-2">{user?.team_name || 'MY TEAM'}</h1>
+              <p className="text-[#C9A84C] font-['Barlow_Condensed'] text-[14px] uppercase tracking-widest">GAMEWEEK {settings?.current_gameweek || 1}</p>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <span className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-[48px] leading-none">{totalPoints}</span>
+              <span className="text-[#C9A84C] font-['Barlow_Condensed'] text-sm uppercase tracking-wider">PTS</span>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-0 w-full sm:w-auto">
-          <button
-            onClick={() => setActiveTab('team')}
-            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors ${
-              activeTab === 'team' ? 'bg-[#FF6B00] text-white' : 'bg-[#1a1a1a] text-white border border-[#242424]'
-            }`}
-          >
-            MY TEAM
-          </button>
-          <Link
-            to="/results"
-            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors bg-[#1a1a1a] text-white border border-[#242424] hover:bg-[#2a2a2a]"
-          >
-            RESULTS
-          </Link>
-          <button
-            onClick={() => setActiveTab('leagues')}
-            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-button transition-colors ${
-              activeTab === 'leagues' ? 'bg-[#FF6B00] text-white' : 'bg-[#1a1a1a] text-white border border-[#242424]'
-            }`}
-          >
-            MY LEAGUES
-          </button>
+          
+          {/* Quick Stats Pills */}
+          <div className="flex flex-wrap gap-3">
+            <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
+              <span className="text-[#A0A0A0] text-xs font-['Inter'] mr-2">Budget</span>
+              <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
+            </div>
+            <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
+              <span className="text-[#A0A0A0] text-xs font-['Inter'] mr-2">Players</span>
+              <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">{squadData.length}/9</span>
+            </div>
+            <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
+              <span className="text-[#A0A0A0] text-xs font-['Inter'] mr-2">Transfers</span>
+              <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">1</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* Left Sidebar — 260px wide, hidden on mobile */}
-        <div className="hidden lg:block w-[260px] flex-shrink-0 p-6 space-y-3">
-          {/* Sidebar Card 1 — My SLB Squad */}
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-bold text-sm">My SLB Squad</h2>
-              {settings?.season_state === 'pre_season' ? (
-                <Link to="/squad-selection" className="text-[#FF6B00] text-xs cursor-pointer hover:underline">Edit Team</Link>
-              ) : settings?.season_state === 'season_active' ? (
-                <Link to="/transfers" className="text-[#FF6B00] text-xs cursor-pointer hover:underline">Make Transfer</Link>
-              ) : null}
-            </div>
-            <div className="border-t border-[#242424] my-3"></div>
-            <div className="space-y-3">
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">Gameweek points</span>
-                <span className="text-[#FF6B00] font-bold text-sm">54</span>
-              </div>
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">Overall points</span>
-                <span className="text-white font-bold text-sm">54</span>
-              </div>
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">Overall rank</span>
-                <span className="text-white font-bold text-sm">—</span>
-              </div>
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">Gameweek rank</span>
-                <span className="text-white font-bold text-sm">—</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar Card 2 — My Chips */}
-          <div className="card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[#a0a0a0] text-xs">ⓘ</span>
-              <h2 className="text-white font-bold text-sm">My Chips</h2>
-            </div>
-            <div className="border-t border-[#242424] my-3"></div>
-            <div className="grid grid-cols-2 gap-2">
-              {chips.map((chip) => (
-                <div key={chip.name} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-button p-2.5">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-white font-bold text-xs">{chip.name}</span>
-                    <span className="bg-[#FF6B00] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-pill">×{chip.remaining}</span>
-                  </div>
-                  <p className="text-[#a0a0a0] text-[11px]">Available</p>
-                  <p className="text-[#666] text-[11px]">{chip.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar Card 3 — Finance */}
-          <div className="card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[#a0a0a0] text-xs">💰</span>
-              <h2 className="text-white font-bold text-sm">Finance</h2>
-            </div>
-            <div className="border-t border-[#242424] my-3"></div>
-            <div className="space-y-3">
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">Squad value</span>
-                <span className="text-white font-bold text-sm">£{(squadValue / 1000000).toFixed(1)}m</span>
-              </div>
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">In the bank</span>
-                <span className="text-white font-bold text-sm">£{(bank / 1000000).toFixed(1)}m</span>
-              </div>
-              <div className="flex justify-between h-8">
-                <span className="text-[#a0a0a0] text-xs">Total budget</span>
-                <span className="text-white font-bold text-sm">£100.0m</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar Card 4 — Transfers */}
-          <div className="card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[#a0a0a0] text-xs">⇄</span>
-              <h2 className="text-white font-bold text-sm">Transfers</h2>
-            </div>
-            <div className="border-t border-[#242424] my-3"></div>
-            <div className="flex justify-between h-8 mb-3">
-              <span className="text-[#a0a0a0] text-xs">Free transfers available</span>
-              <span className="text-white font-bold text-sm">1</span>
-            </div>
-            <Link to="/transfers" className="block w-full bg-[#FF6B00] text-white font-bold text-sm h-10 rounded-button hover:bg-[#e05f00] transition-colors text-center leading-10">
-              Make Transfer →
-            </Link>
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 p-4 sm:p-6 space-y-3">
-          {activeTab === 'team' && (
-            <>
-              {!hasSquad && settings?.season_state === 'pre_season' && (
-                <div className="card p-6 text-center">
-                  <h2 className="text-white font-bold text-xl mb-2">Build Your Squad</h2>
-                  <p className="text-[#a0a0a0] text-sm mb-4">Select 10 players within £100m budget to get started</p>
-                  <Link
-                    to="/squad-selection"
-                    className="inline-block bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#e05f00] transition-colors"
-                  >
-                    Build Your Squad →
-                  </Link>
-                </div>
-              )}
-
-              {hasSquad && (
-                <div className="card p-6 text-center">
-                  <h2 className="text-white font-bold text-xl mb-2">Transfers</h2>
-                  <p className="text-[#a0a0a0] text-sm mb-4">Make changes to your squad</p>
-                  <Link
-                    to="/transfers"
-                    className="inline-block bg-[#FF6B00] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#e05f00] transition-colors"
-                  >
-                    Make Transfer →
-                  </Link>
-                </div>
-              )}
-
-              {/* Court Panel */}
-              <div className="card p-4 sm:p-5 h-auto sm:h-[520px]">
-                {/* Panel Header */}
-                <div className="mb-4 sm:mb-6">
-                  <p className="text-[#FF6B00] font-bold text-xl sm:text-2xl">Total: {totalPoints} pts</p>
-                  <p className="text-[#a0a0a0] text-xs mt-1">GW{settings?.current_gameweek || 1} · {playersScoring} players scoring</p>
-                </div>
-
-                {/* Formation Label */}
-                <div className="mb-4 sm:mb-6">
-                  <p className="text-[#a0a0a0] text-xs">Formation: {formationLabel}</p>
-                </div>
-
-                {/* Basketball Court */}
-                <div
-                  style={{
-                    position: 'relative',
-                    width: '100%',
-                    minHeight: '480px',
-                    backgroundColor: '#1a472a'
-                  }}
+      <div className="px-4 sm:px-8 pb-8 sm:pb-12">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Left Column - Court (~65%) */}
+          <div className="w-full lg:w-[65%]">
+            {!hasSquad && settings?.season_state === 'pre_season' && (
+              <div className="bg-[#111111] border border-[#222222] rounded-xl p-6 text-center">
+                <h2 className="text-white font-['Barlow_Condensed'] font-bold text-xl mb-2 uppercase">Build Your Squad</h2>
+                <p className="text-[#A0A0A0] text-sm mb-4 font-['Inter']">Select 9 players within £100m budget to get started</p>
+                <Link
+                  to="/squad-selection"
+                  className="inline-block bg-[#F4622A] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#d4521a] transition-colors font-['Inter']"
                 >
-                  {/* Court image as background layer */}
-                  <img
-                    src={halfCourt}
-                    style={{
-                      position: 'absolute',
-                      top: 0, left: 0,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'fill',
-                      objectPosition: 'center',
-                      opacity: 0.9,
-                      zIndex: 0,
-                      pointerEvents: 'none'
-                    }}
-                    alt=""
-                  />
+                  Build Your Squad →
+                </Link>
+              </div>
+            )}
 
-                  {/* Players layer on top */}
+            {hasSquad && (
+              <>
+                {/* Basketball Court */}
+                <div className="bg-[#1A1A1A] border border-[#2E2E2E] rounded-xl p-4 sm:p-6" style={{ boxShadow: 'inset 0 0 40px rgba(244, 98, 42, 0.05)' }}>
+                  {/* Court Container */}
                   <div
                     style={{
-                      position: 'absolute',
-                      top: 0, left: 0,
+                      position: 'relative',
                       width: '100%',
-                      height: '100%',
-                      zIndex: 1
+                      paddingTop: '60%',
+                      backgroundColor: '#1A1A1A'
                     }}
-                    onClick={() => setSelectedPlayer(null)}
                   >
-                    {formationPositions[formation]?.map((pos, index) => {
-                      const player = courtPlayers[index];
-                      if (!player || !player.players) return null;
-                      
-                      const isCaptain = captain === player.player_id;
-                      const isViceCaptain = viceCaptain === player.player_id;
-                      const isDragged = draggedId === player.id;
-                      const isDragOver = dragOverTarget?.id === player.id;
-                      const isSelectedForSwap = selectedForSwap === player.id;
-                      
-                      return (
-                        <div
-                          key={player.player_id}
-                          draggable={true}
-                          onDragStart={(e) => handleDragStart(e, player)}
-                          onDragOver={(e) => handleDragOver(e, player)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, player)}
-                          style={{
-                            position: 'absolute',
-                            transform: 'translate(-50%, -50%)',
-                            top: pos.top,
-                            left: pos.left,
-                            opacity: isDragged ? 0.5 : 1,
-                            border: isDragOver || isSelectedForSwap ? '2px dashed #FF5500' : 'none',
-                            borderRadius: '8px',
-                            padding: '4px',
-                            animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
-                          }}
-                          className="text-center cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.innerWidth < 768) {
-                              handleTap(player);
-                            } else {
-                              handlePlayerClick(player, e);
-                            }
-                          }}
-                        >
-                          <div style={{textAlign: 'center', position: 'relative'}}>
-                            {/* Captain/Vice Captain Badge */}
-                            {isCaptain && (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: '-8px',
-                                  right: '-8px',
-                                  backgroundColor: '#FF6B00',
-                                  color: 'white',
-                                  width: '20px',
-                                  height: '20px',
-                                  borderRadius: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '10px',
-                                  fontWeight: 'bold',
-                                  zIndex: 2
-                                }}
-                              >
-                                C
+                    {/* Court image as background layer */}
+                    <img
+                      src={halfCourt}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                        opacity: 0.8,
+                        zIndex: 0,
+                        pointerEvents: 'none'
+                      }}
+                      alt=""
+                    />
+
+                    {/* Players layer on top */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        zIndex: 1
+                      }}
+                      onClick={() => setSelectedPlayer(null)}
+                    >
+                      {formationPositions[formation]?.map((pos, index) => {
+                        const player = courtPlayers[index];
+                        if (!player || !player.players) return null;
+
+                        const isCaptain = captain === player.player_id;
+                        const isViceCaptain = viceCaptain === player.player_id;
+                        const isDragged = draggedId === player.id;
+                        const isDragOver = dragOverTarget?.id === player.id;
+                        const isSelectedForSwap = selectedForSwap === player.id;
+
+                        return (
+                          <div
+                            key={player.player_id}
+                            draggable={true}
+                            onDragStart={(e) => handleDragStart(e, player)}
+                            onDragOver={(e) => handleDragOver(e, player)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, player)}
+                            style={{
+                              position: 'absolute',
+                              transform: 'translate(-50%, -50%)',
+                              top: pos.top,
+                              left: pos.left,
+                              opacity: isDragged ? 0.5 : 1,
+                              border: isDragOver || isSelectedForSwap ? '2px dashed #F4622A' : 'none',
+                              borderRadius: '12px',
+                              padding: '8px',
+                              animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
+                            }}
+                            className="text-center cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.innerWidth < 768) {
+                                handleTap(player);
+                              } else {
+                                handlePlayerClick(player, e);
+                              }
+                            }}
+                          >
+                            <div className="bg-[#111111] border border-[#222222] rounded-xl p-3 hover:border-[#F4622A] transition-all" style={{ position: 'relative' }}>
+                              {/* Captain/Vice Captain Badge */}
+                              {isCaptain && (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: '-8px',
+                                    right: '-8px',
+                                    backgroundColor: '#C9A84C',
+                                    color: 'white',
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    zIndex: 2
+                                  }}
+                                >
+                                  C
+                                </div>
+                              )}
+                              {isViceCaptain && (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: '-8px',
+                                    right: '-8px',
+                                    backgroundColor: '#666666',
+                                    color: 'white',
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    zIndex: 2
+                                  }}
+                                >
+                                  V
+                                </div>
+                              )}
+                              <img
+                                src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
+                                style={{ width: '64px', height: '80px', objectFit: 'contain' }}
+                                alt={player.players.position}
+                              />
+                              <div style={{ color: 'white', fontSize: '12px', fontWeight: '600', marginTop: '4px', fontFamily: 'Inter' }}>
+                                {player.players.name?.split(' ')[0]}
                               </div>
-                            )}
-                            {isViceCaptain && (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: '-8px',
-                                  right: '-8px',
-                                  backgroundColor: '#666666',
-                                  color: 'white',
-                                  width: '20px',
-                                  height: '20px',
-                                  borderRadius: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '10px',
-                                  fontWeight: 'bold',
-                                  zIndex: 2
-                                }}
-                              >
-                                V
+                              <div style={{ color: '#F4622A', fontSize: '14px', fontWeight: 'bold', fontFamily: 'Barlow Condensed' }}>
+                                {player.players.total_season_points || 0} pts
                               </div>
-                            )}
-                            <img
-                              src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
-                              style={{width: '64px', height: '80px', objectFit: 'contain'}}
-                              alt={player.players.position}
-                            />
-                            <div style={{color: 'white', fontSize: '13px', fontWeight: 'bold', marginTop: '4px'}}>
-                              {player.players.name?.split(' ')[0]}
-                            </div>
-                            <div style={{color: '#FF5500', fontSize: '12px'}}>
-                              {player.players.total_season_points || 0} pts
+                              <div style={{ color: '#C9A84C', fontSize: '11px', fontFamily: 'Inter' }}>
+                                £{((player.players?.value || 0) / 1000000).toFixed(1)}m
+                              </div>
                             </div>
                           </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Captain/Vice Captain Popup */}
+                  {selectedPlayer && !isMobile && (
+                    <div
+                      className="absolute z-50 bg-[#1A1A1A] border border-[#F4622A] rounded-xl p-4 shadow-xl min-w-[180px]"
+                      style={{
+                        top: popupPosition.top,
+                        left: popupPosition.left
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p className="text-white font-bold text-sm mb-3 font-['Inter']">{selectedPlayer.players?.name}</p>
+
+                      <button
+                        onClick={() => handleSetCaptain(selectedPlayer)}
+                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#F4622A] font-bold font-['Inter']"
+                      >
+                        🅒 Set as Captain
+                      </button>
+
+                      <button
+                        onClick={() => handleSetViceCaptain(selectedPlayer)}
+                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#A0A0A0] font-['Inter']"
+                      >
+                        Ⓥ Set as Vice Captain
+                      </button>
+
+                      {captain === selectedPlayer.player_id && (
+                        <button
+                          onClick={() => handleRemoveCaptain(selectedPlayer)}
+                          className="w-full text-left px-3 py-2 text-sm rounded-lg text-red-400 hover:bg-[#2A2A2A] font-['Inter']"
+                        >
+                          Remove Captain
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => setSelectedPlayer(null)}
+                        className="w-full text-left px-3 py-2 text-sm rounded-lg text-[#555555] hover:bg-[#2A2A2A] mt-1 font-['Inter']"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Bench Section */}
+                  <div className="border-t border-[#2E2E2E] mt-6 pt-6">
+                    <h3 className="text-white font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">Bench</h3>
+                    {isMobile && (
+                      <p className="text-[#A0A0A0] text-xs mb-4 font-['Inter']">
+                        {selectedForSwap ? "Tap another player to swap" : "Tap a player to move them"}
+                      </p>
+                    )}
+                    <div className="flex gap-3 overflow-x-auto pb-2">
+                      {benchPlayers.map((player, index) => {
+                        if (!player || !player.players) return null;
+                        const isCaptain = captain === player.player_id;
+                        const isViceCaptain = viceCaptain === player.player_id;
+                        const isDragged = draggedId === player.id;
+                        const isDragOver = dragOverTarget?.id === player.id;
+                        const isSelectedForSwap = selectedForSwap === player.id;
+
+                        return (
+                          <div
+                            key={player.player_id}
+                            className="text-center flex-shrink-0 flex-1 sm:flex-none cursor-pointer"
+                            draggable={true}
+                            onDragStart={(e) => handleDragStart(e, player)}
+                            onDragOver={(e) => handleDragOver(e, player)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, player)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.innerWidth < 768) {
+                                handleTap(player);
+                              } else {
+                                handlePlayerClick(player, e);
+                              }
+                            }}
+                            style={{
+                              opacity: isDragged ? 0.5 : 1,
+                              border: isDragOver || isSelectedForSwap ? '2px dashed #F4622A' : 'none',
+                              borderRadius: '12px',
+                              padding: '4px',
+                              animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
+                            }}
+                          >
+                            <div className="bg-[#111111] border border-[#222222] rounded-xl p-3 hover:border-[#F4622A] transition-all" style={{ position: 'relative' }}>
+                              {isCaptain && (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: '-6px',
+                                    right: '-6px',
+                                    backgroundColor: '#C9A84C',
+                                    color: 'white',
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    fontWeight: 'bold',
+                                    zIndex: 2
+                                  }}
+                                >
+                                  C
+                                </div>
+                              )}
+                              {isViceCaptain && (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    top: '-6px',
+                                    right: '-6px',
+                                    backgroundColor: '#666666',
+                                    color: 'white',
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    fontWeight: 'bold',
+                                    zIndex: 2
+                                  }}
+                                >
+                                  V
+                                </div>
+                              )}
+                              <img
+                                src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
+                                style={{ width: '48px', height: '60px', objectFit: 'contain' }}
+                                alt={player.players.position}
+                              />
+                              <p className="text-white font-semibold text-[11px] mt-2 font-['Inter']">{player.players.name?.split(' ')[0]}</p>
+                              <p className="text-[#F4622A] font-bold text-[11px] font-['Barlow_Condensed']">{player.players.total_season_points || 0} pts</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {[...Array(4 - benchPlayers.length)].map((_, index) => (
+                        <div key={`empty-${index}`} className="text-center flex-shrink-0 flex-1 sm:flex-none">
+                          <div className="border-2 border-dashed border-[#2E2E2E] rounded-xl p-3 h-[100px] flex flex-col items-center justify-center">
+                            <span className="text-[#C9A84C] font-['Bebas_Neue'] text-[14px]">G/F/C</span>
+                          </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
                 </div>
+              </>
+            )}
+          </div>
 
-                {/* Captain/Vice Captain Popup */}
-                {selectedPlayer && !isMobile && (
-                  <div 
-                    className="absolute z-50 bg-[#1a1a1a] border border-[#FF5500] rounded-xl p-4 shadow-xl min-w-[180px]"
-                    style={{ 
-                      top: popupPosition.top, 
-                      left: popupPosition.left 
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <p className="text-white font-bold text-sm mb-3">{selectedPlayer.players?.name}</p>
-                    
-                    <button 
-                      onClick={() => handleSetCaptain(selectedPlayer)}
-                      className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2a2a2a] text-orange-400 font-bold"
-                    >
-                      🅒 Set as Captain
-                    </button>
-                    
-                    <button 
-                      onClick={() => handleSetViceCaptain(selectedPlayer)}
-                      className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2a2a2a] text-gray-300"
-                    >
-                      Ⓥ Set as Vice Captain
-                    </button>
-                    
-                    {captain === selectedPlayer.player_id && (
-                      <button 
-                        onClick={() => handleRemoveCaptain(selectedPlayer)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg text-red-400 hover:bg-[#2a2a2a]"
-                      >
-                        Remove Captain
-                      </button>
-                    )}
-                    
-                    <button 
-                      onClick={() => setSelectedPlayer(null)}
-                      className="w-full text-left px-3 py-2 text-sm rounded-lg text-gray-500 hover:bg-[#2a2a2a] mt-1"
-                    >
-                      Cancel
-                    </button>
+          {/* Right Column - Panel (~35%) */}
+          <div className="w-full lg:w-[35%] space-y-6">
+            {/* Chips Section */}
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">
+              <h2 className="text-[#C9A84C] font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">CHIPS</h2>
+              <div className="space-y-3">
+                {chips.map((chip) => (
+                  <div key={chip.name} className="bg-[#1A1A1A] border border-[#222222] rounded-xl p-4 hover:border-[#F4622A] transition-colors cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-['Barlow_Condensed'] font-bold text-sm">{chip.name}</span>
+                      <span className={`text-white text-[10px] font-bold px-2 py-1 rounded-full ${chip.remaining > 0 ? 'bg-[#F4622A]' : 'bg-[#555555]'}`}>
+                        {chip.remaining > 0 ? `×${chip.remaining}` : 'USED'}
+                      </span>
+                    </div>
+                    <p className="text-[#A0A0A0] text-xs font-['Inter']">{chip.description}</p>
                   </div>
-                )}
+                ))}
+              </div>
+            </div>
 
-                {/* Bench Section */}
-                <div className="border-t border-[#242424] mt-3 sm:mt-4 pt-3 sm:pt-4">
-                  <h3 className="text-white font-bold text-xs sm:text-sm mb-2 sm:mb-3">Bench</h3>
-                  {isMobile && (
-                    <p className="text-[#a0a0a0] text-xs mb-2">
-                      {selectedForSwap ? "Tap another player to swap" : "Tap a player to move them"}
-                    </p>
-                  )}
-                  <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
-                    {benchPlayers.map((player, index) => {
-                      if (!player || !player.players) return null;
-                      const isCaptain = captain === player.player_id;
-                      const isViceCaptain = viceCaptain === player.player_id;
-                      const isDragged = draggedId === player.id;
-                      const isDragOver = dragOverTarget?.id === player.id;
-                      const isSelectedForSwap = selectedForSwap === player.id;
-                      
-                      return (
-                        <div 
-                          key={player.player_id} 
-                          className="text-center flex-shrink-0 flex-1 sm:flex-none cursor-pointer"
-                          draggable={true}
-                          onDragStart={(e) => handleDragStart(e, player)}
-                          onDragOver={(e) => handleDragOver(e, player)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, player)}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.innerWidth < 768) {
-                              handleTap(player);
-                            } else {
-                              handlePlayerClick(player, e);
-                            }
-                          }}
-                          style={{
-                            opacity: isDragged ? 0.5 : 1,
-                            border: isDragOver || isSelectedForSwap ? '2px dashed #FF5500' : 'none',
-                            borderRadius: '8px',
-                            padding: '4px',
-                            animation: isSelectedForSwap ? 'pulse 1s infinite' : 'none'
-                          }}
-                        >
-                          <div style={{position: 'relative', display: 'inline-block'}}>
-                            {isCaptain && (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: '-6px',
-                                  right: '-6px',
-                                  backgroundColor: '#FF6B00',
-                                  color: 'white',
-                                  width: '16px',
-                                  height: '16px',
-                                  borderRadius: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '8px',
-                                  fontWeight: 'bold',
-                                  zIndex: 2
-                                }}
-                              >
-                                C
-                              </div>
-                            )}
-                            {isViceCaptain && (
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  top: '-6px',
-                                  right: '-6px',
-                                  backgroundColor: '#666666',
-                                  color: 'white',
-                                  width: '16px',
-                                  height: '16px',
-                                  borderRadius: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '8px',
-                                  fontWeight: 'bold',
-                                  zIndex: 2
-                                }}
-                              >
-                                V
-                              </div>
-                            )}
-                            <img
-                              src={getJerseyForTeam(player.players?.slb_teams?.short_name)}
-                              style={{width: '48px', height: '60px', objectFit: 'contain'}}
-                              alt={player.players.position}
-                            />
-                          </div>
-                          <p className="text-white font-bold text-[10px] sm:text-[11px] mt-1">{player.players.name?.split(' ')[0]}</p>
-                          <p className="text-[#FF6B00] font-bold text-[10px] sm:text-[11px]">{player.players.total_season_points || 0} pts</p>
-                        </div>
-                      );
-                    })}
-                    {[...Array(4 - benchPlayers.length)].map((_, index) => (
-                      <div key={`empty-${index}`} className="text-center flex-shrink-0 flex-1 sm:flex-none">
-                        <div className="border border-dashed border-[#333] rounded-button p-2 h-[60px] sm:h-[70px] flex flex-col items-center justify-center">
-                          <span className="text-[#555] text-[10px] sm:text-[11px]">Player</span>
+            {/* Squad List */}
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">
+              <h2 className="text-[#C9A84C] font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">SQUAD</h2>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {squadData.map((squadItem) => {
+                  if (!squadItem.players) return null;
+                  const isCaptain = captain === squadItem.player_id;
+                  const positionColor = squadItem.players.position === 'G' ? '#F4622A' : squadItem.players.position === 'F' ? '#C9A84C' : '#FFFFFF';
+                  return (
+                    <div key={squadItem.id} className="flex items-center gap-3 p-3 bg-[#1A1A1A] rounded-lg border border-[#222222]">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: squadItem.players.slb_teams?.primary_colour || '#6B7280' }}
+                      />
+                      <div className="flex-1">
+                        <p className="text-white font-semibold text-sm font-['Inter']">{squadItem.players.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-full font-['Inter']"
+                            style={{ backgroundColor: positionColor + '20', color: positionColor }}
+                          >
+                            {squadItem.players.position}
+                          </span>
+                          {isCaptain && (
+                            <span className="text-[#C9A84C] text-[10px] font-bold font-['Barlow_Condensed']">C</span>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <span className="text-[#F4622A] font-['Barlow_Condensed'] font-bold text-sm">{squadItem.players.total_season_points || 0}</span>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Bottom Stats Bar */}
-              <div className="card h-auto sm:h-20 flex flex-col sm:flex-row items-center">
-                <div className="flex-1 flex items-center justify-center border-r border-[#242424] w-full sm:w-auto py-3 sm:py-0">
-                  <div className="text-center">
-                    <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">GAMEWEEK POINTS</p>
-                    <p className="text-[#FF6B00] font-bold text-xl sm:text-2xl">54</p>
-                  </div>
+            {/* Gameweek Stats */}
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">
+              <h2 className="text-[#C9A84C] font-['Barlow_Condensed'] font-bold text-sm uppercase mb-4">GAMEWEEK STATS</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#A0A0A0] text-sm font-['Inter']">Points</span>
+                  <span className="text-white font-['Barlow_Condensed'] font-bold text-lg">{totalPoints}</span>
                 </div>
-                <div className="flex-1 flex items-center justify-center border-r border-[#242424] w-full sm:w-auto py-3 sm:py-0">
-                  <div className="text-center">
-                    <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">OVERALL POINTS</p>
-                    <p className="text-white font-bold text-xl sm:text-2xl">54</p>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#A0A0A0] text-sm font-['Inter']">Players scoring</span>
+                  <span className="text-white font-['Barlow_Condensed'] font-bold text-lg">{playersScoring}/5</span>
                 </div>
-                <div className="flex-1 flex items-center justify-center w-full sm:w-auto py-3 sm:py-0">
-                  <div className="text-center">
-                    <p className="text-[#a0a0a0] text-[10px] sm:text-[11px] uppercase tracking-wider mb-1">OVERALL RANK</p>
-                    <p className="text-white font-bold text-xl sm:text-2xl">—</p>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[#A0A0A0] text-sm font-['Inter']">Formation</span>
+                  <span className="text-white font-['Barlow_Condensed'] font-bold text-lg">{formationLabel}</span>
                 </div>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
