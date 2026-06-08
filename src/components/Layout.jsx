@@ -1,5 +1,5 @@
 // Layout.jsx — Main layout component with fixed header navigation and ticker
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -8,9 +8,16 @@ const Layout = ({ children }) => {
   const { user, signOut } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
 
   const isLandingPage = location.pathname === '/';
   const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
+  const isPrivacyOrTermsPage = location.pathname === '/privacy' || location.pathname === '/terms';
+
+  useEffect(() => {
+    const consent = localStorage.getItem('slb_cookie_consent');
+    if (!consent) setShowBanner(true);
+  }, []);
 
   const getUserInitials = () => {
     if (!user?.email) return 'U';
@@ -205,6 +212,38 @@ const Layout = ({ children }) => {
       <div className={isAuthPage ? '' : 'pt-24'}>
         {children}
       </div>
+
+      {/* GDPR Cookie Consent Banner */}
+      {showBanner && !isPrivacyOrTermsPage && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#141414] border-t border-[#2A2A2A] px-6 py-4">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <p className="text-[#999999] text-sm flex-1">
+              We use cookies to improve your experience and serve relevant ads. By continuing to use SLB Fantasy you accept our use of cookies.{' '}
+              <Link to="/privacy" className="text-[#FF5500] hover:underline">Privacy Policy</Link>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  localStorage.setItem('slb_cookie_consent', 'accepted');
+                  setShowBanner(false);
+                }}
+                className="bg-[#FF5500] text-white font-bold px-6 py-2 rounded-full hover:bg-[#e04400] transition-colors"
+              >
+                Accept All
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.setItem('slb_cookie_consent', 'declined');
+                  setShowBanner(false);
+                }}
+                className="bg-[#1a1a1a] text-[#999999] border border-[#2A2A2A] font-bold px-6 py-2 rounded-full hover:bg-[#2a2a2a] transition-colors"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
