@@ -102,20 +102,20 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center p-4">
-      <div className="card w-full max-w-[440px] p-10">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center p-4">
+      <div className="bg-[#111111] border border-[#222222] rounded-2xl w-full max-w-[440px] p-10">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <span className="text-white font-bold text-3xl">SLB</span>
-            <span className="text-[#FF6B00] text-2xl">🏀</span>
+            <span className="text-[#F4622A] text-2xl">🏀</span>
           </div>
-          <span className="text-[#FF6B00] text-sm font-bold uppercase tracking-wider">FANTASY</span>
+          <span className="text-[#F4622A] text-sm font-bold uppercase tracking-wider">FANTASY</span>
         </div>
 
         {/* Heading */}
         <h1 className="text-white font-bold text-3xl mb-2">Create your account</h1>
-        <p className="text-[#a0a0a0] text-sm mb-8">Join SLB Fantasy and start building your squad</p>
+        <p className="text-[#A0A0A0] text-sm mb-8">Join SLB Fantasy and start building your squad</p>
 
         {/* Form */}
         <form onSubmit={handleSignUp} className="space-y-4">
@@ -126,7 +126,7 @@ const SignUpPage = () => {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
+              className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] transition-colors"
               required
             />
           </div>
@@ -138,7 +138,7 @@ const SignUpPage = () => {
               placeholder="e.g. The Hoop Gang FC"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
+              className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] transition-colors"
               required
             />
             <p className="text-[#555555] text-xs mt-1">This is how you appear in leagues</p>
@@ -151,7 +151,7 @@ const SignUpPage = () => {
               placeholder="Enter invite code"
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
+              className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] transition-colors"
               required
             />
             {inviteCodeError && (
@@ -166,7 +166,7 @@ const SignUpPage = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors"
+              className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] transition-colors"
               required
             />
           </div>
@@ -179,7 +179,7 @@ const SignUpPage = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors pr-12"
+                className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] transition-colors pr-12"
                 required
               />
               <button
@@ -204,7 +204,7 @@ const SignUpPage = () => {
                             : passwordStrength <= 3
                             ? 'bg-yellow-500'
                             : 'bg-green-500'
-                          : 'bg-[#242424]'
+                          : 'bg-[#222222]'
                       }`}
                     />
                   ))}
@@ -225,7 +225,7 @@ const SignUpPage = () => {
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] transition-colors pr-12"
+              className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] transition-colors pr-12"
               required
             />
             <button
@@ -246,7 +246,7 @@ const SignUpPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#FF6B00] text-white font-bold py-3 rounded-button hover:bg-[#e05f00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#F4622A] text-white font-bold py-3 rounded-lg hover:bg-[#d4521a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="inline-block animate-spin">⏳</span>
@@ -257,15 +257,15 @@ const SignUpPage = () => {
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-[#242424]"></div>
+            <div className="flex-1 h-px bg-[#222222]"></div>
             <span className="text-[#555555] text-sm">or</span>
-            <div className="flex-1 h-px bg-[#242424]"></div>
+            <div className="flex-1 h-px bg-[#222222]"></div>
           </div>
 
           {/* Sign In Link */}
           <div className="text-center">
-            <span className="text-[#a0a0a0] text-sm">Already have an account? </span>
-            <Link to="/signin" className="text-[#FF6B00] text-sm font-semibold hover:underline">
+            <span className="text-[#A0A0A0] text-sm">Already have an account? </span>
+            <Link to="/signin" className="text-[#F4622A] text-sm font-semibold hover:underline">
               Sign in
             </Link>
           </div>

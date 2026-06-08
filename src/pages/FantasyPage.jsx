@@ -566,45 +566,45 @@ const FantasyPage = () => {
   const formationPositions = {
     '2G-2F-1C': [
       // Top row - Guards (3 slots)
-      { position: 'G', top: '20%', left: '20%' },
-      { position: 'G', top: '20%', left: '50%' },
-      { position: 'G', top: '20%', left: '80%' },
+      { position: 'G', top: '15%', left: '20%', transform: 'none' },
+      { position: 'G', top: '15%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'G', top: '15%', left: '80%', transform: 'translateX(-100%)' },
       // Middle row - Forwards (3 slots)
-      { position: 'F', top: '50%', left: '20%' },
-      { position: 'F', top: '50%', left: '50%' },
-      { position: 'F', top: '50%', left: '80%' },
+      { position: 'F', top: '45%', left: '20%', transform: 'none' },
+      { position: 'F', top: '45%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'F', top: '45%', left: '80%', transform: 'translateX(-100%)' },
       // Bottom row - Centres (3 slots)
-      { position: 'C', top: '80%', left: '20%' },
-      { position: 'C', top: '80%', left: '50%' },
-      { position: 'C', top: '80%', left: '80%' }
+      { position: 'C', top: '72%', left: '20%', transform: 'none' },
+      { position: 'C', top: '72%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'C', top: '72%', left: '80%', transform: 'translateX(-100%)' }
     ],
     '3G-1F-1C': [
       // Top row - Guards (3 slots)
-      { position: 'G', top: '20%', left: '20%' },
-      { position: 'G', top: '20%', left: '50%' },
-      { position: 'G', top: '20%', left: '80%' },
+      { position: 'G', top: '15%', left: '20%', transform: 'none' },
+      { position: 'G', top: '15%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'G', top: '15%', left: '80%', transform: 'translateX(-100%)' },
       // Middle row - Forwards (3 slots)
-      { position: 'F', top: '50%', left: '20%' },
-      { position: 'F', top: '50%', left: '50%' },
-      { position: 'F', top: '50%', left: '80%' },
+      { position: 'F', top: '45%', left: '20%', transform: 'none' },
+      { position: 'F', top: '45%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'F', top: '45%', left: '80%', transform: 'translateX(-100%)' },
       // Bottom row - Centres (3 slots)
-      { position: 'C', top: '80%', left: '20%' },
-      { position: 'C', top: '80%', left: '50%' },
-      { position: 'C', top: '80%', left: '80%' }
+      { position: 'C', top: '72%', left: '20%', transform: 'none' },
+      { position: 'C', top: '72%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'C', top: '72%', left: '80%', transform: 'translateX(-100%)' }
     ],
     '1G-3F-1C': [
       // Top row - Guards (3 slots)
-      { position: 'G', top: '20%', left: '20%' },
-      { position: 'G', top: '20%', left: '50%' },
-      { position: 'G', top: '20%', left: '80%' },
+      { position: 'G', top: '15%', left: '20%', transform: 'none' },
+      { position: 'G', top: '15%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'G', top: '15%', left: '80%', transform: 'translateX(-100%)' },
       // Middle row - Forwards (3 slots)
-      { position: 'F', top: '50%', left: '20%' },
-      { position: 'F', top: '50%', left: '50%' },
-      { position: 'F', top: '50%', left: '80%' },
+      { position: 'F', top: '45%', left: '20%', transform: 'none' },
+      { position: 'F', top: '45%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'F', top: '45%', left: '80%', transform: 'translateX(-100%)' },
       // Bottom row - Centres (3 slots)
-      { position: 'C', top: '80%', left: '20%' },
-      { position: 'C', top: '80%', left: '50%' },
-      { position: 'C', top: '80%', left: '80%' }
+      { position: 'C', top: '72%', left: '20%', transform: 'none' },
+      { position: 'C', top: '72%', left: '50%', transform: 'translateX(-50%)' },
+      { position: 'C', top: '72%', left: '80%', transform: 'translateX(-100%)' }
     ]
   };
 
@@ -957,7 +957,7 @@ const FantasyPage = () => {
                             onDrop={(e) => handleDrop(e, player)}
                             style={{
                               position: 'absolute',
-                              transform: 'translate(-50%, -50%)',
+                              transform: pos.transform === 'none' ? 'translate(-50%, -50%)' : pos.transform,
                               top: pos.top,
                               left: pos.left,
                               opacity: isDragged ? 0.5 : 1,

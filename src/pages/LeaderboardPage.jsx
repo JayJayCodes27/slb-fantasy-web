@@ -13,14 +13,8 @@ const LeaderboardPage = () => {
   const [totalManagers, setTotalManagers] = useState(0);
 
   if (authLoading) return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#0A0A0A', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center' 
-    }}>
-      <div style={{ color: '#FF5500', fontSize: '18px' }}>Loading...</div>
+    <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
+      <div className="text-[#F4622A] text-lg">Loading...</div>
     </div>
   );
 
@@ -81,41 +75,17 @@ const LeaderboardPage = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#0A0A0A', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
-      }}>
-        <div style={{ color: '#FF6B00' }}>Loading...</div>
+      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
+        <div className="text-[#F4622A]">Loading...</div>
       </div>
     );
   }
 
   if (totalManagers === 0) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#0A0A0A', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
-        <div style={{
-          backgroundColor: '#141414',
-          border: '1px solid #2A2A2A',
-          borderRadius: '16px',
-          padding: '40px',
-          textAlign: 'center',
-          maxWidth: '500px'
-        }}>
-          <p style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: '16px',
-            color: '#666'
-          }}>
+      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-5">
+        <div className="bg-[#111111] border border-[#222222] rounded-xl p-10 text-center max-w-md">
+          <p className="text-[#666666] text-base">
             No managers yet. Be the first to build your squad.
           </p>
         </div>
@@ -124,78 +94,31 @@ const LeaderboardPage = () => {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#0A0A0A', 
-      padding: '20px',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter'] p-5 max-w-6xl mx-auto">
+      {/* Page Header */}
+      <div className="pt-24 sm:pt-32 pb-8 sm:pb-12">
+        <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">LEADERBOARD</h1>
+      </div>
+
       {/* Top Card - Your Position */}
       {currentUserRank && (
-        <div style={{
-          backgroundColor: '#141414',
-          border: '1px solid #2A2A2A',
-          borderRadius: '16px',
-          padding: '32px',
-          marginBottom: '24px'
-        }}>
-          <p style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: '14px',
-            color: '#666',
-            marginBottom: '8px'
-          }}>
+        <div className="bg-[#111111] border border-[#222222] rounded-xl p-8 mb-6">
+          <p className="text-[#A0A0A0] text-sm mb-2">
             {currentUserRank.users?.team_name || currentUserRank.users?.username}
           </p>
-          <p style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: '18px',
-            color: 'white',
-            marginBottom: '16px'
-          }}>
+          <p className="text-white text-lg mb-4">
             You are {getRankBadge(currentUserRank.current_user_rank)} of {totalManagers} managers
           </p>
-          <div style={{ display: 'flex', gap: '32px' }}>
+          <div className="flex gap-8">
             <div>
-              <p style={{
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '4px'
-              }}>
-                Total Points
-              </p>
-              <p style={{
-                fontFamily: 'Oswald, sans-serif',
-                fontSize: '36px',
-                fontWeight: 'bold',
-                color: '#FF6B00',
-                lineHeight: 1
-              }}>
+              <p className="text-[#A0A0A0] text-xs uppercase tracking-widest mb-1">Total Points</p>
+              <p className="text-[#F4622A] font-bold text-4xl leading-none">
                 {currentUserRank.total_points || 0}
               </p>
             </div>
             <div>
-              <p style={{
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '4px'
-              }}>
-                Last GW
-              </p>
-              <p style={{
-                fontFamily: 'Oswald, sans-serif',
-                fontSize: '36px',
-                fontWeight: 'bold',
-                color: '#666',
-                lineHeight: 1
-              }}>
+              <p className="text-[#A0A0A0] text-xs uppercase tracking-widest mb-1">Last GW</p>
+              <p className="text-[#A0A0A0] font-bold text-4xl leading-none">
                 {currentUserRank.gameweek_points || 0}
               </p>
             </div>
@@ -204,150 +127,50 @@ const LeaderboardPage = () => {
       )}
 
       {/* Main Table */}
-      <div style={{
-        backgroundColor: '#141414',
-        border: '1px solid #2A2A2A',
-        borderRadius: '16px',
-        overflow: 'hidden'
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="bg-[#111111] border border-[#222222] rounded-xl overflow-hidden">
+        <table className="w-full">
           <thead>
-            <tr style={{ borderBottom: '1px solid #2A2A2A' }}>
-              <th style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                width: '80px'
-              }}>
-                Rank
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-              }}>
-                Team
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-              }}>
-                Manager
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'right',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                width: '100px'
-              }}>
-                GW Pts
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'right',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                width: '100px'
-              }}>
-                Total
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'right',
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: '12px',
-                color: '#666',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                width: '80px'
-              }}>
-              </th>
+            <tr className="border-b border-[#222222]">
+              <th className="p-4 text-left text-[#A0A0A0] text-xs uppercase tracking-widest w-20">Rank</th>
+              <th className="p-4 text-left text-[#A0A0A0] text-xs uppercase tracking-widest">Team</th>
+              <th className="p-4 text-left text-[#A0A0A0] text-xs uppercase tracking-widest">Manager</th>
+              <th className="p-4 text-right text-[#A0A0A0] text-xs uppercase tracking-widest w-24">GW Pts</th>
+              <th className="p-4 text-right text-[#A0A0A0] text-xs uppercase tracking-widest w-24">Total</th>
+              <th className="p-4 text-right text-[#A0A0A0] text-xs uppercase tracking-widest w-20"></th>
             </tr>
           </thead>
           <tbody>
             {leaderboard.map((member, index) => {
               const isCurrentUser = member.user_id === user.id;
+              const rank = member.current_user_rank;
+              const getRankBorder = () => {
+                if (rank === 1) return 'border-l-4 border-[#FFD700]';
+                if (rank === 2) return 'border-l-4 border-[#C0C0C0]';
+                if (rank === 3) return 'border-l-4 border-[#CD7F32]';
+                if (isCurrentUser) return 'border-l-4 border-[#F4622A]';
+                return 'border-l-4 border-transparent';
+              };
               return (
                 <tr
                   key={member.user_id}
-                  style={{
-                    borderBottom: '1px solid #1A1A1A',
-                    backgroundColor: isCurrentUser ? '#1a1a1a' : 'transparent',
-                    borderLeft: isCurrentUser ? '3px solid #FF6B00' : '3px solid transparent'
-                  }}
+                  className={`border-b border-[#1A1A1A] ${isCurrentUser ? 'bg-[#1A1A1A]' : ''} ${getRankBorder()}`}
                 >
-                  <td style={{
-                    padding: '16px',
-                    fontFamily: 'Oswald, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    color: 'white'
-                  }}>
-                    {getRankBadge(member.current_user_rank)}
+                  <td className="p-4 text-[#C9A84C] font-bold text-base">
+                    {getRankBadge(rank)}
                   </td>
-                  <td style={{
-                    padding: '16px',
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: '14px',
-                    color: 'white',
-                    fontWeight: '500'
-                  }}>
+                  <td className="p-4 text-white font-semibold text-sm">
                     {member.users?.team_name || member.users?.username}
                   </td>
-                  <td style={{
-                    padding: '16px',
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: '14px',
-                    color: '#666'
-                  }}>
+                  <td className="p-4 text-[#A0A0A0] text-sm">
                     {member.users?.username}
                   </td>
-                  <td style={{
-                    padding: '16px',
-                    textAlign: 'right',
-                    fontFamily: 'Oswald, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    color: '#666'
-                  }}>
+                  <td className="p-4 text-right text-[#A0A0A0] font-bold text-base">
                     {member.gameweek_points || 0}
                   </td>
-                  <td style={{
-                    padding: '16px',
-                    textAlign: 'right',
-                    fontFamily: 'Oswald, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    color: '#FF6B00'
-                  }}>
+                  <td className="p-4 text-right text-[#F4622A] font-bold text-base">
                     {member.total_points || 0}
                   </td>
-                  <td style={{
-                    padding: '16px',
-                    textAlign: 'right',
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: '14px'
-                  }}>
+                  <td className="p-4 text-right text-sm">
                     {getRankChangeBadge(member.rank_change)}
                   </td>
                 </tr>
@@ -358,47 +181,29 @@ const LeaderboardPage = () => {
 
         {/* Pagination */}
         {totalManagers > 100 && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '16px',
-            borderTop: '1px solid #2A2A2A'
-          }}>
+          <div className="flex justify-center gap-2 p-4 border-t border-[#222222]">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: page === 1 ? '#1A1A1A' : '#2A2A2A',
-                color: page === 1 ? '#666' : 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: page === 1 ? 'not-allowed' : 'pointer',
-                fontFamily: 'DM Sans, sans-serif'
-              }}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                page === 1 
+                  ? 'bg-[#1A1A1A] text-[#666666] cursor-not-allowed' 
+                  : 'bg-[#2A2A2A] text-white hover:bg-[#3A3A3A]'
+              }`}
             >
               Previous
             </button>
-            <span style={{
-              padding: '8px 16px',
-              color: '#666',
-              fontFamily: 'DM Sans, sans-serif'
-            }}>
+            <span className="px-4 py-2 text-[#666666] text-sm">
               Page {page}
             </span>
             <button
               onClick={() => setPage(page + 1)}
               disabled={page * 100 >= totalManagers}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: page * 100 >= totalManagers ? '#1A1A1A' : '#2A2A2A',
-                color: page * 100 >= totalManagers ? '#666' : 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: page * 100 >= totalManagers ? 'not-allowed' : 'pointer',
-                fontFamily: 'DM Sans, sans-serif'
-              }}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                page * 100 >= totalManagers 
+                  ? 'bg-[#1A1A1A] text-[#666666] cursor-not-allowed' 
+                  : 'bg-[#2A2A2A] text-white hover:bg-[#3A3A3A]'
+              }`}
             >
               Next
             </button>

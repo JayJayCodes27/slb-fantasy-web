@@ -84,19 +84,19 @@ const PlayersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Page Header */}
       <div className="pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-white font-bold text-3xl sm:text-5xl uppercase tracking-wide mb-4">Players</h1>
-          <p className="text-base sm:text-xl text-[#a0a0a0]">Full SLB player pool — stats, values and availability</p>
+          <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">PLAYERS</h1>
+          <p className="text-[#A0A0A0] text-base sm:text-lg">Browse and scout players</p>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="px-4 sm:px-8 pb-8">
+      {/* Filter Bar - Sticky */}
+      <div className="sticky top-16 z-30 bg-[#0A0A0A] px-4 sm:px-8 pb-4">
         <div className="max-w-7xl mx-auto">
-          <div className="card p-4 sm:p-6">
+          <div className="bg-[#111111] border border-[#222222] rounded-xl p-4 sm:p-6">
             <div className="flex flex-col sm:flex-wrap gap-4 items-center">
               {/* Search */}
               <div className="w-full sm:flex-1 min-w-[200px]">
@@ -105,7 +105,7 @@ const PlayersPage = () => {
                   placeholder="Search players..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-[#242424] rounded-button px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#FF6B00] text-sm sm:text-base"
+                  className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] text-sm sm:text-base"
                 />
               </div>
 
@@ -115,10 +115,10 @@ const PlayersPage = () => {
                   <button
                     key={pos}
                     onClick={() => setPositionFilter(pos)}
-                    className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors text-sm sm:text-base whitespace-nowrap ${
+                    className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm sm:text-base whitespace-nowrap ${
                       positionFilter === pos
-                        ? 'bg-[#FF6B00] text-white'
-                        : 'bg-[#1a1a1a] text-[#a0a0a0] hover:text-white'
+                        ? 'bg-[#F4622A] text-white'
+                        : 'bg-[#1A1A1A] text-[#A0A0A0] hover:text-white'
                     }`}
                   >
                     {pos}
@@ -131,7 +131,7 @@ const PlayersPage = () => {
                 <select
                   value={teamFilter}
                   onChange={(e) => setTeamFilter(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#242424] rounded-button px-4 py-3 text-white focus:outline-none focus:border-[#FF6B00] text-sm sm:text-base"
+                  className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4622A] text-sm sm:text-base"
                 >
                   <option value="All">All Teams</option>
                   {teams.map((team) => (
@@ -147,7 +147,7 @@ const PlayersPage = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#242424] rounded-button px-4 py-3 text-white focus:outline-none focus:border-[#FF6B00] text-sm sm:text-base"
+                  className="w-full bg-[#1A1A1A] border border-[#222222] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F4622A] text-sm sm:text-base"
                 >
                   <option value="value-desc">Value (high to low)</option>
                   <option value="value-asc">Value (low to high)</option>
@@ -159,109 +159,81 @@ const PlayersPage = () => {
         </div>
       </div>
 
-      {/* Player Cards (Mobile) - Table (Desktop) */}
+      {/* Player Cards Grid */}
       <div className="px-4 sm:px-8 pb-20">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="space-y-3">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="card h-16 animate-pulse" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-[#111111] border border-[#222222] rounded-xl h-48 animate-pulse" />
               ))}
             </div>
           ) : displayPlayers.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-xl sm:text-2xl text-[#a0a0a0]">No players found</p>
+              <p className="text-xl sm:text-2xl text-[#A0A0A0]">No players found</p>
             </div>
           ) : (
-            <>
-              {/* Mobile: Player Cards */}
-              <div className="grid grid-cols-1 sm:hidden gap-4">
-                {displayPlayers.map((player) => (
-                  <div
-                    key={player.id}
-                    onClick={() => setSelectedPlayer(player)}
-                    className="card p-4 cursor-pointer hover:bg-[#1a1a1a] transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center"
-                          style={{ backgroundColor: player.slb_teams?.primary_colour + '20' }}
-                        >
-                          <span className="text-sm font-bold" style={{ color: player.slb_teams?.primary_colour }}>
-                            {player.position}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-sm">{player.name}</p>
-                          <p className="text-xs text-gray-400">{player.slb_teams?.name || 'Unknown'}</p>
-                        </div>
-                      </div>
-                      <div
-                        className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                          player.is_available ? 'bg-[#00FF87]' : 'bg-[#FF3B3B]'
-                        }`}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[#FF6B00] font-bold text-sm">{formatValue(player.value)}</span>
-                      <span className="text-gray-400 text-sm">{player.total_season_points} PTS</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {displayPlayers.map((player) => (
+                <div
+                  key={player.id}
+                  onClick={() => setSelectedPlayer(player)}
+                  className="bg-[#111111] border border-[#222222] rounded-xl p-4 cursor-pointer hover:border-[#F4622A] hover:scale-[1.02] transition-all duration-200 group relative"
+                >
+                  {/* Jersey Component */}
+                  <div className="flex justify-center mb-3">
+                    <div
+                      className="w-12 h-14 rounded flex items-center justify-center"
+                      style={{ backgroundColor: player.slb_teams?.primary_colour + '30' }}
+                    >
+                      <span className="text-xs font-bold" style={{ color: player.slb_teams?.primary_colour }}>
+                        {player.slb_teams?.short_name}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
 
-              {/* Desktop: Player Table */}
-              <div className="hidden sm:block card overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#242424]">
-                      <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Player</th>
-                      <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Position</th>
-                      <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Team</th>
-                      <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Value</th>
-                      <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Season Points</th>
-                      <th className="text-left py-4 px-6 text-lg text-[#a0a0a0]">Availability</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayPlayers.map((player) => (
-                      <tr
-                        key={player.id}
-                        onClick={() => setSelectedPlayer(player)}
-                        className="border-b border-[#242424]/5 hover:bg-[#1a1a1a] cursor-pointer transition-colors"
-                      >
-                        <td className="py-4 px-6 font-semibold">{player.name}</td>
-                        <td className="py-4 px-6">
-                          <span
-                            className="px-3 py-1 rounded-full text-sm font-semibold"
-                            style={{ backgroundColor: getPositionColor(player.position) + '20', color: getPositionColor(player.position) }}
-                          >
-                            {player.position}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6 flex items-center gap-3">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: player.slb_teams?.primary_colour || '#6B7280' }}
-                          />
-                          {player.slb_teams?.name || 'Unknown'}
-                        </td>
-                        <td className="py-4 px-6 font-semibold">{formatValue(player.value)}</td>
-                        <td className="py-4 px-6">{player.total_season_points}</td>
-                        <td className="py-4 px-6">
-                          <div
-                            className={`w-3 h-3 rounded-full ${
-                              player.is_available ? 'bg-[#00FF87]' : 'bg-[#FF3B3B]'
-                            }`}
-                          />
-                        </td>
-                      </tr>
+                  {/* Player Name */}
+                  <p className="text-white font-semibold text-sm mb-1 truncate">{player.name}</p>
+
+                  {/* Team Name */}
+                  <p className="text-[#A0A0A0] text-xs mb-2">{player.slb_teams?.short_name}</p>
+
+                  {/* Position Badge */}
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full text-[10px] font-bold mb-2 ${
+                      player.position === 'G' ? 'bg-[#F4622A] text-white' :
+                      player.position === 'F' ? 'bg-[#C9A84C] text-white' :
+                      'bg-[#2A2A2A] text-white'
+                    }`}
+                  >
+                    {player.position}
+                  </span>
+
+                  {/* Price */}
+                  <p className="text-[#C9A84C] font-semibold text-sm mb-1">{formatValue(player.value)}</p>
+
+                  {/* Points */}
+                  <p className="text-[#F4622A] font-bold text-lg">{player.total_season_points || 0}</p>
+
+                  {/* Form Indicator */}
+                  <div className="flex gap-1 mt-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-2 h-2 rounded-full ${
+                          i < 2 ? 'bg-[#00FF87]' : 'bg-[#555555]'
+                        }`}
+                      />
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                  </div>
+
+                  {/* Add to Squad Button - Appears on Hover */}
+                  <button className="absolute bottom-4 right-4 bg-[#F4622A] text-white text-xs font-semibold px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                    Add
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

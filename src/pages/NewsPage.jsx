@@ -110,27 +110,26 @@ const NewsPage = () => {
   const filteredNews = getFilteredNews();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Page Header */}
       <div className="pt-24 sm:pt-32 pb-8 sm:pb-12 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-white font-bold text-3xl sm:text-5xl uppercase tracking-wide mb-4">News</h1>
-          <p className="text-base sm:text-xl text-[#a0a0a0]">Latest SLB player news, injuries and transfers</p>
+          <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">NEWS</h1>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="px-4 sm:px-8 pb-8">
+      <div className="px-4 sm:px-8 pb-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2">
             {['All', 'Injuries', 'Transfers', 'Team News'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base whitespace-nowrap ${
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors text-sm whitespace-nowrap ${
                   activeFilter === filter
-                    ? 'bg-[#FF6B00] text-white'
-                    : 'bg-[#141414] text-[#a0a0a0] hover:text-white'
+                    ? 'bg-[#F4622A] text-white'
+                    : 'bg-[#111111] text-[#A0A0A0] hover:text-white'
                 }`}
               >
                 {filter}
@@ -141,77 +140,76 @@ const NewsPage = () => {
       </div>
 
       {/* News Feed */}
-      <div className="px-4 sm:px-8 pb-20">
+      <div className="px-4 sm:px-8 pb-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="card p-4 sm:p-6 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-[#111111] border border-[#222222] rounded-xl p-6 animate-pulse h-48" />
               ))}
             </div>
           ) : filteredNews.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-xl sm:text-2xl text-[#a0a0a0]">
+              <p className="text-xl sm:text-2xl text-[#A0A0A0]">
                 {activeFilter === 'Injuries' ? 'No injury updates right now' : 
                  activeFilter === 'Transfers' ? 'No transfer news right now' : 
                  'No news right now'}
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filteredNews.map((item) => (
-                <div key={item.id} className="card p-4 sm:p-6">
+                <div key={item.id} className="bg-[#111111] border border-[#222222] rounded-xl overflow-hidden">
                   {item.type === 'injury' ? (
                     // Injury/Availability Card
-                    <div>
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
-                        <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="p-6">
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-3">
                           <div>
-                            <h3 className="text-white text-lg sm:text-2xl font-bold mb-1">
+                            <h3 className="text-white text-lg font-semibold mb-1">
                               {item.players?.name || 'Unknown Player'}
                             </h3>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <div className="flex items-center gap-2">
                               {item.players?.position && (
                                 <span
-                                  className="px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold"
-                                  style={{ backgroundColor: getPositionColor(item.players.position) + '20', color: getPositionColor(item.players.position) }}
+                                  className="px-2 py-1 rounded-full text-[10px] font-semibold bg-[#F4622A] text-white"
                                 >
                                   {item.players.position}
                                 </span>
                               )}
-                              <span className="text-[#a0a0a0] text-xs sm:text-sm">{item.slb_teams?.name || 'Unknown Team'}</span>
+                              <span className="text-[#A0A0A0] text-xs">{item.slb_teams?.name || 'Unknown Team'}</span>
                             </div>
                           </div>
                           <span
-                            className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold border ${getStatusInfo(item.status).color}`}
+                            className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${getStatusInfo(item.status).color}`}
                           >
                             {getStatusInfo(item.status).label}
                           </span>
                         </div>
-                        <span className="text-[#555555] text-xs sm:text-sm">{getTimeAgo(item.created_at)}</span>
+                        <span className="text-[#555555] text-xs">{getTimeAgo(item.created_at)}</span>
                       </div>
-                      <h4 className="text-base sm:text-xl font-semibold mb-2">{item.headline}</h4>
-                      {item.body && <p className="text-[#a0a0a0] text-sm sm:text-base">{item.body}</p>}
+                      <h4 className="text-white font-semibold text-sm mb-2">{item.headline}</h4>
+                      {item.body && <p className="text-[#A0A0A0] text-xs">{item.body}</p>}
                     </div>
                   ) : (
                     // Transfer Card
-                    <div>
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                    <div className="p-6">
+                      <div className="flex items-start justify-between gap-3 mb-4">
                         <div>
                           {item.player_name && (
-                            <h3 className="text-white text-lg sm:text-2xl font-bold mb-1">{item.player_name}</h3>
+                            <h3 className="text-white text-lg font-semibold mb-1">{item.player_name}</h3>
                           )}
                           <span
-                            className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold border ${getTransferStatusInfo(item.status).color}`}
+                            className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${getTransferStatusInfo(item.status).color}`}
                           >
                             {getTransferStatusInfo(item.status).label}
                           </span>
                         </div>
-                        <span className="text-[#555555] text-xs sm:text-sm">{getTimeAgo(item.created_at)}</span>
+                        <span className="text-[#555555] text-xs">{getTimeAgo(item.created_at)}</span>
                       </div>
-                      <h4 className="text-base sm:text-xl font-semibold mb-2">{item.headline}</h4>
-                      {item.body && <p className="text-[#a0a0a0] mb-2 text-sm sm:text-base">{item.body}</p>}
-                      {item.source && <p className="text-[#FF6B00] text-xs sm:text-sm">Source: {item.source}</p>}
+                      <h4 className="text-white font-semibold text-sm mb-2">{item.headline}</h4>
+                      {item.body && <p className="text-[#A0A0A0] mb-2 text-xs">{item.body}</p>}
+                      {item.source && <p className="text-[#F4622A] text-xs">Source: {item.source}</p>}
                     </div>
                   )}
                 </div>

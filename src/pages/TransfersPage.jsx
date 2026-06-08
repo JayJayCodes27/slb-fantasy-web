@@ -33,6 +33,10 @@ const TransfersPage = () => {
   const [showBuyConfirm, setShowBuyConfirm] = useState(false);
   const [buyingPlayer, setBuyingPlayer] = useState(null);
   const [pointsDeduction, setPointsDeduction] = useState(false);
+  const [pendingTransfers, setPendingTransfers] = useState([]); // Track pending transfers
+  const [showConfirmAllDialog, setShowConfirmAllDialog] = useState(false);
+  const [initialBankBalance, setInitialBankBalance] = useState(0);
+  const [initialFreeTransfers, setInitialFreeTransfers] = useState(1);
 
   useEffect(() => {
     if (!user) {
@@ -63,6 +67,8 @@ const TransfersPage = () => {
       setUserData(userData);
       setFreeTransfers(userData.free_transfers_available || 1);
       setBankBalance(userData.bank_balance || 0);
+      setInitialBankBalance(userData.bank_balance || 0);
+      setInitialFreeTransfers(userData.free_transfers_available || 1);
 
       // Fetch squad data
       const { data: squadData, error: squadError } = await supabase
@@ -144,67 +150,31 @@ const TransfersPage = () => {
 
   const handleConfirmSell = async () => {
     try {
-      // Delete from user_squads
-      const { error: deleteError } = await supabase
-        .from('user_squads')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('player_id', selectedPlayer.player_id);
-
-      if (deleteError) throw deleteError;
-
       // Calculate sell price with correct formula
       const purchasePrice = selectedPlayer.purchase_price || selectedPlayer.players?.value || 0;
       const sellPrice = calculateSellPrice(selectedPlayer.players, purchasePrice);
 
-      // Update user transfers and bank
-      const currentFreeTransfers = userData.free_transfers_available || 1;
-      const newFreeTransfers = Math.max(0, currentFreeTransfers - 1);
-      const newBankBalance = (userData.bank_balance || 0) + sellPrice;
+      // Add to pending transfers instead of committing immediately
+      const newPendingTransfer = {
+        type: 'sell',
+        player: selectedPlayer,
+        sellPrice: sellPrice,
+        purchasePrice: purchasePrice
+      };
 
-      console.log('Current free transfers:', currentFreeTransfers);
-      console.log('Updating free transfers to:', newFreeTransfers);
+      setPendingTransfers([...pendingTransfers, newPendingTransfer]);
 
-      // Set points deduction flag if no free transfers
-      if (currentFreeTransfers === 0) {
-        setPointsDeduction(true);
-      }
+      // Update local bank balance (preview)
+      setBankBalance(bankBalance + sellPrice);
 
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({
-          free_transfers_available: newFreeTransfers,
-          bank_balance: newBankBalance
-        })
-        .eq('id', user.id);
+      // Remove from squad display (local only)
+      setSquadData(squadData.filter(s => s.player_id !== selectedPlayer.player_id));
 
-      if (updateError) throw updateError;
-
-      // Refetch user data to refresh display
-      const { data: refreshed } = await supabase
-        .from('users')
-        .select('free_transfers_available, bank_balance')
-        .eq('id', user.id)
-        .single();
-
-      if (refreshed) {
-        setFreeTransfers(refreshed.free_transfers_available);
-        setBankBalance(refreshed.bank_balance);
-      }
-
-      // Refresh squad display
-      const { data: updatedSquad } = await supabase
-        .from('user_squads')
-        .select('*, players(*, slb_teams(*))')
-        .eq('user_id', user.id);
-
-      if (updatedSquad) setSquadData(updatedSquad);
-
-      // Add empty slot instead of redirecting
+      // Add empty slot
       setEmptySlots([...emptySlots, { position: selectedPlayer.players?.position, slotIndex: emptySlots.length }]);
 
       // Show success toast
-      setShowToast(`Sold ${selectedPlayer.players?.name} for £${(sellPrice / 1000000).toFixed(1)}m`);
+      setShowToast(`${selectedPlayer.players?.name} marked for transfer`);
       setTimeout(() => setShowToast(null), 3000);
 
       // Close panel
@@ -217,6 +187,118 @@ const TransfersPage = () => {
       setTimeout(() => setShowToast(null), 3000);
       setShowConfirmDialog(false);
     }
+  };
+
+  const handleUndoSale = (transferIndex) => {
+    const transfer = pendingTransfers[transferIndex];
+    if (!transfer || transfer.type !== 'sell') return;
+
+    // Remove from pending transfers
+    const newPendingTransfers = pendingTransfers.filter((_, i) => i !== transferIndex);
+    setPendingTransfers(newPendingTransfers);
+
+    // Restore player to squad
+    setSquadData([...squadData, transfer.player]);
+
+    // Restore bank balance
+    setBankBalance(bankBalance - transfer.sellPrice);
+
+    // Remove empty slot
+    const slotIndex = emptySlots.findIndex(slot => slot.position === transfer.player.players?.position);
+    if (slotIndex !== -1) {
+      const newEmptySlots = [...emptySlots];
+      newEmptySlots.splice(slotIndex, 1);
+      setEmptySlots(newEmptySlots);
+    }
+
+    setShowToast(`Undo: ${transfer.player.players?.name} restored to squad`);
+    setTimeout(() => setShowToast(null), 3000);
+  };
+
+  const handleConfirmAllTransfers = async () => {
+    try {
+      setShowConfirmAllDialog(false);
+
+      // Commit all pending transfers to Supabase
+      for (const transfer of pendingTransfers) {
+        if (transfer.type === 'sell') {
+          // Delete from user_squads
+          await supabase
+            .from('user_squads')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('player_id', transfer.player.player_id);
+        }
+      }
+
+      // Update user transfers and bank
+      const currentFreeTransfers = initialFreeTransfers;
+      const transfersUsed = pendingTransfers.filter(t => t.type === 'sell').length;
+      const newFreeTransfers = Math.max(0, currentFreeTransfers - transfersUsed);
+      const newBankBalance = bankBalance;
+
+      // Set points deduction flag if no free transfers
+      if (currentFreeTransfers === 0) {
+        setPointsDeduction(true);
+      }
+
+      await supabase
+        .from('users')
+        .update({
+          free_transfers_available: newFreeTransfers,
+          bank_balance: newBankBalance
+        })
+        .eq('id', user.id);
+
+      // Refetch user data to refresh display
+      const { data: refreshed } = await supabase
+        .from('users')
+        .select('free_transfers_available, bank_balance')
+        .eq('id', user.id)
+        .single();
+
+      if (refreshed) {
+        setFreeTransfers(refreshed.free_transfers_available);
+        setBankBalance(refreshed.bank_balance);
+        setInitialFreeTransfers(refreshed.free_transfers_available);
+        setInitialBankBalance(refreshed.bank_balance);
+      }
+
+      // Refresh squad display
+      const { data: updatedSquad } = await supabase
+        .from('user_squads')
+        .select('*, players(*, slb_teams(*))')
+        .eq('user_id', user.id);
+
+      if (updatedSquad) setSquadData(updatedSquad);
+
+      // Clear pending transfers
+      setPendingTransfers([]);
+
+      // Show success toast
+      setShowToast(`${transfersUsed} transfer${transfersUsed !== 1 ? 's' : ''} confirmed!`);
+      setTimeout(() => setShowToast(null), 3000);
+
+    } catch (error) {
+      console.error('Error confirming transfers:', error);
+      setShowToast('Error confirming transfers. Please try again.');
+      setTimeout(() => setShowToast(null), 3000);
+    }
+  };
+
+  const handleResetAll = () => {
+    // Restore initial state
+    setBankBalance(initialBankBalance);
+    setFreeTransfers(initialFreeTransfers);
+    setPendingTransfers([]);
+    setEmptySlots([]);
+    setPointsDeduction(false);
+
+    // Refetch squad data
+    fetchData();
+
+    setShowToast('All pending transfers reset');
+    setTimeout(() => setShowToast(null), 3000);
   };
 
   const handleBuyClick = (player) => {
@@ -382,101 +464,133 @@ const TransfersPage = () => {
   }
 
   const { guards, forwards, centres } = groupPlayersByPosition();
-  const usedTransfers = 1 - freeTransfers;
+  const usedTransfers = pendingTransfers.filter(t => t.type === 'sell').length;
   const totalBudget = 100000000;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
       {/* Header */}
-      <div className="px-4 sm:px-6 py-4 border-b border-[#2a2a2a]">
-        <h1 className="text-white font-bold text-xl uppercase tracking-wide">TRANSFERS</h1>
+      <div className="px-4 sm:px-6 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">TRANSFERS</h1>
+        </div>
       </div>
 
       {/* Section 1 - Transfer Status Bar */}
-      <div className="bg-[#141414] border-b border-[#2a2a2a]">
-        {/* Row 1: Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-          <div className="bg-[#0a0a0a] rounded-lg p-3">
-            <p className="text-[#a0a0a0] text-xs mb-1">Free Transfers</p>
-            <p className={freeTransfers > 0 ? 'text-green-400 font-bold text-lg' : 'text-red-400 font-bold text-lg'}>
-              {freeTransfers}
-            </p>
+      <div className="px-4 sm:px-6 pb-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-4">
+              <p className="text-[#A0A0A0] text-xs mb-1">Free Transfers</p>
+              <p className={freeTransfers > 0 ? 'text-white font-bold text-lg' : 'text-red-400 font-bold text-lg'}>
+                {freeTransfers}
+              </p>
+            </div>
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-4">
+              <p className="text-[#A0A0A0] text-xs mb-1">Used This Week</p>
+              <p className="text-white font-bold text-lg">{usedTransfers}</p>
+            </div>
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-4">
+              <p className="text-[#A0A0A0] text-xs mb-1">Bank Balance</p>
+              <p className="text-[#C9A84C] font-bold text-lg">{formatValue(bankBalance)}</p>
+            </div>
+            <div className="bg-[#111111] border border-[#222222] rounded-xl p-4">
+              <p className="text-[#A0A0A0] text-xs mb-1">Total Budget</p>
+              <p className="text-white font-bold text-lg">{formatValue(totalBudget)}</p>
+            </div>
           </div>
-          <div className="bg-[#0a0a0a] rounded-lg p-3">
-            <p className="text-[#a0a0a0] text-xs mb-1">Used This Week</p>
-            <p className="text-white font-bold text-lg">{usedTransfers}</p>
-          </div>
-          <div className="bg-[#0a0a0a] rounded-lg p-3">
-            <p className="text-[#a0a0a0] text-xs mb-1">Bank Balance</p>
-            <p className="text-[#FF5500] font-bold text-lg">{formatValue(bankBalance)}</p>
-          </div>
-          <div className="bg-[#0a0a0a] rounded-lg p-3">
-            <p className="text-[#a0a0a0] text-xs mb-1">Total Budget</p>
-            <p className="text-white font-bold text-lg">{formatValue(totalBudget)}</p>
-          </div>
+
+          {/* Warning if no free transfers */}
+          {(freeTransfers === 0 || pointsDeduction) && (
+            <div className="bg-orange-900/30 border border-orange-900/50 rounded-xl px-4 py-3 mt-3">
+              <p className="text-orange-400 text-sm text-center">
+                ⚠️ This transfer costs -4 points
+              </p>
+            </div>
+          )}
+
+          {/* Empty slots info */}
+          {emptySlots.length > 0 && (
+            <div className="bg-blue-900/30 border border-blue-900/50 rounded-xl px-4 py-3 mt-3">
+              <p className="text-blue-400 text-sm text-center">
+                You have {emptySlots.length} empty slot{emptySlots.length !== 1 ? 's' : ''}. Click an empty slot to choose a replacement.
+              </p>
+            </div>
+          )}
         </div>
-
-        {/* Row 2: Warning if no free transfers */}
-        {(freeTransfers === 0 || pointsDeduction) && (
-          <div className="bg-orange-900/30 border-t border-b border-orange-900/50 px-4 py-3">
-            <p className="text-orange-400 text-sm text-center">
-              ⚠️ This transfer costs -4 points
-            </p>
-          </div>
-        )}
-
-        {/* Row 3: Empty slots info */}
-        {emptySlots.length > 0 && (
-          <div className="bg-blue-900/30 border-t border-b border-blue-900/50 px-4 py-3">
-            <p className="text-blue-400 text-sm text-center">
-              You have {emptySlots.length} empty slot{emptySlots.length !== 1 ? 's' : ''}. Click an empty slot to choose a replacement.
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Section 2 - Your Squad */}
-      <div className="p-4 sm:p-6">
-        <h2 className="text-white font-bold text-lg mb-4">YOUR SQUAD — Select a player to transfer</h2>
+      <div className="px-4 sm:px-6 pb-32">
+        <h2 className="text-[#A0A0A0] font-semibold text-sm uppercase tracking-wide mb-6">YOUR SQUAD — SELECT A PLAYER TO TRANSFER</h2>
+        
+        {/* Pending Transfers Display */}
+        {pendingTransfers.length > 0 && (
+          <div className="mb-6 bg-[#FF5500]/10 border border-[#FF5500] rounded-xl p-4">
+            <h3 className="text-[#FF5500] font-bold text-sm mb-3">PENDING TRANSFERS ({pendingTransfers.length})</h3>
+            <div className="space-y-2">
+              {pendingTransfers.map((transfer, index) => (
+                <div key={index} className="bg-[#1A1A1A] rounded-lg p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-8 h-8 rounded-full"
+                      style={{ backgroundColor: transfer.player.players?.slb_teams?.primary_colour || '#666' }}
+                    />
+                    <div>
+                      <p className="text-white font-bold text-sm">{transfer.player.players?.name}</p>
+                      <p className="text-[#FF5500] text-xs">Selling for £{(transfer.sellPrice / 1000000).toFixed(1)}m</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleUndoSale(index)}
+                    className="text-[#A0A0A0] text-xs hover:text-white transition-colors"
+                  >
+                    Undo
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Guards */}
         <div className="mb-6">
-          <h3 className="text-[#a0a0a0] text-sm font-bold mb-3 uppercase">Guards</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <h3 className="text-[#C9A84C] font-bold text-xs uppercase mb-3">GUARDS</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {guards.map((squadPlayer) => (
               <div
                 key={squadPlayer.player_id}
                 onClick={() => handlePlayerClick(squadPlayer)}
-                className={`bg-[#141414] border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                className={`bg-[#111111] border-2 rounded-xl p-4 cursor-pointer transition-colors ${
                   selectedPlayer?.player_id === squadPlayer.player_id
-                    ? 'border-[#FF5500]'
-                    : 'border-[#2a2a2a] hover:border-[#FF5500]'
+                    ? 'border-[#F4622A]'
+                    : 'border-[#222222] hover:border-[#F4622A]'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-3 mb-3">
                   <div 
                     className="w-8 h-8 rounded-full"
                     style={{ backgroundColor: squadPlayer.players?.slb_teams?.primary_colour || '#666' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{squadPlayer.players?.name}</p>
-                    <p className="text-[#a0a0a0] text-xs">{squadPlayer.players?.slb_teams?.short_name}</p>
+                    <p className="text-white font-semibold text-sm truncate">{squadPlayer.players?.name}</p>
+                    <p className="text-[#A0A0A0] text-xs">{squadPlayer.players?.slb_teams?.short_name}</p>
                   </div>
                 </div>
-                <p className="text-[#FF5500] font-bold text-sm">{formatValue(squadPlayer.players?.value)}</p>
+                <p className="text-[#C9A84C] font-semibold text-sm">{formatValue(squadPlayer.players?.value)}</p>
               </div>
             ))}
             {emptySlots.filter(s => s.position === 'G').map((slot, idx) => (
               <div
                 key={`empty-g-${idx}`}
                 onClick={() => handleEmptySlotClick(slot)}
-                className="bg-[#141414] border-2 border-dashed border-[#FF5500] rounded-lg p-3 cursor-pointer animate-pulse"
+                className="bg-[#111111] border-2 border-dashed border-[#F4622A] rounded-xl p-4 cursor-pointer animate-pulse"
               >
-                <div className="flex items-center justify-center h-full min-h-[60px]">
+                <div className="flex items-center justify-center h-full min-h-[80px]">
                   <div className="text-center">
-                    <p className="text-[#FF5500] font-bold text-2xl mb-1">+</p>
-                    <p className="text-[#a0a0a0] text-xs">Guard</p>
-                    <p className="text-[#a0a0a0] text-xs">Click to buy</p>
+                    <p className="text-[#F4622A] font-bold text-2xl mb-1">+</p>
+                    <p className="text-[#A0A0A0] text-xs">Guard</p>
+                    <p className="text-[#A0A0A0] text-xs">Click to buy</p>
                   </div>
                 </div>
               </div>
@@ -486,42 +600,42 @@ const TransfersPage = () => {
 
         {/* Forwards */}
         <div className="mb-6">
-          <h3 className="text-[#a0a0a0] text-sm font-bold mb-3 uppercase">Forwards</h3>
+          <h3 className="text-[#C9A84C] font-bold text-xs uppercase mb-3">FORWARDS</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {forwards.map((squadPlayer) => (
               <div
                 key={squadPlayer.player_id}
                 onClick={() => handlePlayerClick(squadPlayer)}
-                className={`bg-[#141414] border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                className={`bg-[#111111] border-2 rounded-xl p-4 cursor-pointer transition-colors ${
                   selectedPlayer?.player_id === squadPlayer.player_id
-                    ? 'border-[#FF5500]'
-                    : 'border-[#2a2a2a] hover:border-[#FF5500]'
+                    ? 'border-[#F4622A]'
+                    : 'border-[#222222] hover:border-[#F4622A]'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-3 mb-3">
                   <div 
                     className="w-8 h-8 rounded-full"
                     style={{ backgroundColor: squadPlayer.players?.slb_teams?.primary_colour || '#666' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{squadPlayer.players?.name}</p>
-                    <p className="text-[#a0a0a0] text-xs">{squadPlayer.players?.slb_teams?.short_name}</p>
+                    <p className="text-white font-semibold text-sm truncate">{squadPlayer.players?.name}</p>
+                    <p className="text-[#A0A0A0] text-xs">{squadPlayer.players?.slb_teams?.short_name}</p>
                   </div>
                 </div>
-                <p className="text-[#FF5500] font-bold text-sm">{formatValue(squadPlayer.players?.value)}</p>
+                <p className="text-[#C9A84C] font-semibold text-sm">{formatValue(squadPlayer.players?.value)}</p>
               </div>
             ))}
             {emptySlots.filter(s => s.position === 'F').map((slot, idx) => (
               <div
                 key={`empty-f-${idx}`}
                 onClick={() => handleEmptySlotClick(slot)}
-                className="bg-[#141414] border-2 border-dashed border-[#FF5500] rounded-lg p-3 cursor-pointer animate-pulse"
+                className="bg-[#111111] border-2 border-dashed border-[#F4622A] rounded-xl p-4 cursor-pointer animate-pulse"
               >
-                <div className="flex items-center justify-center h-full min-h-[60px]">
+                <div className="flex items-center justify-center h-full min-h-[80px]">
                   <div className="text-center">
-                    <p className="text-[#FF5500] font-bold text-2xl mb-1">+</p>
-                    <p className="text-[#a0a0a0] text-xs">Forward</p>
-                    <p className="text-[#a0a0a0] text-xs">Click to buy</p>
+                    <p className="text-[#F4622A] font-bold text-2xl mb-1">+</p>
+                    <p className="text-[#A0A0A0] text-xs">Forward</p>
+                    <p className="text-[#A0A0A0] text-xs">Click to buy</p>
                   </div>
                 </div>
               </div>
@@ -531,42 +645,42 @@ const TransfersPage = () => {
 
         {/* Centres */}
         <div>
-          <h3 className="text-[#a0a0a0] text-sm font-bold mb-3 uppercase">Centres</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <h3 className="text-[#C9A84C] font-bold text-xs uppercase mb-3">CENTRES</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {centres.map((squadPlayer) => (
               <div
                 key={squadPlayer.player_id}
                 onClick={() => handlePlayerClick(squadPlayer)}
-                className={`bg-[#141414] border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                className={`bg-[#111111] border-2 rounded-xl p-4 cursor-pointer transition-colors ${
                   selectedPlayer?.player_id === squadPlayer.player_id
-                    ? 'border-[#FF5500]'
-                    : 'border-[#2a2a2a] hover:border-[#FF5500]'
+                    ? 'border-[#F4622A]'
+                    : 'border-[#222222] hover:border-[#F4622A]'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-3 mb-3">
                   <div 
                     className="w-8 h-8 rounded-full"
                     style={{ backgroundColor: squadPlayer.players?.slb_teams?.primary_colour || '#666' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{squadPlayer.players?.name}</p>
-                    <p className="text-[#a0a0a0] text-xs">{squadPlayer.players?.slb_teams?.short_name}</p>
+                    <p className="text-white font-semibold text-sm truncate">{squadPlayer.players?.name}</p>
+                    <p className="text-[#A0A0A0] text-xs">{squadPlayer.players?.slb_teams?.short_name}</p>
                   </div>
                 </div>
-                <p className="text-[#FF5500] font-bold text-sm">{formatValue(squadPlayer.players?.value)}</p>
+                <p className="text-[#C9A84C] font-semibold text-sm">{formatValue(squadPlayer.players?.value)}</p>
               </div>
             ))}
             {emptySlots.filter(s => s.position === 'C').map((slot, idx) => (
               <div
                 key={`empty-c-${idx}`}
                 onClick={() => handleEmptySlotClick(slot)}
-                className="bg-[#141414] border-2 border-dashed border-[#FF5500] rounded-lg p-3 cursor-pointer animate-pulse"
+                className="bg-[#111111] border-2 border-dashed border-[#F4622A] rounded-xl p-4 cursor-pointer animate-pulse"
               >
-                <div className="flex items-center justify-center h-full min-h-[60px]">
+                <div className="flex items-center justify-center h-full min-h-[80px]">
                   <div className="text-center">
-                    <p className="text-[#FF5500] font-bold text-2xl mb-1">+</p>
-                    <p className="text-[#a0a0a0] text-xs">Centre</p>
-                    <p className="text-[#a0a0a0] text-xs">Click to buy</p>
+                    <p className="text-[#F4622A] font-bold text-2xl mb-1">+</p>
+                    <p className="text-[#A0A0A0] text-xs">Centre</p>
+                    <p className="text-[#A0A0A0] text-xs">Click to buy</p>
                   </div>
                 </div>
               </div>
@@ -802,10 +916,58 @@ const TransfersPage = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full font-bold z-50">
-          {showToast}
+      {/* Bottom Action Bar */}
+      {pendingTransfers.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-[#0A0A0A] border-t border-[#222222] p-4 z-40">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div>
+              <p className="text-white font-bold text-sm">{pendingTransfers.length} pending transfer{pendingTransfers.length !== 1 ? 's' : ''}</p>
+              <p className="text-[#A0A0A0] text-xs">Confirm to commit changes</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleResetAll}
+                className="px-4 py-2 border border-white text-white font-semibold text-sm rounded-lg hover:bg-white hover:text-black transition-colors"
+              >
+                Reset All
+              </button>
+              <button
+                onClick={() => setShowConfirmAllDialog(true)}
+                className="px-4 py-2 bg-[#F4622A] text-white font-semibold text-sm rounded-lg hover:bg-[#d4521a] transition-colors flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Confirm Transfers
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm All Transfers Dialog */}
+      {showConfirmAllDialog && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-white font-bold text-lg mb-2">Confirm Transfers</h3>
+            <p className="text-gray-400 mb-4">
+              Are you sure? This will use {pendingTransfers.length} of your free transfers.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmAllDialog(false)}
+                className="flex-1 px-4 py-2 border border-[#2A2A2A] text-white font-semibold text-sm rounded-lg hover:bg-[#2A2A2A] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmAllTransfers}
+                className="flex-1 px-4 py-2 bg-[#F4622A] text-white font-semibold text-sm rounded-lg hover:bg-[#d4521a] transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
