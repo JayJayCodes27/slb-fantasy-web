@@ -920,47 +920,91 @@ const FantasyPage = () => {
                     </div>
                   </div>
 
-                  {/* Captain/Vice Captain Popup — court players only */}
-                  {selectedPlayer && !isMobile && courtPlayers.some(p => p.id === selectedPlayer.id) && (
-                    <div
-                      className="absolute z-50 bg-[#1A1A1A] border border-[#F4622A] rounded-xl p-4 shadow-xl min-w-[180px]"
-                      style={{
-                        top: popupPosition.top,
-                        left: popupPosition.left
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <p className="text-white font-bold text-sm mb-3">{selectedPlayer.players?.name}</p>
+                  {/* Quick stats modal — opens for any player click */}
+                  {selectedPlayer && (
+                    <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+                      onClick={() => setSelectedPlayer(null)}>
+                      <div className="bg-[#141414] border border-[#2A2A2A] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}>
+                        {/* Player header */}
+                        <div className="flex items-center gap-4 px-5 pt-5 pb-4 border-b border-[#222222]">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ backgroundColor: (selectedPlayer.players?.slb_teams?.primary_colour || '#333') + '33' }}>
+                            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: selectedPlayer.players?.slb_teams?.primary_colour || '#666' }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-bold text-base truncate">{selectedPlayer.players?.name}</p>
+                            <p className="text-[#666666] text-xs">{selectedPlayer.players?.slb_teams?.name}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              selectedPlayer.players?.position === 'G' ? 'bg-[#F4622A]/20 text-[#F4622A]' :
+                              selectedPlayer.players?.position === 'F' ? 'bg-[#C9A84C]/20 text-[#C9A84C]' :
+                              'bg-white/10 text-white'
+                            }`}>{selectedPlayer.players?.position}</span>
+                            <button onClick={() => setSelectedPlayer(null)} className="text-[#555555] hover:text-white text-xl leading-none ml-1">×</button>
+                          </div>
+                        </div>
 
-                      <button
-                        onClick={() => handleSetCaptain(selectedPlayer)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#F4622A] font-bold"
-                      >
-                        🅒 Set as Captain
-                      </button>
+                        {/* Stats row */}
+                        <div className="grid grid-cols-3 divide-x divide-[#222222] border-b border-[#222222]">
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-[#666666] text-[10px] uppercase tracking-wide mb-1">GW Pts</p>
+                            <p className="text-[#F4622A] font-bold text-xl">{selectedPlayer.players?.gw_points || 0}</p>
+                          </div>
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-[#666666] text-[10px] uppercase tracking-wide mb-1">Season</p>
+                            <p className="text-white font-bold text-xl">{selectedPlayer.players?.total_season_points || 0}</p>
+                          </div>
+                          <div className="px-4 py-4 text-center">
+                            <p className="text-[#666666] text-[10px] uppercase tracking-wide mb-1">Price</p>
+                            <p className="text-[#C9A84C] font-bold text-xl">
+                              {selectedPlayer.players?.value ? `£${(selectedPlayer.players.value / 1000000).toFixed(1)}m` : '—'}
+                            </p>
+                          </div>
+                        </div>
 
-                      <button
-                        onClick={() => handleSetViceCaptain(selectedPlayer)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg mb-1 flex items-center gap-2 hover:bg-[#2A2A2A] text-[#A0A0A0]"
-                      >
-                        Ⓥ Set as Vice Captain
-                      </button>
+                        {/* Captain / VC actions — court players only */}
+                        {courtPlayers.some(p => p.id === selectedPlayer.id) && (
+                          <div className="px-5 py-4 border-b border-[#222222] space-y-2">
+                            <button onClick={() => handleSetCaptain(selectedPlayer)}
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                                captain === selectedPlayer.player_id
+                                  ? 'bg-[#C9A84C]/20 text-[#C9A84C] border border-[#C9A84C]/40'
+                                  : 'bg-[#1A1A1A] text-white hover:bg-[#222222]'
+                              }`}>
+                              <span className="w-5 h-5 rounded-full bg-[#C9A84C] text-black text-[10px] font-black flex items-center justify-center flex-shrink-0">C</span>
+                              {captain === selectedPlayer.player_id ? 'Captain (tap to reassign)' : 'Set as Captain'}
+                            </button>
+                            <button onClick={() => handleSetViceCaptain(selectedPlayer)}
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                                viceCaptain === selectedPlayer.player_id
+                                  ? 'bg-white/10 text-white border border-white/20'
+                                  : 'bg-[#1A1A1A] text-[#A0A0A0] hover:bg-[#222222] hover:text-white'
+                              }`}>
+                              <span className="w-5 h-5 rounded-full bg-[#555555] text-white text-[10px] font-black flex items-center justify-center flex-shrink-0">V</span>
+                              {viceCaptain === selectedPlayer.player_id ? 'Vice Captain (tap to reassign)' : 'Set as Vice Captain'}
+                            </button>
+                            {captain === selectedPlayer.player_id && (
+                              <button onClick={() => handleRemoveCaptain(selectedPlayer)}
+                                className="w-full px-4 py-2 rounded-xl text-sm text-red-400 hover:bg-red-900/20 transition-colors text-left">
+                                Remove Captain
+                              </button>
+                            )}
+                          </div>
+                        )}
 
-                      {captain === selectedPlayer.player_id && (
-                        <button
-                          onClick={() => handleRemoveCaptain(selectedPlayer)}
-                          className="w-full text-left px-3 py-2 text-sm rounded-lg text-red-400 hover:bg-[#2A2A2A]"
-                        >
-                          Remove Captain
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => setSelectedPlayer(null)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-lg text-[#555555] hover:bg-[#2A2A2A] mt-1"
-                      >
-                        Cancel
-                      </button>
+                        {/* Transfer Out button */}
+                        <div className="px-5 py-4">
+                          <button
+                            onClick={() => { setSelectedPlayer(null); window.location.href = `/transfers`; }}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1A1A1A] border border-[#333333] text-[#A0A0A0] hover:border-[#F4622A] hover:text-[#F4622A] text-sm font-semibold rounded-xl transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Transfer Out
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
 

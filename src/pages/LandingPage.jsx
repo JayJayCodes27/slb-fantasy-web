@@ -388,41 +388,59 @@ const fetchNews = async () => {
       {/* Latest News */}
       <section className="py-12 sm:py-20 px-4 sm:px-8 bg-[#1A1A1A]">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-oswald text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-16">Latest News</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Large Featured Card - Left (60%) */}
-            <Link to="/news" className="lg:col-span-3 relative h-64 sm:h-96 rounded-xl overflow-hidden group cursor-pointer">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10" />
-              <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-20">
-                <h3 className="font-oswald text-lg sm:text-2xl font-bold mb-2">London Lions seal SLB domestic Quadruple at The O2</h3>
-                <p className="text-gray-300 text-xs sm:text-sm">The defending champions complete an historic season with their fourth trophy of the campaign.</p>
-              </div>
-            </Link>
-
-            {/* Stacked Cards - Right (40%) */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
-              {/* Top Right Card */}
-              <Link to="/news" className="relative h-44 rounded-xl overflow-hidden group cursor-pointer">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10" />
-                <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-20">
-                  <h3 className="font-oswald text-base sm:text-lg font-bold mb-1">Patrick Robinson named 2025/26 Season MVP</h3>
-                  <p className="text-gray-300 text-[10px] sm:text-xs">London Lions guard takes home the league's most prestigious individual award.</p>
-                </div>
-              </Link>
-
-              {/* Bottom Right Card */}
-              <Link to="/news" className="relative h-44 rounded-xl overflow-hidden group cursor-pointer">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10" />
-                <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#1a1a1a] transition-colors" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-20">
-                  <h3 className="font-oswald text-base sm:text-lg font-bold mb-1">Joel Scott returns to London Lions for 2026/27 season</h3>
-                  <p className="text-gray-300 text-[10px] sm:text-xs">Star forward commits to another year with the London Lions.</p>
-                </div>
-              </Link>
-            </div>
+          <div className="flex items-center justify-between mb-8 sm:mb-12">
+            <h2 className="font-oswald text-2xl sm:text-4xl font-bold">Latest News</h2>
+            <Link to="/news" className="text-[#F4622A] text-sm font-semibold hover:underline">View all →</Link>
           </div>
+          {newsItems.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+              {/* Large Featured Card - Left (60%) */}
+              <Link to="/news" className="lg:col-span-3 relative h-64 sm:h-96 rounded-xl overflow-hidden group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+                <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#181818] transition-colors" />
+                <div className="absolute top-4 left-4 z-20">
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${
+                    newsItems[0]?.type === 'transfer' ? 'bg-[#F4622A] text-white' : 'bg-[#C9A84C] text-black'
+                  }`}>{newsItems[0]?.type === 'transfer' ? 'Transfer' : 'News'}</span>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-20">
+                  <h3 className="font-oswald text-lg sm:text-2xl font-bold mb-2 leading-snug">{newsItems[0]?.text}</h3>
+                </div>
+              </Link>
+
+              {/* Stacked Cards - Right (40%) */}
+              <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-6">
+                {[1, 2, 3].map((i) => newsItems[i] ? (
+                  <Link key={i} to="/news" className="relative flex-1 min-h-[100px] sm:min-h-[112px] rounded-xl overflow-hidden group cursor-pointer">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-[#111111] group-hover:bg-[#181818] transition-colors" />
+                    <div className="absolute top-3 left-3 z-20">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${
+                        newsItems[i]?.type === 'transfer' ? 'bg-[#F4622A] text-white' : 'bg-[#C9A84C] text-black'
+                      }`}>{newsItems[i]?.type === 'transfer' ? 'Transfer' : 'News'}</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 z-20">
+                      <p className="font-oswald text-sm sm:text-base font-bold leading-snug line-clamp-2">{newsItems[i]?.text}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <div key={i} className="flex-1 min-h-[100px] sm:min-h-[112px] rounded-xl bg-[#111111] border border-dashed border-[#222222]" />
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* Placeholder layout when no DB news */
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+              <div className="lg:col-span-3 h-64 sm:h-96 rounded-xl bg-[#111111] border border-dashed border-[#222222] flex items-center justify-center">
+                <p className="text-[#444444] text-sm">No news yet — check back soon</p>
+              </div>
+              <div className="lg:col-span-2 flex flex-col gap-4 sm:gap-6">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="flex-1 min-h-[100px] sm:min-h-[112px] rounded-xl bg-[#111111] border border-dashed border-[#222222]" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
