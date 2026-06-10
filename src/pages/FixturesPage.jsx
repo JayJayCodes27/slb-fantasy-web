@@ -14,8 +14,8 @@ const FixturesPage = () => {
     const fetchGameweeks = async () => {
       const { data } = await supabase
         .from('gameweeks')
-        .select('id, number, deadline, is_active, is_finished')
-        .order('number');
+        .select('id, week_number, deadline, is_active, is_complete')
+        .order('week_number');
 
       if (data && data.length > 0) {
         setGameweeks(data);
@@ -103,7 +103,7 @@ const FixturesPage = () => {
                       : 'bg-[#111111] text-[#A0A0A0] hover:text-white border border-[#222222]'
                   }`}
                 >
-                  GW{gw.number}
+                  GW{gw.week_number}
                   {gw.is_active && (
                     <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-[#22c55e] inline-block align-middle" />
                   )}
@@ -120,7 +120,7 @@ const FixturesPage = () => {
           {/* Gameweek deadline */}
           {selectedGw?.deadline && (
             <p className="text-[#555555] text-xs mb-4">
-              GW{selectedGw.number} deadline: {formatDateTime(selectedGw.deadline)}
+              GW{selectedGw.week_number} deadline: {formatDateTime(selectedGw.deadline)}
             </p>
           )}
 
