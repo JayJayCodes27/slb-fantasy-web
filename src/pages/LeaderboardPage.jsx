@@ -1,5 +1,6 @@
+// LeaderboardPage.jsx — Clean minimal leaderboard
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -7,208 +8,153 @@ const LeaderboardPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [leaderboard, setLeaderboard] = useState([]);
-  const [currentUserRank, setCurrentUserRank] = useState(null);
+  const [currentUserEntry, setCurrentUserEntry] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const [totalManagers, setTotalManagers] = useState(0);
+  const [page, setPage] = useState(1);
 
   if (authLoading) return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
-      <div className="text-[#F4622A] text-lg">Loading...</div>
+      <div className="text-[#F4622A]">Loading...</div>
     </div>
   );
 
-  if (!user) {
-    navigate('/signin');
-    return null;
-  }
+  if (!user) { navigate('/signin'); return null; }
 
-  useEffect(() => {
-    fetchLeaderboard();
-  }, [user, page]);
+  useEffect(() => { fetchLeaderboard(); }, [user, page]);
 
   const fetchLeaderboard = async () => {
     try {
-      const { data: members, error } = await supabase
+      const { data: members } = await supabase
         .from('league_members')
-        .select(`
-          *,
-          users (username, team_name)
-        `)
+        .select('*, users(username, team_name)')
         .order('total_points', { ascending: false })
-        .range((page - 1) * 100, page * 100 - 1);
-
-      if (error) throw error;
+        .range((page - 1) * 50, page * 50 - 1);
 
       setLeaderboard(members || []);
 
-      // Get total count
       const { count } = await supabase
         .from('league_members')
         .select('*', { count: 'exact', head: true });
-
       setTotalManagers(count || 0);
 
-      // Find current user's rank
-      const userRank = members?.find(m => m.user_id === user.id);
-      setCurrentUserRank(userRank);
-
+      setCurrentUserEntry(members?.find(m => m.user_id === user.id) || null);
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
+      // Silent
     } finally {
       setLoading(false);
     }
   };
 
-  const getRankBadge = (rank) => {
+  const rankBadge = (rank) => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
     if (rank === 3) return '🥉';
     return rank;
   };
 
-  const getRankChangeBadge = (rankChange) => {
-    if (!rankChange || rankChange === 0) return <span style={{ color: '#666' }}>—</span>;
-    if (rankChange > 0) return <span style={{ color: '#22c55e' }}>▲{rankChange}</span>;
-    return <span style={{ color: '#ef4444' }}>▼{Math.abs(rankChange)}</span>;
-  };
+  if (loading) return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
+      <div className="text-[#F4622A]">Loading...</div>
+    </div>
+  );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
-        <div className="text-[#F4622A]">Loading...</div>
+  if (totalManagers === 0) return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-6">
+      <div className="text-center">
+        <div className="text-6xl mb-4">🏀</div>
+        <h2 className="text-white font-bold text-2xl mb-2">No managers yet</h2>
+        <p className="text-[#666666] mb-6">Be the first to build your squad</p>
+        <Link to="/squad-selection" className="bg-[#F4622A] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#d4521a] transition-colors">
+          Build Your Squad
+        </Link>
       </div>
-    );
-  }
-
-  if (totalManagers === 0) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-5">
-        <div className="bg-[#111111] border border-[#222222] rounded-xl p-10 text-center max-w-md">
-          <p className="text-[#666666] text-base">
-            No managers yet. Be the first to build your squad.
-          </p>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter'] p-5 max-w-6xl mx-auto">
-      {/* Page Header */}
-      <div className="pt-6 pb-8 sm:pb-12">
-        <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-2">LEADERBOARD</h1>
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-['Inter']">
+      {/* Header */}
+      <div className="pt-6 pb-6 px-4 sm:px-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-white font-bold text-3xl sm:text-[32px] mb-1">LEADERBOARD</h1>
+          <p className="text-[#666666] text-sm">{totalManagers} managers competing</p>
+        </div>
       </div>
 
-      {/* Top Card - Your Position */}
-      {currentUserRank && (
-        <div className="bg-[#111111] border border-[#222222] rounded-xl p-8 mb-6">
-          <p className="text-[#A0A0A0] text-sm mb-2">
-            {currentUserRank.users?.team_name || currentUserRank.users?.username}
-          </p>
-          <p className="text-white text-lg mb-4">
-            You are {getRankBadge(currentUserRank.current_user_rank)} of {totalManagers} managers
-          </p>
-          <div className="flex gap-8">
-            <div>
-              <p className="text-[#A0A0A0] text-xs uppercase tracking-widest mb-1">Total Points</p>
-              <p className="text-[#F4622A] font-bold text-4xl leading-none">
-                {currentUserRank.total_points || 0}
+      <div className="px-4 sm:px-8 pb-16">
+        <div className="max-w-4xl mx-auto space-y-4">
+
+          {/* Your position card */}
+          {currentUserEntry && (
+            <div className="bg-[#111111] border border-[#F4622A]/30 rounded-2xl p-5 sm:p-6">
+              <p className="text-[#A0A0A0] text-xs uppercase tracking-widest mb-1">Your Team</p>
+              <h2 className="text-white font-bold text-xl sm:text-2xl mb-3">
+                {currentUserEntry.users?.team_name || currentUserEntry.users?.username}
+              </h2>
+              <p className="text-[#F4622A] font-semibold text-sm mb-4">
+                Rank {leaderboard.findIndex(m => m.user_id === user.id) + 1 + (page - 1) * 50} of {totalManagers} managers
               </p>
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-[#666666] text-xs uppercase tracking-wide mb-1">Total Points</p>
+                  <p className="text-[#F4622A] font-bold text-4xl">{currentUserEntry.total_points || 0}</p>
+                </div>
+                <div>
+                  <p className="text-[#666666] text-xs uppercase tracking-wide mb-1">GW Points</p>
+                  <p className="text-[#A0A0A0] font-bold text-4xl">{currentUserEntry.gameweek_points || 0}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[#A0A0A0] text-xs uppercase tracking-widest mb-1">Last GW</p>
-              <p className="text-[#A0A0A0] font-bold text-4xl leading-none">
-                {currentUserRank.gameweek_points || 0}
-              </p>
+          )}
+
+          {/* Table */}
+          <div className="bg-[#111111] border border-[#222222] rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-[40px_1fr_64px_64px] px-4 py-3 border-b border-[#1A1A1A]">
+              <span className="text-[#555555] text-xs uppercase tracking-wide">#</span>
+              <span className="text-[#555555] text-xs uppercase tracking-wide">Team</span>
+              <span className="text-[#555555] text-xs uppercase tracking-wide text-right">GW</span>
+              <span className="text-[#555555] text-xs uppercase tracking-wide text-right">Total</span>
+            </div>
+
+            <div className="divide-y divide-[#1A1A1A]">
+              {leaderboard.map((member, index) => {
+                const rank = (page - 1) * 50 + index + 1;
+                const isCurrentUser = member.user_id === user.id;
+                return (
+                  <div
+                    key={member.user_id}
+                    className={`grid grid-cols-[40px_1fr_64px_64px] px-4 py-3 items-center border-l-2 ${
+                      isCurrentUser
+                        ? 'border-[#F4622A] bg-[#1A1A1A]'
+                        : index % 2 === 0 ? 'border-transparent' : 'border-transparent bg-[#141414]'
+                    }`}
+                  >
+                    <span className="text-[#C9A84C] font-bold text-sm">{rankBadge(rank)}</span>
+                    <div className="min-w-0">
+                      <p className={`font-semibold text-sm truncate ${isCurrentUser ? 'text-white' : 'text-[#E0E0E0]'}`}>
+                        {member.users?.team_name || member.users?.username}
+                      </p>
+                      <p className="text-[#555555] text-xs truncate">{member.users?.username}</p>
+                    </div>
+                    <span className="text-[#A0A0A0] font-bold text-sm text-right">{member.gameweek_points || 0}</span>
+                    <span className="text-[#F4622A] font-bold text-sm text-right">{member.total_points || 0}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
+
+          {totalManagers > 50 && (
+            <div className="flex justify-center gap-3">
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}
+                className="px-4 py-2 bg-[#111111] border border-[#222222] rounded-lg text-sm text-[#A0A0A0] disabled:opacity-30 hover:text-white transition-colors">Previous</button>
+              <span className="px-4 py-2 text-[#666666] text-sm">Page {page}</span>
+              <button onClick={() => setPage(page + 1)} disabled={page * 50 >= totalManagers}
+                className="px-4 py-2 bg-[#111111] border border-[#222222] rounded-lg text-sm text-[#A0A0A0] disabled:opacity-30 hover:text-white transition-colors">Next</button>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Main Table */}
-      <div className="bg-[#111111] border border-[#222222] rounded-xl overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#222222]">
-              <th className="p-4 text-left text-[#A0A0A0] text-xs uppercase tracking-widest w-20">Rank</th>
-              <th className="p-4 text-left text-[#A0A0A0] text-xs uppercase tracking-widest">Team</th>
-              <th className="p-4 text-left text-[#A0A0A0] text-xs uppercase tracking-widest">Manager</th>
-              <th className="p-4 text-right text-[#A0A0A0] text-xs uppercase tracking-widest w-24">GW Pts</th>
-              <th className="p-4 text-right text-[#A0A0A0] text-xs uppercase tracking-widest w-24">Total</th>
-              <th className="p-4 text-right text-[#A0A0A0] text-xs uppercase tracking-widest w-20"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaderboard.map((member, index) => {
-              const isCurrentUser = member.user_id === user.id;
-              const rank = (page - 1) * 100 + index + 1;
-              const getRankBorder = () => {
-                if (rank === 1) return 'border-l-4 border-[#FFD700]';
-                if (rank === 2) return 'border-l-4 border-[#C0C0C0]';
-                if (rank === 3) return 'border-l-4 border-[#CD7F32]';
-                if (isCurrentUser) return 'border-l-4 border-[#F4622A]';
-                return 'border-l-4 border-transparent';
-              };
-              return (
-                <tr
-                  key={member.user_id}
-                  className={`border-b border-[#1A1A1A] ${isCurrentUser ? 'bg-[#1A1A1A]' : ''} ${getRankBorder()}`}
-                >
-                  <td className="p-4 text-[#C9A84C] font-bold text-base">
-                    {getRankBadge(rank)}
-                  </td>
-                  <td className="p-4 text-white font-semibold text-sm">
-                    {member.users?.team_name || member.users?.username}
-                  </td>
-                  <td className="p-4 text-[#A0A0A0] text-sm">
-                    {member.users?.username}
-                  </td>
-                  <td className="p-4 text-right text-[#A0A0A0] font-bold text-base">
-                    {member.gameweek_points || 0}
-                  </td>
-                  <td className="p-4 text-right text-[#F4622A] font-bold text-base">
-                    {member.total_points || 0}
-                  </td>
-                  <td className="p-4 text-right text-sm">
-                    {getRankChangeBadge(member.rank_change)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {/* Pagination */}
-        {totalManagers > 100 && (
-          <div className="flex justify-center gap-2 p-4 border-t border-[#222222]">
-            <button
-              onClick={() => setPage(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-                page === 1 
-                  ? 'bg-[#1A1A1A] text-[#666666] cursor-not-allowed' 
-                  : 'bg-[#2A2A2A] text-white hover:bg-[#3A3A3A]'
-              }`}
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 text-[#666666] text-sm">
-              Page {page}
-            </span>
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page * 100 >= totalManagers}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-                page * 100 >= totalManagers 
-                  ? 'bg-[#1A1A1A] text-[#666666] cursor-not-allowed' 
-                  : 'bg-[#2A2A2A] text-white hover:bg-[#3A3A3A]'
-              }`}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

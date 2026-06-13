@@ -9,6 +9,7 @@ export default function DevToolbar() {
   const [seasonState, setSeasonState] = useState('off_season');
   const [currentGameweek, setCurrentGameweek] = useState(0);
   const [settings, setSettings] = useState(null);
+  const [minimised, setMinimised] = useState(false);
 
   const fetchSettings = async () => {
     try {
@@ -73,16 +74,25 @@ export default function DevToolbar() {
     fetchSettings();
   }, []);
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+  if (user.email !== 'slbfantasy@gmail.com') return null;
 
-  if (user.email !== 'slbfantasy@gmail.com') {
-    return null;
+  if (minimised) {
+    return (
+      <div className="fixed bottom-4 left-4 z-50">
+        <button
+          onClick={() => setMinimised(false)}
+          className="bg-[#1a1a1a] border border-[#FF5500] text-[#FF5500] text-xs font-bold px-3 py-1.5 rounded-full hover:bg-[#FF5500] hover:text-white transition-colors"
+        >
+          ▲ DEV
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-[#FF5500] h-12 flex items-center px-4 gap-6 z-50">
+      <button onClick={() => setMinimised(true)} className="text-[#FF5500] text-xs font-bold hover:text-white transition-colors" title="Minimise">▼</button>
       <span className="text-[#FF5500] font-bold text-sm whitespace-nowrap">DEV TOOLS</span>
 
       {/* Season State Dropdown */}

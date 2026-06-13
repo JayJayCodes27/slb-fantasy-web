@@ -6,17 +6,45 @@ import Jersey from '../components/Jersey.jsx';
 import { getTeamColours } from '../constants/teamColours.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
+// Carousel content — edit here without touching JSX
+const carouselSlides = [
+  {
+    tag: 'SUPER LEAGUE BASKETBALL',
+    title: 'YOUR SLB SQUAD.',
+    titleAccent: 'OWN THE SEASON.',
+    subtitle: "The UK's first fantasy basketball game for Super League Basketball. Live scoring. Season-long leagues. Free to play.",
+    cta: { label: 'Get Started', to: '/signup', primary: true, authGated: true },
+    ctaSecondary: { label: 'Learn More', to: '/about' },
+  },
+  {
+    tag: 'SUPER LEAGUE BASKETBALL',
+    title: 'BUILD YOUR',
+    titleAccent: 'DREAM TEAM.',
+    subtitle: '9 players. £100m budget. Every decision counts.',
+    cta: { label: 'How It Works', to: '/about', primary: true },
+  },
+  {
+    tag: 'SUPER LEAGUE BASKETBALL',
+    title: 'COMPETE. SCORE.',
+    titleAccent: 'WIN.',
+    subtitle: 'Live scoring. Season-long leagues. Free to play.',
+    cta: { label: 'Join the Waitlist', waitlist: true, primary: true },
+  },
+];
+
 const LandingPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [topPlayers, setTopPlayers] = useState([]);
   const [newsItems, setNewsItems] = useState([]);
-  const [email, setEmail] = useState('');
-  const [waitlistMessage, setWaitlistMessage] = useState('');
-  const [waitlistError, setWaitlistError] = useState('');
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
+  // Waitlist modal state
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistStatus, setWaitlistStatus] = useState(null); // null | 'success' | 'error' | 'duplicate'
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   // Auto-advance hero carousel
   useEffect(() => {
@@ -127,28 +155,26 @@ const fetchNews = async () => {
 
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
-    setWaitlistMessage('');
-    setWaitlistError('');
-
+    if (!waitlistEmail) return;
+    setWaitlistLoading(true);
+    setWaitlistStatus(null);
     try {
-      const { data, error } = await supabase
-        .from('waitlist')
-        .insert([{ email }])
-        .select();
-
+      const { error } = await supabase.from('waitlist').insert({ email: waitlistEmail });
       if (error) {
-        if (error.code === '23505') { // Unique violation
-          setWaitlistError("You're already on the list!");
+        if (error.code === '23505') {
+          setWaitlistStatus('duplicate');
         } else {
           throw error;
         }
       } else {
-        setWaitlistMessage("You're on the list! We'll be in touch.");
-        setEmail('');
+        setWaitlistStatus('success');
+        setWaitlistEmail('');
+        setTimeout(() => setShowWaitlistModal(false), 2000);
       }
     } catch (error) {
-      // Silent error handling
-      setWaitlistError('Something went wrong. Please try again.');
+      setWaitlistStatus('error');
+    } finally {
+      setWaitlistLoading(false);
     }
   };
 
@@ -160,90 +186,77 @@ const fetchNews = async () => {
     <>
       {/* Hero Carousel */}
       <section
-        className="py-12 sm:py-20 px-4 sm:px-12 relative overflow-hidden"
+        className="py-12 sm:py-20 px-4 sm:px-12 relative overflow-hidden bg-[#0A0A0A]"
         onMouseEnter={() => setHeroPaused(true)}
         onMouseLeave={() => setHeroPaused(false)}
       >
         <div className="max-w-7xl mx-auto">
-          {/* Slides */}
           <div className="relative min-h-[320px] sm:min-h-[380px]">
-
-            {/* Slide 1 */}
-            <div className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === 0 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
-                <div className="w-full lg:w-[55%] text-center lg:text-left">
-                  <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
-                  <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">YOUR SLB SQUAD.</h1>
-                  <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">OWN THE SEASON.</h2>
-                  <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">The UK's first fantasy basketball game for Super League Basketball. Live scoring. Season-long leagues. Free to play.</p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                    {!user && <Link to="/signup" className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center">Get Started</Link>}
-                    <Link to="/about" className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-white hover:bg-white hover:text-black transition-colors text-center">Learn More</Link>
-                  </div>
-                </div>
-                <div className="hidden lg:flex w-[45%] items-center justify-center">
-                  <div className="relative" style={{ width: '280px', height: '350px' }}>
-                    <div className="absolute inset-0 bg-gradient-radial from-[#FF6B00]/30 via-[#FF6B00]/10 to-transparent rounded-full blur-3xl"></div>
-                    <div className="relative transform rotate-[-10deg]">
-                      <svg viewBox="0 0 280 350" className="w-full h-full" style={{ filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.3))' }}>
-                        <path d="M30 20 L250 20 L270 50 L270 180 L250 220 L140 240 L30 220 L10 180 L10 50 Z" fill="#0a0a0a" />
-                        <path d="M30 20 L250 20 L270 50 L250 70 L30 70 L10 50 Z" fill="#FF6B00" />
-                        <path d="M10 50 L30 70 L30 220 L10 180 Z" fill="#FF6B00" />
-                        <path d="M250 20 L270 50 L270 180 L250 220 L250 70 Z" fill="#FF6B00" />
-                        <path d="M100 20 L140 40 L180 20" fill="none" stroke="#FF6B00" strokeWidth="4" />
-                        <text x="140" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold" fontFamily="sans-serif">SLB</text>
-                        <text x="140" y="180" textAnchor="middle" fill="white" fontSize="100" fontWeight="bold" fontFamily="sans-serif">23</text>
-                      </svg>
+            {carouselSlides.map((slide, i) => (
+              <div
+                key={i}
+                className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === i ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+              >
+                <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
+                  {/* Text side */}
+                  <div className="w-full lg:w-[55%] text-center lg:text-left">
+                    <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">{slide.tag}</p>
+                    <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">{slide.title}</h1>
+                    <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">{slide.titleAccent}</h2>
+                    <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">{slide.subtitle}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                      {slide.cta && (
+                        slide.cta.waitlist ? (
+                          <button
+                            onClick={() => setShowWaitlistModal(true)}
+                            className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center"
+                          >{slide.cta.label}</button>
+                        ) : slide.cta.authGated && user ? null : (
+                          <Link
+                            to={slide.cta.to}
+                            className={`font-bold text-sm px-6 py-3 rounded-lg transition-colors text-center ${slide.cta.primary ? 'bg-[#F4622A] text-white hover:bg-[#d4521a]' : 'bg-transparent text-white border border-white hover:bg-white hover:text-black'}`}
+                          >{slide.cta.label}</Link>
+                        )
+                      )}
+                      {slide.ctaSecondary && (
+                        <Link
+                          to={slide.ctaSecondary.to}
+                          className="bg-transparent text-white font-bold text-sm px-6 py-3 rounded-lg border border-[#333333] hover:border-white transition-colors text-center"
+                        >{slide.ctaSecondary.label}</Link>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Slide 2 */}
-            <div className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === 1 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
-                <div className="w-full lg:w-[55%] text-center lg:text-left">
-                  <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
-                  <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">BUILD YOUR</h1>
-                  <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">DREAM TEAM.</h2>
-                  <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">9 players. £100m budget. Every decision counts.</p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                    <Link to="/about" className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center">How It Works</Link>
-                  </div>
-                </div>
-                <div className="hidden lg:flex w-[45%] items-center justify-center">
-                  <div className="w-[280px] h-[350px] bg-[#111111] rounded-2xl border border-[#222222] flex items-center justify-center">
-                    <span className="text-[#F4622A] font-['Bebas_Neue'] text-6xl">SLB</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Slide 3 */}
-            <div className={`absolute inset-0 transition-opacity duration-700 ${heroSlide === 2 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 h-full">
-                <div className="w-full lg:w-[55%] text-center lg:text-left">
-                  <p className="text-[#C9A84C] text-[13px] font-bold uppercase tracking-widest mb-4">SUPER LEAGUE BASKETBALL</p>
-                  <h1 className="text-white font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-2">COMPETE. SCORE.</h1>
-                  <h2 className="text-[#F4622A] font-['Bebas_Neue'] text-5xl sm:text-6xl lg:text-[64px] leading-none mb-6">WIN.</h2>
-                  <p className="text-[#A0A0A0] text-base leading-relaxed mb-8">Live scoring. Season-long leagues. Free to play.</p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                    <a href="mailto:hello@slbfantasy.co.uk" className="bg-[#F4622A] text-white font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#d4521a] transition-colors text-center">Join the Waitlist</a>
-                  </div>
-                </div>
-                <div className="hidden lg:flex w-[45%] items-center justify-center">
-                  <div className="w-[280px] h-[350px] bg-[#111111] rounded-2xl border border-[#222222] flex items-center justify-center">
-                    <span className="text-[#F4622A] font-['Bebas_Neue'] text-6xl">SLB</span>
+                  {/* Graphic side */}
+                  <div className="hidden lg:flex w-[45%] items-center justify-center">
+                    {i === 0 ? (
+                      <div className="relative" style={{ width: '280px', height: '350px' }}>
+                        <div className="absolute inset-0 bg-[#FF6B00]/10 rounded-full blur-3xl"></div>
+                        <div className="relative transform rotate-[-10deg]">
+                          <svg viewBox="0 0 280 350" className="w-full h-full" style={{ filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.3))' }}>
+                            <path d="M30 20 L250 20 L270 50 L270 180 L250 220 L140 240 L30 220 L10 180 L10 50 Z" fill="#0a0a0a" />
+                            <path d="M30 20 L250 20 L270 50 L250 70 L30 70 L10 50 Z" fill="#FF6B00" />
+                            <path d="M10 50 L30 70 L30 220 L10 180 Z" fill="#FF6B00" />
+                            <path d="M250 20 L270 50 L270 180 L250 220 L250 70 Z" fill="#FF6B00" />
+                            <path d="M100 20 L140 40 L180 20" fill="none" stroke="#FF6B00" strokeWidth="4" />
+                            <text x="140" y="100" textAnchor="middle" fill="white" fontSize="32" fontWeight="bold" fontFamily="sans-serif">SLB</text>
+                            <text x="140" y="180" textAnchor="middle" fill="white" fontSize="100" fontWeight="bold" fontFamily="sans-serif">23</text>
+                          </svg>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-[280px] h-[350px] bg-[#111111] rounded-2xl border border-[#2A2A2A] flex items-center justify-center">
+                        <span className="text-[#F4622A] font-['Bebas_Neue'] text-6xl">SLB</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
 
           {/* Dot indicators */}
           <div className="flex items-center justify-center gap-2 mt-8">
-            {[0, 1, 2].map(i => (
+            {carouselSlides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setHeroSlide(i)}
@@ -314,20 +327,6 @@ const fetchNews = async () => {
         </div>
       </section>
 
-      {/* News Ticker */}
-      <div className="bg-[#0D0D0D] overflow-hidden">
-        <div className="flex animate-scroll whitespace-nowrap py-3">
-          {newsItems.length > 0 ? (
-            [...newsItems, ...newsItems].map((item, i) => (
-              <span key={i} className="mx-8 text-[#a0a0a0] font-semibold">
-                🏀 {item.text}
-              </span>
-            ))
-          ) : (
-            <span className="mx-8 text-[#a0a0a0] font-semibold">🏀 Loading news...</span>
-          )}
-        </div>
-      </div>
 
       {/* Top Form Players */}
       <section className="py-16 px-4 sm:px-12">
@@ -546,33 +545,17 @@ const fetchNews = async () => {
         </div>
       </section>
 
-      {/* Email Waitlist */}
-      <section className="py-12 sm:py-20 px-4 sm:px-8 bg-[#1A1A1A]">
+      {/* Waitlist CTA Banner */}
+      <section className="py-12 sm:py-20 px-4 sm:px-8 bg-[#111111] border-y border-[#2A2A2A]">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="font-oswald text-2xl sm:text-4xl font-bold mb-4">Be first to play when we launch</h2>
-          <p className="text-base sm:text-xl text-gray-400 mb-6 sm:mb-10">Join the waitlist — launching autumn 2026</p>
-          <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-1 bg-[#1A1A1A] border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange text-sm sm:text-base"
-            />
-            <button
-              type="submit"
-              className="bg-orange text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange/90 transition-colors text-sm sm:text-base"
-            >
-              Join Waitlist
-            </button>
-          </form>
-          {waitlistMessage && (
-            <p className="mt-4 text-green-400 font-semibold text-sm sm:text-base">{waitlistMessage}</p>
-          )}
-          {waitlistError && (
-            <p className="mt-4 text-red-400 font-semibold text-sm sm:text-base">{waitlistError}</p>
-          )}
+          <h2 className="font-['Bebas_Neue'] text-3xl sm:text-5xl font-bold mb-4">Be first to play when we launch</h2>
+          <p className="text-[#A0A0A0] text-base sm:text-lg mb-8">Join the waitlist — launching autumn 2026</p>
+          <button
+            onClick={() => setShowWaitlistModal(true)}
+            className="bg-[#F4622A] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#d4521a] transition-colors text-sm sm:text-base"
+          >
+            Join the Waitlist
+          </button>
         </div>
       </section>
 
@@ -593,6 +576,52 @@ const fetchNews = async () => {
           </div>
         </div>
       </section>
+
+      {/* Waitlist Modal */}
+      {showWaitlistModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowWaitlistModal(false)}>
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h2 className="text-white font-bold text-2xl mb-1">Join the Waitlist</h2>
+                <p className="text-[#A0A0A0] text-sm">Be first to know when SLB Fantasy opens</p>
+              </div>
+              <button onClick={() => setShowWaitlistModal(false)} className="text-[#555555] hover:text-white text-2xl leading-none ml-4">×</button>
+            </div>
+            {waitlistStatus === 'success' ? (
+              <div className="text-center py-6">
+                <div className="text-4xl mb-3">🏀</div>
+                <p className="text-[#22c55e] font-bold text-lg mb-1">You're on the list!</p>
+                <p className="text-[#A0A0A0] text-sm">We'll be in touch when we launch.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleWaitlistSubmit} className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={waitlistEmail}
+                  onChange={e => setWaitlistEmail(e.target.value)}
+                  required
+                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-xl px-4 py-3 text-white placeholder-[#555555] focus:outline-none focus:border-[#F4622A] text-sm"
+                />
+                {waitlistStatus === 'duplicate' && (
+                  <p className="text-[#C9A84C] text-sm">You're already on the list!</p>
+                )}
+                {waitlistStatus === 'error' && (
+                  <p className="text-red-400 text-sm">Something went wrong. Please try again.</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={waitlistLoading}
+                  className="w-full bg-[#F4622A] text-white font-bold py-3 rounded-xl hover:bg-[#d4521a] transition-colors disabled:opacity-50"
+                >
+                  {waitlistLoading ? 'Joining...' : 'Join Now'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="py-8 sm:py-12 px-4 sm:px-8 bg-[#1A1A1A] border-t border-white/10">
