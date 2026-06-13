@@ -755,130 +755,114 @@ const InjuriesTab = ({ showToast }) => {
 
 
 // Fixtures Tab Component
+// Fixtures Tab Component — manages slb_fixtures (real game results)
 const FixturesTab = ({ showToast }) => {
   const [fixtures, setFixtures] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [gameweeks, setGameweeks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingFixture, setEditingFixture] = useState(null);
-  const [formData, setFormData] = useState({
-    gameweek: 1,
-    home_team_id: '',
-    away_team_id: '',
-    match_date: '',
-    home_difficulty: 3,
-    away_difficulty: 3
-  });
+  const emptyForm = { gameweek_id: '', home_team_id: '', away_team_id: '', played_at: '', home_score: '', away_score: '', is_complete: false };
+  const [formData, setFormData] = useState(emptyForm);
 
-  useEffect(() => {
-    const fetchTeams = async () => {
-      const { data, error } = await supabase
-        .from('slb_teams')
-        .select('id, name')
-        .order('name');
-      console.log('Teams:', data, error);
-      if (data) setTeams(data);
-    };
-    fetchTeams();
-  }, []);
-
-  const fetchFixtures = async () => {
-    const { data, error } = await supabase
-      .from('fixture_difficulty')
-      .select(`
-        id, gameweek_number, match_date,
-        home_difficulty, away_difficulty,
-        home_team_id, away_team_id,
-        home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
-        away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
-      `)
-      .order('gameweek_number', { ascending: true });
-    if (data) setFixtures(data);
-    setLoading(false);
+  const fetchAll = async () => {
+    try {
+      const [fixturesRes, teamsRes, gwRes] = await Promise.all([
+        supabase
+          .from('slb_fixtures')
+          .select(`
+            id, played_at, home_score, away_score, is_complete, gameweek_id,
+            home_team:slb_teams!slb_fixtures_home_team_id_fkey(id, name, short_name),
+            away_team:slb_teams!slb_fixtures_away_team_id_fkey(id, name, short_name)
+          `)
+          .order('played_at', { nullsFirst: false }),
+        supabase.from('slb_teams').select('id, name, short_name').order('name'),
+        supabase.from('gameweeks').select('id, week_number').order('week_number'),
+      ]);
+      if (fixturesRes.data) setFixtures(fixturesRes.data);
+      if (teamsRes.data) setTeams(teamsRes.data);
+      if (gwRes.data) setGameweeks(gwRes.data);
+    } catch {
+      // Silent
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => {
-    fetchFixtures();
-  }, []);
+  useEffect(() => { fetchAll(); }, []);
 
   const handleSave = async () => {
+    if (!formData.gameweek_id || !formData.home_team_id || !formData.away_team_id) {
+      showToast('Gameweek, home team and away team are required', 'error');
+      return;
+    }
     try {
-      const fixtureData = {
-        gameweek_number: formData.gameweek,
+      const payload = {
+        gameweek_id: formData.gameweek_id,
         home_team_id: formData.home_team_id,
         away_team_id: formData.away_team_id,
-        match_date: formData.match_date,
-        home_difficulty: formData.home_difficulty,
-        away_difficulty: formData.away_difficulty
+        played_at: formData.played_at || null,
+        home_score: formData.home_score !== '' ? parseInt(formData.home_score, 10) : null,
+        away_score: formData.away_score !== '' ? parseInt(formData.away_score, 10) : null,
+        is_complete: formData.is_complete,
       };
-
       let error;
       if (editingFixture) {
-        const result = await supabase.from('fixture_difficulty').update(fixtureData).eq('id', editingFixture.id);
-        error = result.error;
+        ({ error } = await supabase.from('slb_fixtures').update(payload).eq('id', editingFixture.id));
       } else {
-        const result = await supabase.from('fixture_difficulty').insert(fixtureData);
-        error = result.error;
+        ({ error } = await supabase.from('slb_fixtures').insert(payload));
       }
-
       if (error) throw error;
       showToast('Saved successfully');
       setShowModal(false);
       setEditingFixture(null);
-      setFormData({ gameweek: 1, home_team_id: '', away_team_id: '', match_date: '', home_difficulty: 3, away_difficulty: 3 });
-      fetchFixtures();
-    } catch (error) {
-      showToast('Failed to save', 'error');
+      setFormData(emptyForm);
+      fetchAll();
+    } catch (err) {
+      showToast(`Failed to save: ${err.message}`, 'error');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this fixture?')) return;
+    if (!confirm('Delete this fixture?')) return;
     try {
-      const { error } = await supabase.from('fixture_difficulty').delete().eq('id', id);
+      const { error } = await supabase.from('slb_fixtures').delete().eq('id', id);
       if (error) throw error;
-      showToast('Deleted successfully');
-      fetchFixtures();
-    } catch (error) {
+      showToast('Deleted');
+      fetchAll();
+    } catch {
       showToast('Failed to delete', 'error');
     }
   };
 
-  const handleEdit = (fixture) => {
-    setEditingFixture(fixture);
+  const handleEdit = (f) => {
+    setEditingFixture(f);
     setFormData({
-      gameweek: fixture.gameweek_number,
-      home_team_id: fixture.home_team_id,
-      away_team_id: fixture.away_team_id,
-      match_date: fixture.match_date,
-      home_difficulty: fixture.home_difficulty,
-      away_difficulty: fixture.away_difficulty
+      gameweek_id: f.gameweek_id || '',
+      home_team_id: f.home_team?.id || '',
+      away_team_id: f.away_team?.id || '',
+      played_at: f.played_at ? f.played_at.slice(0, 16) : '',
+      home_score: f.home_score ?? '',
+      away_score: f.away_score ?? '',
+      is_complete: f.is_complete || false,
     });
     setShowModal(true);
   };
 
-  const getDifficultyColor = (rating) => {
-    const colors = {
-      1: 'bg-green-500',
-      2: 'bg-green-400',
-      3: 'bg-amber-500',
-      4: 'bg-orange-500',
-      5: 'bg-red-500'
-    };
-    return colors[rating] || 'bg-gray-500';
+  const gwLabel = (gwId) => {
+    const gw = gameweeks.find(g => g.id === gwId);
+    return gw ? `GW${gw.week_number}` : '—';
   };
 
   if (loading) return <div className="text-center py-8">Loading...</div>;
 
   return (
     <div>
-      <div className="flex justify-end mb-6">
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-[#a0a0a0] text-sm">{fixtures.length} fixtures in slb_fixtures</p>
         <button
-          onClick={() => {
-            setEditingFixture(null);
-            setFormData({ gameweek: 1, home_team_id: '', away_team_id: '', match_date: '', home_difficulty: 3, away_difficulty: 3 });
-            setShowModal(true);
-          }}
+          onClick={() => { setEditingFixture(null); setFormData(emptyForm); setShowModal(true); }}
           className="bg-[#FF5500] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#e04a00] transition-colors"
         >
           Add Fixture
@@ -890,64 +874,59 @@ const FixturesTab = ({ showToast }) => {
         <table className="w-full">
           <thead className="bg-[#FF5500]">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-bold">Gameweek</th>
+              <th className="px-4 py-3 text-left text-sm font-bold">GW</th>
               <th className="px-4 py-3 text-left text-sm font-bold">Match</th>
+              <th className="px-4 py-3 text-left text-sm font-bold">Score</th>
               <th className="px-4 py-3 text-left text-sm font-bold">Date</th>
-              <th className="px-4 py-3 text-left text-sm font-bold">Home Diff</th>
-              <th className="px-4 py-3 text-left text-sm font-bold">Away Diff</th>
+              <th className="px-4 py-3 text-left text-sm font-bold">Status</th>
               <th className="px-4 py-3 text-left text-sm font-bold">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {fixtures.map((fixture, index) => (
-              <tr key={fixture.id} className={index % 2 === 0 ? 'bg-[#141414]' : 'bg-[#1a1a1a]'}>
-                <td className="px-4 py-3 text-sm">GW{fixture.gameweek_number}</td>
+            {fixtures.map((f, i) => (
+              <tr key={f.id} className={i % 2 === 0 ? 'bg-[#141414]' : 'bg-[#1a1a1a]'}>
+                <td className="px-4 py-3 text-sm text-[#a0a0a0]">{gwLabel(f.gameweek_id)}</td>
+                <td className="px-4 py-3 text-sm font-semibold">{f.home_team?.short_name} vs {f.away_team?.short_name}</td>
                 <td className="px-4 py-3 text-sm">
-                  {fixture.home_team?.name} vs {fixture.away_team?.name}
+                  {f.is_complete ? <span className="text-white font-bold">{f.home_score ?? '—'} – {f.away_score ?? '—'}</span> : <span className="text-[#555]">—</span>}
+                </td>
+                <td className="px-4 py-3 text-sm text-[#a0a0a0]">{f.played_at ? new Date(f.played_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'TBC'}</td>
+                <td className="px-4 py-3 text-sm">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${f.is_complete ? 'bg-green-600/20 text-green-400' : 'bg-[#2A2A2A] text-[#a0a0a0]'}`}>
+                    {f.is_complete ? 'FINAL' : 'SCHEDULED'}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {new Date(fixture.match_date).toLocaleString()}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <div className={`w-6 h-6 rounded ${getDifficultyColor(fixture.home_difficulty)} flex items-center justify-center text-xs font-bold`}>
-                    {fixture.home_difficulty}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <div className={`w-6 h-6 rounded ${getDifficultyColor(fixture.away_difficulty)} flex items-center justify-center text-xs font-bold`}>
-                    {fixture.away_difficulty}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <button onClick={() => handleEdit(fixture)} className="text-[#FF5500] mr-2">Edit</button>
-                  <button onClick={() => handleDelete(fixture.id)} className="text-red-500">Delete</button>
+                  <button onClick={() => handleEdit(f)} className="text-[#FF5500] mr-3">Edit</button>
+                  <button onClick={() => handleDelete(f.id)} className="text-red-500">Delete</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {fixtures.length === 0 && <p className="text-center py-8 text-[#555]">No fixtures yet</p>}
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">{editingFixture ? 'Edit Fixture' : 'Add Fixture'}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm mb-2">Gameweek</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="38"
-                  value={formData.gameweek}
-                  onChange={(e) => setFormData({ ...formData, gameweek: parseInt(e.target.value) })}
+                <label className="block text-sm mb-2">Gameweek <span className="text-red-400">*</span></label>
+                <select
+                  value={formData.gameweek_id}
+                  onChange={(e) => setFormData({ ...formData, gameweek_id: e.target.value })}
                   className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
                   required
-                />
+                >
+                  <option value="">Select Gameweek</option>
+                  {gameweeks.map(gw => <option key={gw.id} value={gw.id}>GW{gw.week_number}</option>)}
+                </select>
               </div>
               <div>
-                <label className="block text-sm mb-2">Home Team</label>
+                <label className="block text-sm mb-2">Home Team <span className="text-red-400">*</span></label>
                 <select
                   value={formData.home_team_id}
                   onChange={(e) => setFormData({ ...formData, home_team_id: e.target.value })}
@@ -955,13 +934,11 @@ const FixturesTab = ({ showToast }) => {
                   required
                 >
                   <option value="">Select Team</option>
-                  {teams.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
-                  ))}
+                  {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm mb-2">Away Team</label>
+                <label className="block text-sm mb-2">Away Team <span className="text-red-400">*</span></label>
                 <select
                   value={formData.away_team_id}
                   onChange={(e) => setFormData({ ...formData, away_team_id: e.target.value })}
@@ -969,56 +946,53 @@ const FixturesTab = ({ showToast }) => {
                   required
                 >
                   <option value="">Select Team</option>
-                  {teams.filter(t => t.id !== formData.home_team_id).map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
-                  ))}
+                  {teams.filter(t => t.id !== formData.home_team_id).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm mb-2">Match Date & Time</label>
+                <label className="block text-sm mb-2">Date & Time</label>
                 <input
                   type="datetime-local"
-                  value={formData.match_date}
-                  onChange={(e) => setFormData({ ...formData, match_date: e.target.value })}
+                  value={formData.played_at}
+                  onChange={(e) => setFormData({ ...formData, played_at: e.target.value })}
                   className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
-                  required
                 />
               </div>
-              <div>
-                <label className="block text-sm mb-2">Home Difficulty (1-5)</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(rating => (
-                    <button
-                      key={rating}
-                      onClick={() => setFormData({ ...formData, home_difficulty: rating })}
-                      className={`w-10 h-10 rounded ${formData.home_difficulty === rating ? getDifficultyColor(rating) : 'bg-[#2A2A2A]'} flex items-center justify-center font-bold`}
-                    >
-                      {rating}
-                    </button>
-                  ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm mb-2">Home Score</label>
+                  <input
+                    type="number" min="0"
+                    value={formData.home_score}
+                    onChange={(e) => setFormData({ ...formData, home_score: e.target.value })}
+                    placeholder="e.g. 92"
+                    className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-2">Away Score</label>
+                  <input
+                    type="number" min="0"
+                    value={formData.away_score}
+                    onChange={(e) => setFormData({ ...formData, away_score: e.target.value })}
+                    placeholder="e.g. 85"
+                    className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
+                  />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm mb-2">Away Difficulty (1-5)</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(rating => (
-                    <button
-                      key={rating}
-                      onClick={() => setFormData({ ...formData, away_difficulty: rating })}
-                      className={`w-10 h-10 rounded ${formData.away_difficulty === rating ? getDifficultyColor(rating) : 'bg-[#2A2A2A]'} flex items-center justify-center font-bold`}
-                    >
-                      {rating}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="is_complete"
+                  checked={formData.is_complete}
+                  onChange={(e) => setFormData({ ...formData, is_complete: e.target.checked })}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="is_complete" className="text-sm">Mark as complete (final score)</label>
               </div>
               <div className="flex gap-4 mt-6">
-                <button onClick={handleSave} className="flex-1 bg-[#FF5500] text-white py-2 rounded-lg font-medium">
-                  Save
-                </button>
-                <button onClick={() => setShowModal(false)} className="flex-1 bg-[#2A2A2A] text-white py-2 rounded-lg font-medium">
-                  Cancel
-                </button>
+                <button onClick={handleSave} className="flex-1 bg-[#FF5500] text-white py-2 rounded-lg font-medium">Save</button>
+                <button onClick={() => setShowModal(false)} className="flex-1 bg-[#2A2A2A] text-white py-2 rounded-lg font-medium">Cancel</button>
               </div>
             </div>
           </div>
