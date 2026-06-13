@@ -8,6 +8,9 @@ const FixturesPage = () => {
   const [loading, setLoading] = useState(true);
   const [gwLoading, setGwLoading] = useState(true);
   const [selectedGwId, setSelectedGwId] = useState(null);
+  const [selectedFixture, setSelectedFixture] = useState(null);
+  const [homePlayers, setHomePlayers] = useState([]);
+  const [awayPlayers, setAwayPlayers] = useState([]);
 
   // Load gameweeks on mount, default to active one
   useEffect(() => {
@@ -55,6 +58,28 @@ const FixturesPage = () => {
     };
     fetchFixtures();
   }, [selectedGwId]);
+
+  const openFixture = async (fixture) => {
+    setSelectedFixture(fixture);
+    setHomePlayers([]);
+    setAwayPlayers([]);
+    const [homeRes, awayRes] = await Promise.all([
+      supabase.from('players').select('id, name, position, value')
+        .eq('slb_team_id', fixture.home_team?.id).order('value', { ascending: false }).limit(2),
+      supabase.from('players').select('id, name, position, value')
+        .eq('slb_team_id', fixture.away_team?.id).order('value', { ascending: false }).limit(2),
+    ]);
+    setHomePlayers(homeRes.data || []);
+    setAwayPlayers(awayRes.data || []);
+  };
+
+  const difficultyColour = (r) => {
+    if (r <= 1) return 'bg-[#16a34a] text-white';
+    if (r === 2) return 'bg-[#4ade80] text-black';
+    if (r === 3) return 'bg-[#eab308] text-black';
+    if (r === 4) return 'bg-[#F4622A] text-white';
+    return 'bg-[#EF4444] text-white';
+  };
 
   const formatDateTime = (ts) => {
     if (!ts) return null;
@@ -142,7 +167,8 @@ const FixturesPage = () => {
                 return (
                   <div
                     key={fixture.id}
-                    className={`bg-[#111111] border rounded-xl p-5 sm:p-6 ${
+                    onClick={() => openFixture(fixture)}
+                    className={`bg-[#111111] border rounded-xl p-5 sm:p-6 cursor-pointer hover:border-[#F4622A]/50 transition-colors ${
                       fixture.is_complete ? 'border-[#222222]' : isLive ? 'border-[#F4622A]/40' : 'border-[#222222]'
                     }`}
                   >
@@ -214,6 +240,89 @@ const FixturesPage = () => {
           )}
         </div>
       </div>
+
+      {/* Fixture detail modal */}
+      {selectedFixture && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setSelectedFixture(null)}>
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg overflow-y-auto max-h-[90vh]"
+            onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#222222]">
+              <p className="text-[#666666] text-xs uppercase tracking-wide">Fixture Detail</p>
+              <button onClick={() => setSelectedFixture(null)} className="text-[#555555] hover:text-white text-xl">×</button>
+            </div>
+
+            {/* Teams */}
+            <div className="px-5 py-6 flex items-center gap-4">
+              <div className="flex-1 text-right">
+                <div className="flex items-center justify-end gap-2 mb-1">
+                  <p className="text-white font-bold text-lg">{selectedFixture.home_team?.short_name}</p>
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedFixture.home_team?.primary_colour || '#555' }} />
+                </div>
+                <p className="text-[#666666] text-xs">{selectedFixture.home_team?.name}</p>
+              </div>
+
+              <div className="flex-shrink-0 text-center w-20">
+                {selectedFixture.is_complete ? (
+                  <p className="text-white font-black text-2xl">{selectedFixture.home_score} – {selectedFixture.away_score}</p>
+                ) : (
+                  <p className="text-[#555555] font-bold">vs</p>
+                )}
+                {selectedFixture.is_complete && <p className="text-[#22c55e] text-[10px] font-semibold mt-1">FINAL</p>}
+              </div>
+
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedFixture.away_team?.primary_colour || '#555' }} />
+                  <p className="text-white font-bold text-lg">{selectedFixture.away_team?.short_name}</p>
+                </div>
+                <p className="text-[#666666] text-xs">{selectedFixture.away_team?.name}</p>
+              </div>
+            </div>
+
+            {/* Date */}
+            <div className="px-5 pb-4 text-center">
+              <p className="text-[#A0A0A0] text-sm">{selectedFixture.played_at ? formatDateTime(selectedFixture.played_at) : 'Date TBC'}</p>
+            </div>
+
+            {/* Key Players */}
+            {(homePlayers.length > 0 || awayPlayers.length > 0) && (
+              <div className="border-t border-[#222222] px-5 py-4">
+                <p className="text-[#666666] text-xs uppercase tracking-wide mb-3">Key Players to Watch</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <p className="text-[#A0A0A0] text-xs font-semibold">{selectedFixture.home_team?.short_name}</p>
+                    {homePlayers.map(p => (
+                      <div key={p.id} className="bg-[#1A1A1A] rounded-lg px-3 py-2 border border-[#2A2A2A]">
+                        <p className="text-white text-sm font-semibold">{p.name}</p>
+                        <div className="flex items-center justify-between mt-0.5">
+                          <span className="text-[#666666] text-xs">{p.position}</span>
+                          <span className="text-[#C9A84C] text-xs">£{(p.value / 1000000).toFixed(1)}m</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[#A0A0A0] text-xs font-semibold">{selectedFixture.away_team?.short_name}</p>
+                    {awayPlayers.map(p => (
+                      <div key={p.id} className="bg-[#1A1A1A] rounded-lg px-3 py-2 border border-[#2A2A2A]">
+                        <p className="text-white text-sm font-semibold">{p.name}</p>
+                        <div className="flex items-center justify-between mt-0.5">
+                          <span className="text-[#666666] text-xs">{p.position}</span>
+                          <span className="text-[#C9A84C] text-xs">£{(p.value / 1000000).toFixed(1)}m</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="pb-5" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

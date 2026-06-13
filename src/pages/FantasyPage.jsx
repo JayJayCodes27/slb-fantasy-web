@@ -31,6 +31,9 @@ const FantasyPage = () => {
   const [swapError, setSwapError] = useState(null);       // { ids: [id, id] } for red-flash
   const [swapToast, setSwapToast] = useState(null);       // string message
 
+  // Chip modal state
+  const [activeChipModal, setActiveChipModal] = useState(null); // chip object
+
   // Create Private League form state
   const [leagueName, setLeagueName] = useState('');
   const [creating, setCreating] = useState(false);
@@ -740,22 +743,38 @@ const FantasyPage = () => {
               <h1 className="text-white font-bold text-4xl sm:text-[36px] leading-none mb-2">{user?.team_name || 'MY TEAM'}</h1>
               <p className="text-[#C9A84C] font-semibold text-[14px] uppercase tracking-widest">GAMEWEEK {settings?.current_gameweek || 1}</p>
             </div>
-            <div className="flex items-baseline gap-3">
-              <span className="text-[#F4622A] font-bold text-5xl sm:text-[48px] leading-none">{totalPoints}</span>
-              <span className="text-[#C9A84C] font-semibold text-sm uppercase tracking-wider">PTS</span>
-            </div>
+            {/* FIX 10: Only show points once squad is confirmed */}
+            {hasSquad && (
+              <div className="flex items-baseline gap-3">
+                <span className="text-[#F4622A] font-bold text-5xl sm:text-[48px] leading-none">{totalPoints}</span>
+                <span className="text-[#C9A84C] font-semibold text-sm uppercase tracking-wider">PTS</span>
+              </div>
+            )}
           </div>
-          
+
           {/* Quick Stats Pills */}
           <div className="flex flex-wrap gap-3 items-center">
             <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
               <span className="text-[#A0A0A0] text-xs mr-2">Budget</span>
               <span className="text-white font-bold text-sm">£{(Math.max(0, bank) / 1000000).toFixed(1)}m</span>
             </div>
-            <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
-              <span className="text-[#A0A0A0] text-xs mr-2">Transfers</span>
-              <span className="text-white font-bold text-sm">1</span>
-            </div>
+            {/* FIX 11: Hide transfer pill until GW2+ */}
+            {hasSquad && (settings?.current_gameweek || 0) >= 2 && (
+              <div className="bg-[#1A1A1A] px-4 py-2 rounded-lg border border-[#222222]">
+                <span className="text-[#A0A0A0] text-xs mr-2">Transfers</span>
+                <span className="text-white font-bold text-sm">1</span>
+              </div>
+            )}
+            {/* FIX 9: Show Make Transfer or Build Your Squad CTA */}
+            {hasSquad ? (
+              <Link to="/transfers" className="ml-auto bg-[#F4622A] text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-[#d4521a] transition-colors">
+                Make Transfer
+              </Link>
+            ) : (
+              <Link to="/squad-selection" className="ml-auto bg-[#F4622A] text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-[#d4521a] transition-colors">
+                Build Your Squad →
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -1100,7 +1119,16 @@ const FantasyPage = () => {
               <h2 className="text-[#C9A84C] font-bold text-sm uppercase mb-4">CHIPS</h2>
               <div className="space-y-3">
                 {chips.map((chip) => (
-                  <div key={chip.name} className="bg-[#1A1A1A] border border-[#222222] rounded-xl p-4 hover:border-[#F4622A] transition-colors cursor-pointer">
+                  <button
+                    key={chip.name}
+                    disabled={chip.remaining === 0}
+                    onClick={() => chip.remaining > 0 && setActiveChipModal(chip)}
+                    className={`w-full text-left bg-[#1A1A1A] border rounded-xl p-4 transition-colors ${
+                      chip.remaining > 0
+                        ? 'border-[#222222] hover:border-[#F4622A] cursor-pointer'
+                        : 'border-[#1A1A1A] opacity-50 cursor-not-allowed'
+                    }`}
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white font-bold text-sm">{chip.name}</span>
                       <span className={`text-white text-[10px] font-bold px-2 py-1 rounded-full ${chip.remaining > 0 ? 'bg-[#F4622A]' : 'bg-[#555555]'}`}>
@@ -1108,10 +1136,38 @@ const FantasyPage = () => {
                       </span>
                     </div>
                     <p className="text-[#A0A0A0] text-xs">{chip.description}</p>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
+
+            {/* Chip confirmation modal */}
+            {activeChipModal && (
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                onClick={() => setActiveChipModal(null)}>
+                <div className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                  onClick={e => e.stopPropagation()}>
+                  <h3 className="text-white font-bold text-lg mb-1">Activate {activeChipModal.name}?</h3>
+                  <p className="text-[#A0A0A0] text-sm mb-2">{activeChipModal.description}</p>
+                  <p className="text-[#EF4444] text-xs mb-6">This action cannot be undone this gameweek. You have {activeChipModal.remaining} use{activeChipModal.remaining > 1 ? 's' : ''} remaining.</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        // TODO: write chip activation to DB once columns are added
+                        setActiveChipModal(null);
+                      }}
+                      className="flex-1 bg-[#F4622A] text-white font-bold py-3 rounded-xl hover:bg-[#d4521a] transition-colors"
+                    >
+                      Activate
+                    </button>
+                    <button onClick={() => setActiveChipModal(null)}
+                      className="flex-1 bg-[#1A1A1A] border border-[#333333] text-white font-bold py-3 rounded-xl hover:bg-[#222222] transition-colors">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Squad List */}
             <div className="bg-[#111111] border border-[#222222] rounded-xl p-6">

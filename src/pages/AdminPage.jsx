@@ -75,7 +75,7 @@ const AdminPage = () => {
       <div className="bg-[#141414] border-b border-[#2A2A2A]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex gap-8">
-            {['players', 'news', 'injuries', 'scout_picks', 'fixtures', 'settings'].map((tab) => (
+            {['players', 'news', 'injuries', 'fixtures', 'settings'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -97,7 +97,6 @@ const AdminPage = () => {
         {activeTab === 'players' && <PlayersTab showToast={showToast} />}
         {activeTab === 'news' && <NewsTab showToast={showToast} />}
         {activeTab === 'injuries' && <InjuriesTab showToast={showToast} />}
-        {activeTab === 'scout_picks' && <ScoutPicksTab showToast={showToast} />}
         {activeTab === 'fixtures' && <FixturesTab showToast={showToast} />}
         {activeTab === 'settings' && <SettingsTab showToast={showToast} settings={settings} onSettingsUpdate={fetchSettings} />}
       </div>
@@ -403,35 +402,50 @@ const PlayersTab = ({ showToast }) => {
 };
 
 // News Tab Component
+const STATUS_BADGE = (status) => {
+  const map = {
+    fit: 'bg-green-600/20 text-green-400',
+    available: 'bg-green-600/20 text-green-400',
+    doubtful: 'bg-yellow-600/20 text-yellow-400',
+    injured: 'bg-red-600/20 text-red-400',
+    out: 'bg-red-600/20 text-red-400',
+    suspended: 'bg-purple-600/20 text-purple-400',
+    resting: 'bg-blue-600/20 text-blue-400',
+    unknown: 'bg-gray-600/20 text-gray-400',
+  };
+  return map[status] || map.unknown;
+};
+
 const NewsTab = ({ showToast }) => {
   const [news, setNews] = useState([]);
-  const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingNews, setEditingNews] = useState(null);
   const [formData, setFormData] = useState({
+    slb_team_id: '',
     player_id: '',
     headline: '',
     body: '',
-    status: 'fit'
+    status: 'fit',
+    article_url: '',
+    article_image_url: '',
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
-      const [newsData, playersData] = await Promise.all([
-        supabase.from('player_news').select('*, players(*), slb_teams(*)').order('created_at', { ascending: false }),
-        supabase.from('players').select('id, name, slb_teams(*)').order('name')
+      const [newsData, teamsData] = await Promise.all([
+        supabase.from('player_news').select('*, players(name), slb_teams(name, short_name, primary_colour)').order('created_at', { ascending: false }),
+        supabase.from('slb_teams').select('id, name, short_name').order('name'),
       ]);
       if (newsData.error) throw newsData.error;
-      if (playersData.error) throw playersData.error;
+      if (teamsData.error) throw teamsData.error;
       setNews(newsData.data || []);
-      setPlayers(playersData.data || []);
+      setTeams(teamsData.data || []);
     } catch (error) {
-      // Silent error handling
+      // Silent
     } finally {
       setLoading(false);
     }
@@ -439,27 +453,26 @@ const NewsTab = ({ showToast }) => {
 
   const handleSave = async () => {
     try {
-      const newsData = {
-        player_id: formData.player_id,
+      const payload = {
+        slb_team_id: formData.slb_team_id || null,
+        player_id: formData.player_id || null,
         headline: formData.headline,
         body: formData.body,
-        status: formData.status
+        status: formData.status,
+        article_url: formData.article_url || null,
+        article_image_url: formData.article_image_url || null,
       };
-
       let error;
       if (editingNews) {
-        const result = await supabase.from('player_news').update(newsData).eq('id', editingNews.id);
-        error = result.error;
+        ({ error } = await supabase.from('player_news').update(payload).eq('id', editingNews.id));
       } else {
-        const result = await supabase.from('player_news').insert(newsData);
-        error = result.error;
+        ({ error } = await supabase.from('player_news').insert(payload));
       }
-
       if (error) throw error;
       showToast('Saved successfully');
       setShowModal(false);
       setEditingNews(null);
-      setFormData({ player_id: '', headline: '', body: '', status: 'fit' });
+      setFormData({ slb_team_id: '', player_id: '', headline: '', body: '', status: 'fit', article_url: '', article_image_url: '' });
       fetchData();
     } catch (error) {
       showToast('Failed to save', 'error');
@@ -467,24 +480,27 @@ const NewsTab = ({ showToast }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this news update?')) return;
+    if (!confirm('Delete this news item?')) return;
     try {
       const { error } = await supabase.from('player_news').delete().eq('id', id);
       if (error) throw error;
-      showToast('Deleted successfully');
+      showToast('Deleted');
       fetchData();
-    } catch (error) {
+    } catch {
       showToast('Failed to delete', 'error');
     }
   };
 
-  const handleEdit = (newsItem) => {
-    setEditingNews(newsItem);
+  const handleEdit = (item) => {
+    setEditingNews(item);
     setFormData({
-      player_id: newsItem.player_id,
-      headline: newsItem.headline,
-      body: newsItem.body,
-      status: newsItem.status
+      slb_team_id: item.slb_team_id || '',
+      player_id: item.player_id || '',
+      headline: item.headline || '',
+      body: item.body || '',
+      status: item.status || 'fit',
+      article_url: item.article_url || '',
+      article_image_url: item.article_image_url || '',
     });
     setShowModal(true);
   };
@@ -497,7 +513,7 @@ const NewsTab = ({ showToast }) => {
         <button
           onClick={() => {
             setEditingNews(null);
-            setFormData({ player_id: '', headline: '', body: '', status: 'fit' });
+            setFormData({ slb_team_id: '', player_id: '', headline: '', body: '', status: 'fit', article_url: '', article_image_url: '' });
             setShowModal(true);
           }}
           className="bg-[#FF5500] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#e04a00] transition-colors"
@@ -507,57 +523,50 @@ const NewsTab = ({ showToast }) => {
       </div>
 
       {/* News Cards */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {news.map((item) => (
-          <div key={item.id} className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-bold">{item.players?.name}</span>
-                  <span className="text-[#a0a0a0]">•</span>
-                  <span className="text-[#a0a0a0]">{item.players?.slb_teams?.name}</span>
+          <div key={item.id} className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center flex-wrap gap-2 mb-1">
+                  {item.slb_teams && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.slb_teams.primary_colour || '#555' }} />
+                      <span className="text-[#a0a0a0] text-xs">{item.slb_teams.short_name}</span>
+                    </div>
+                  )}
+                  {item.players?.name && <span className="text-white text-xs font-semibold">{item.players.name}</span>}
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${STATUS_BADGE(item.status)}`}>{(item.status || '').toUpperCase()}</span>
                 </div>
-                <h3 className="text-lg font-bold mb-2">{item.headline}</h3>
-                <p className="text-[#a0a0a0] text-sm mb-4">{item.body.substring(0, 100)}{item.body.length > 100 ? '...' : ''}</p>
-                <div className="flex items-center gap-4 text-xs">
-                  <span className={`px-2 py-1 rounded ${
-                    item.status === 'fit' ? 'bg-green-600/20 text-green-400' :
-                    item.status === 'doubtful' ? 'bg-yellow-600/20 text-yellow-400' :
-                    item.status === 'out' ? 'bg-red-600/20 text-red-400' :
-                    'bg-gray-600/20 text-gray-400'
-                  }`}>
-                    {item.status.toUpperCase()}
-                  </span>
-                  <span className="text-[#a0a0a0]">{new Date(item.created_at).toLocaleDateString()}</span>
-                </div>
+                <h3 className="text-sm font-bold mb-1 truncate">{item.headline}</h3>
+                <p className="text-[#a0a0a0] text-xs">{(item.body || '').substring(0, 80)}{(item.body || '').length > 80 ? '...' : ''}</p>
+                {item.article_url && <a href={item.article_url} target="_blank" rel="noreferrer" className="text-[#FF5500] text-xs mt-1 inline-block">Read article →</a>}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <button onClick={() => handleEdit(item)} className="text-[#FF5500] text-sm">Edit</button>
-                <button onClick={() => handleDelete(item.id)} className="text-red-500 text-sm">Delete</button>
+                <button onClick={() => handleDelete(item.id)} className="text-red-500 text-sm">Del</button>
               </div>
             </div>
+            <p className="text-[#555555] text-[10px] mt-2">{new Date(item.created_at).toLocaleDateString()}</p>
           </div>
         ))}
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">{editingNews ? 'Edit News' : 'Post News Update'}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm mb-2">Player</label>
+                <label className="block text-sm mb-2">Team</label>
                 <select
-                  value={formData.player_id}
-                  onChange={(e) => setFormData({ ...formData, player_id: e.target.value })}
+                  value={formData.slb_team_id}
+                  onChange={(e) => setFormData({ ...formData, slb_team_id: e.target.value })}
                   className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
-                  required
                 >
-                  <option value="">Select Player</option>
-                  {players.map(player => (
-                    <option key={player.id} value={player.id}>{player.name} ({player.slb_teams?.name})</option>
-                  ))}
+                  <option value="">No specific team</option>
+                  {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
               <div>
@@ -575,8 +584,7 @@ const NewsTab = ({ showToast }) => {
                 <textarea
                   value={formData.body}
                   onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2 h-32"
-                  required
+                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2 h-28"
                 />
               </div>
               <div>
@@ -587,18 +595,38 @@ const NewsTab = ({ showToast }) => {
                   className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
                 >
                   <option value="fit">Fit</option>
+                  <option value="available">Available</option>
                   <option value="doubtful">Doubtful</option>
+                  <option value="injured">Injured</option>
                   <option value="out">Out</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="resting">Resting</option>
                   <option value="unknown">Unknown</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm mb-2">Article URL (optional)</label>
+                <input
+                  type="url"
+                  value={formData.article_url}
+                  onChange={(e) => setFormData({ ...formData, article_url: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2">Image URL (optional)</label>
+                <input
+                  type="url"
+                  value={formData.article_image_url}
+                  onChange={(e) => setFormData({ ...formData, article_image_url: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2 text-sm"
+                />
+              </div>
               <div className="flex gap-4 mt-6">
-                <button onClick={handleSave} className="flex-1 bg-[#FF5500] text-white py-2 rounded-lg font-medium">
-                  Save
-                </button>
-                <button onClick={() => setShowModal(false)} className="flex-1 bg-[#2A2A2A] text-white py-2 rounded-lg font-medium">
-                  Cancel
-                </button>
+                <button onClick={handleSave} className="flex-1 bg-[#FF5500] text-white py-2 rounded-lg font-medium">Save</button>
+                <button onClick={() => setShowModal(false)} className="flex-1 bg-[#2A2A2A] text-white py-2 rounded-lg font-medium">Cancel</button>
               </div>
             </div>
           </div>
@@ -612,22 +640,23 @@ const NewsTab = ({ showToast }) => {
 const InjuriesTab = ({ showToast }) => {
   const [injuries, setInjuries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editProb, setEditProb] = useState('');
+  const [editStatus, setEditStatus] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
       const { data, error } = await supabase
         .from('player_news')
-        .select('*, players(*), slb_teams(*)')
-        .in('status', ['doubtful', 'out'])
+        .select('*, players(name, position), slb_teams(name, short_name, primary_colour)')
+        .not('status', 'in', '("fit","available")')
         .order('created_at', { ascending: false });
       if (error) throw error;
       setInjuries(data || []);
-    } catch (error) {
-      // Silent error handling
+    } catch {
+      // Silent
     } finally {
       setLoading(false);
     }
@@ -639,8 +668,22 @@ const InjuriesTab = ({ showToast }) => {
       if (error) throw error;
       showToast(`Marked as ${status}`);
       fetchData();
-    } catch (error) {
-      showToast('Failed to update status', 'error');
+    } catch {
+      showToast('Failed to update', 'error');
+    }
+  };
+
+  const handleProbSave = async (id) => {
+    try {
+      const updates = { status: editStatus };
+      if (editProb !== '') updates.probability_to_play = parseInt(editProb, 10);
+      const { error } = await supabase.from('player_news').update(updates).eq('id', id);
+      if (error) throw error;
+      showToast('Updated');
+      setEditingId(null);
+      fetchData();
+    } catch {
+      showToast('Failed', 'error');
     }
   };
 
@@ -648,217 +691,68 @@ const InjuriesTab = ({ showToast }) => {
 
   return (
     <div>
-      <div className="space-y-4">
+      {injuries.length === 0 && (
+        <div className="text-center py-12 text-[#555555]">No injury or doubt concerns right now</div>
+      )}
+      <div className="space-y-3">
         {injuries.map((item) => (
-          <div key={item.id} className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-bold">{item.players?.name}</span>
-                  <span className="text-[#a0a0a0]">•</span>
-                  <span className="text-[#a0a0a0]">{item.players?.slb_teams?.name}</span>
+          <div key={item.id} className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center flex-wrap gap-2 mb-1">
+                  {item.slb_teams && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.slb_teams.primary_colour || '#555' }} />
+                      <span className="text-[#a0a0a0] text-xs">{item.slb_teams.short_name}</span>
+                    </div>
+                  )}
+                  {item.players?.name && <span className="text-white text-xs font-semibold">{item.players.name}</span>}
+                  {item.players?.position && <span className="text-[#a0a0a0] text-xs">{item.players.position}</span>}
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${STATUS_BADGE(item.status)}`}>{(item.status || '').toUpperCase()}</span>
+                  {item.probability_to_play != null && (
+                    <span className="text-[#C9A84C] text-xs font-semibold">{item.probability_to_play}% fit</span>
+                  )}
                 </div>
-                <h3 className="text-lg font-bold mb-2">{item.headline}</h3>
-                <p className="text-[#a0a0a0] text-sm mb-4">{item.body.substring(0, 100)}{item.body.length > 100 ? '...' : ''}</p>
-                <span className={`px-2 py-1 rounded ${
-                  item.status === 'doubtful' ? 'bg-yellow-600/20 text-yellow-400' :
-                  'bg-red-600/20 text-red-400'
-                }`}>
-                  {item.status.toUpperCase()}
-                </span>
+                <p className="text-sm font-bold truncate">{item.headline}</p>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleStatusChange(item.id, 'fit')} className="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                  Mark Fit
-                </button>
-                <button onClick={() => handleStatusChange(item.id, 'out')} className="bg-red-600 text-white px-3 py-1 rounded text-sm">
-                  Mark Out
-                </button>
-                <button onClick={() => handleStatusChange(item.id, 'doubtful')} className="bg-yellow-600 text-white px-3 py-1 rounded text-sm">
-                  Mark Doubtful
-                </button>
-              </div>
+              <button
+                onClick={() => { setEditingId(item.id); setEditStatus(item.status); setEditProb(item.probability_to_play != null ? String(item.probability_to_play) : ''); }}
+                className="text-[#FF5500] text-sm flex-shrink-0"
+              >Edit</button>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
-// Scout Picks Tab Component
-const ScoutPicksTab = ({ showToast }) => {
-  const [picks, setPicks] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    player_id: '',
-    gameweek: 1,
-    reason: ''
-  });
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const [picksData, playersData] = await Promise.all([
-        supabase.from('weekly_picks').select('*, players(*), slb_teams(*)').order('created_at', { ascending: false }),
-        supabase.from('players').select('id, name, slb_teams(*)').order('name')
-      ]);
-      if (picksData.error) throw picksData.error;
-      if (playersData.error) throw playersData.error;
-      setPicks(picksData.data || []);
-      setPlayers(playersData.data || []);
-    } catch (error) {
-      // Silent error handling
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const pickData = {
-        player_id: formData.player_id,
-        gameweek: formData.gameweek,
-        reason: formData.reason
-      };
-
-      const { error } = await supabase.from('weekly_picks').insert(pickData);
-      if (error) throw error;
-      showToast('Saved successfully');
-      setShowModal(false);
-      setFormData({ player_id: '', gameweek: 1, reason: '' });
-      fetchData();
-    } catch (error) {
-      showToast('Failed to save', 'error');
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this scout pick?')) return;
-    try {
-      const { error } = await supabase.from('weekly_picks').delete().eq('id', id);
-      if (error) throw error;
-      showToast('Deleted successfully');
-      fetchData();
-    } catch (error) {
-      showToast('Failed to delete', 'error');
-    }
-  };
-
-  const currentWeekPicks = picks.filter(p => p.gameweek === formData.gameweek);
-  const maxPicksReached = currentWeekPicks.length >= 3;
-
-  if (loading) return <div className="text-center py-8">Loading...</div>;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <label className="text-sm">Gameweek:</label>
-          <input
-            type="number"
-            min="1"
-            max="38"
-            value={formData.gameweek}
-            onChange={(e) => setFormData({ ...formData, gameweek: parseInt(e.target.value) })}
-            className="bg-[#141414] border border-[#2A2A2A] rounded-lg px-4 py-2 text-sm w-20"
-          />
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          disabled={maxPicksReached}
-          className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            maxPicksReached
-              ? 'bg-[#2A2A2A] text-[#a0a0a0] cursor-not-allowed'
-              : 'bg-[#FF5500] text-white hover:bg-[#e04a00] transition-colors'
-          }`}
-        >
-          {maxPicksReached ? '3 picks set for this gameweek' : 'Add Scout Pick'}
-        </button>
-      </div>
-
-      {/* Scout Picks Cards */}
-      <div className="space-y-4">
-        {picks.filter(p => p.gameweek === formData.gameweek).map((pick) => (
-          <div key={pick.id} className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-bold">{pick.players?.name}</span>
-                  <span className="px-2 py-1 rounded bg-[#2A2A2A] text-xs">{pick.players?.position}</span>
-                </div>
-                <div className="text-[#a0a0a0] text-sm mb-2">
-                  {pick.players?.slb_teams?.name} • £{(pick.players?.value / 1000000).toFixed(1)}m
-                </div>
-                <p className="text-sm">{pick.reason}</p>
-              </div>
-              <button onClick={() => handleDelete(pick.id)} className="text-red-500 text-sm">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#141414] border border-[#2A2A2A] rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Add Scout Pick</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm mb-2">Player</label>
+            {/* Inline edit row */}
+            {editingId === item.id && (
+              <div className="mt-3 pt-3 border-t border-[#2A2A2A] flex flex-wrap gap-2 items-center">
                 <select
-                  value={formData.player_id}
-                  onChange={(e) => setFormData({ ...formData, player_id: e.target.value })}
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
-                  required
+                  value={editStatus}
+                  onChange={e => setEditStatus(e.target.value)}
+                  className="bg-[#0A0A0A] border border-[#2A2A2A] rounded px-3 py-1.5 text-sm"
                 >
-                  <option value="">Select Player</option>
-                  {players.map(player => (
-                    <option key={player.id} value={player.id}>{player.name} ({player.slb_teams?.name})</option>
+                  {['doubtful','injured','out','suspended','resting','unknown','fit','available'].map(s => (
+                    <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm mb-2">Gameweek</label>
                 <input
                   type="number"
-                  min="1"
-                  max="38"
-                  value={formData.gameweek}
-                  onChange={(e) => setFormData({ ...formData, gameweek: parseInt(e.target.value) })}
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2"
-                  required
+                  min="0" max="100"
+                  value={editProb}
+                  onChange={e => setEditProb(e.target.value)}
+                  placeholder="% fit (0-100)"
+                  className="bg-[#0A0A0A] border border-[#2A2A2A] rounded px-3 py-1.5 text-sm w-32"
                 />
+                <button onClick={() => handleProbSave(item.id)} className="bg-[#FF5500] text-white px-3 py-1.5 rounded text-sm">Save</button>
+                <button onClick={() => setEditingId(null)} className="bg-[#2A2A2A] text-white px-3 py-1.5 rounded text-sm">Cancel</button>
+                <button onClick={() => handleStatusChange(item.id, 'fit')} className="bg-green-700 text-white px-3 py-1.5 rounded text-sm">✓ Fit</button>
               </div>
-              <div>
-                <label className="block text-sm mb-2">Reason (shown publicly)</label>
-                <textarea
-                  value={formData.reason}
-                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg px-4 py-2 h-32"
-                  required
-                />
-              </div>
-              <div className="flex gap-4 mt-6">
-                <button onClick={handleSave} className="flex-1 bg-[#FF5500] text-white py-2 rounded-lg font-medium">
-                  Save
-                </button>
-                <button onClick={() => setShowModal(false)} className="flex-1 bg-[#2A2A2A] text-white py-2 rounded-lg font-medium">
-                  Cancel
-                </button>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 };
+
 
 // Fixtures Tab Component
 const FixturesTab = ({ showToast }) => {
@@ -888,22 +782,22 @@ const FixturesTab = ({ showToast }) => {
     fetchTeams();
   }, []);
 
+  const fetchFixtures = async () => {
+    const { data, error } = await supabase
+      .from('fixture_difficulty')
+      .select(`
+        id, gameweek_number, match_date,
+        home_difficulty, away_difficulty,
+        home_team_id, away_team_id,
+        home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
+        away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
+      `)
+      .order('gameweek_number', { ascending: true });
+    if (data) setFixtures(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchFixtures = async () => {
-      const { data, error } = await supabase
-        .from('fixture_difficulty')
-        .select(`
-          id, gameweek_number, match_date,
-          home_difficulty, away_difficulty,
-          home_team_id, away_team_id,
-          home_team:slb_teams!fixture_difficulty_home_team_id_fkey(id, name),
-          away_team:slb_teams!fixture_difficulty_away_team_id_fkey(id, name)
-        `)
-        .order('gameweek_number', { ascending: true });
-      console.log('Fixtures:', data, error);
-      if (data) setFixtures(data);
-      setLoading(false);
-    };
     fetchFixtures();
   }, []);
 
@@ -944,7 +838,7 @@ const FixturesTab = ({ showToast }) => {
       const { error } = await supabase.from('fixture_difficulty').delete().eq('id', id);
       if (error) throw error;
       showToast('Deleted successfully');
-      fetchData();
+      fetchFixtures();
     } catch (error) {
       showToast('Failed to delete', 'error');
     }

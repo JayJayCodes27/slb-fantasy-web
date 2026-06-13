@@ -126,13 +126,13 @@ const ScorerPage = () => {
       const { data: homeData } = await supabase
         .from('players')
         .select('*')
-        .eq('team_id', fixture.home_team_id);
+        .eq('slb_team_id', fixture.home_team_id);
 
       // Fetch away team players
       const { data: awayData } = await supabase
         .from('players')
         .select('*')
-        .eq('team_id', fixture.away_team_id);
+        .eq('slb_team_id', fixture.away_team_id);
 
       setHomePlayers(homeData || []);
       setAwayPlayers(awayData || []);
